@@ -1,4 +1,6 @@
 const AuthModel = require('../models/AuthModel')
+const UserModel = require('../models/UserModel')
+
 
 module.exports.loginTest = async (req, res) => {
     res.send({token:'test123'})
@@ -28,6 +30,10 @@ module.exports.loginTest = async (req, res) => {
 
 // module.exports = router;
 module.exports.loginUser = async (req, res) => {
+    console.log("req: ");
+    console.log(JSON.stringify(req))
+    console.log("req.body:");
+    console.log(JSON.stringify(req.body))
     const { user,password } = req.body;
     console.log(`req: ${req}`);
     console.log(`user: ${user}`);
@@ -57,3 +63,22 @@ module.exports.loginUser = async (req, res) => {
 //     })
 //       .then(data =>  res.send(data))
 //    }
+
+// module.exports = router;
+module.exports.registerUser = async (req, res) => {
+    // console.log("req: ");
+    // console.log(JSON.stringify(req))
+    console.log("req.body:");
+    console.log(JSON.stringify(req.body))
+    
+    const { user, pwd } = req.body;
+    console.log(`user: ${user}, pwd: ${pwd}`)
+    UserModel
+        .create({ username:user, password:pwd })
+        .then((data) => {
+            console.log('Registered user successfully')
+            console.log(data)
+            res.send(data)
+        })
+        .catch((err) => {console.log(err)} ) 
+}

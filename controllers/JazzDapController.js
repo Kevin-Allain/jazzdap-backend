@@ -1,6 +1,7 @@
 const JazzDapModel = require('../models/JazzDapModel')
 
 module.exports.getJazzDap = async (req, res) => {
+    console.log("---getJazzDap---")
     const jazzDap = await JazzDapModel.find()
     res.send(jazzDap)
 }

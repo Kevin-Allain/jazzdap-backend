@@ -1,6 +1,6 @@
 const {Router} = require("express")
 const {getJazzDap, saveJazzDap, updateJazzDap, deleteJazzDap} = require('../controllers/JazzDapController')
-const {loginTest, loginUser} = require ('../controllers/AuthController')
+const {loginTest, loginUser, registerUser} = require ('../controllers/AuthController')
 const router = Router()
 
 // router.get('/',(req,res) => { res.json({message:"Hi there"})  })
@@ -12,5 +12,8 @@ router.post('/delete', deleteJazzDap)
 
 router.get('/loginTest', loginTest)
 router.post('/loginUser', loginUser)
+
+router.post('/register', registerUser)
+
 
 module.exports = router;
