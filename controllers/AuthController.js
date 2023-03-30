@@ -2,62 +2,11 @@ const AuthModel = require('../models/AuthModel')
 const UserModel = require('../models/UserModel')
 const bcrypt = require("bcryptjs")
 
+module.exports.loginTest = async (req, res) => { res.send({ token: 'test123' }) }
 
-module.exports.loginTest = async (req, res) => {
-    res.send({ token: 'test123' })
-}
+// module.exports.loginUser = async (req, res) => { var keys = Object.keys(req); var keys2 = Object.keys(req.body); console.log(`keys2: ${keys2}`); const { username, password } = req.body; return fetch('http://localhost:5000/loginUser', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({username,password}) }) .then(data => data.json()) }
 
-// module.exports.loginUser = async (req, res) => {
-
-//     var keys = Object.keys(req);
-//     var keys2 = Object.keys(req.body);
-
-//     console.log(`keys2: ${keys2}`);
-//     // console.log(`req.body: ${req.body}`);
-
-//     const { username, password } = req.body;
-//     // console.log(`username: ${username}, password: ${password}`);
-
-//     // TODO looks dirty
-//     return fetch('http://localhost:5000/loginUser', {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json'
-//         },
-//         body: JSON.stringify({username,password})
-//       })
-//         .then(data => data.json())
-// }
-
-// module.exports = router;
-module.exports.loginUser = async (req, res) => {
-    console.log("req: ");
-    console.log(JSON.stringify(req))
-    console.log("req.body:");
-    console.log(JSON.stringify(req.body))
-    const { user, password } = req.body;
-    console.log(`req: ${req}`);
-    console.log(`user: ${user}`);
-    console.log(`password: ${password}`);
-
-    AuthModel
-        .create({ user, password })
-        .then((data) => {
-            console.log('Added successfully')
-            console.log(data)
-            res.send(data)
-        })
-}
-
-// async function loginUser(req,res) {
-//     console.log(`loginUser AuthController. credentials: ${req}`);
-//     return fetch( `${baseUrl}/loginUser` , {
-//       method: 'POST',
-//       headers: { 'Content-Type': 'application/json' },
-//       body:  JSON.stringify(req)
-//     })
-//       .then(data =>  res.send(data))
-//    }
+// async function loginUser(req,res) { console.log(`loginUser AuthController. credentials: ${req}`); return fetch( `${baseUrl}/loginUser` , { method: 'POST', headers: { 'Content-Type': 'application/json' }, body:  JSON.stringify(req) }) .then(data =>  res.send(data)) }
 
 // module.exports = router;
 module.exports.registerUser = async (req, res) => {
@@ -174,44 +123,28 @@ module.exports.registerUser = async (req, res) => {
 
     const findOutput = await UserModel.findOne({ username: user }).sort({ _id: -1 });
     if (findOutput !== null) {
-        console.log(`findOutput: `, JSON.stringify(findOutput))
-        const foundHash = await UserModel.findOne({ username: user }).select('password');
-        console.log(`foundHash.password: `, JSON.stringify(foundHash.password))
-        // ----
-        // #### hashItself match
-        bcrypt.compare(passwordEnteredByUser, foundHash.password, function (err, result) { console.log("#### passwordEnteredByUser and foundHash.password match ", result); })
-        // ####
+        // // Bit of code to keep an reuse for login...
+        // console.log(`findOutput: `, JSON.stringify(findOutput))
+        // const foundHash = await UserModel.findOne({ username: user }).select('password');
+        // console.log(`foundHash.password: `, JSON.stringify(foundHash.password))
+        // bcrypt.compare(passwordEnteredByUser, foundHash.password, function (err, result) { console.log("#### passwordEnteredByUser and foundHash.password match ", result); })
+        console.log("USER ALREADY EXISTS");
+        return res.status(400).send({message:"User already exists"});
     }
 
     UserModel
-    .create({ username: user, password: passwordEnteredByUser })
-    .then((data) => {
-        console.log('Registered user successfully');
-        console.log(data);
-        console.log("data.password: ",data.password,", passwordEnteredByUser: ",passwordEnteredByUser);
-        console.log("data.password === passwordEnteredByUser: ", data.password === passwordEnteredByUser);
-        res.send(data);
-    })
-    .catch((err) => { console.log(err) })
-
+        .create({ username: user, password: passwordEnteredByUser, created_at: new Date() })
+        .then((data) => {
+            console.log('Registered user successfully');
+            console.log(data);
+            // console.log("data.password: ", data.password, ", passwordEnteredByUser: ", passwordEnteredByUser); console.log("data.password === passwordEnteredByUser: ", data.password === passwordEnteredByUser);
+            res.send(data);
+        })
+        .catch((err) => { console.log(err) })
 }
 
 
-// module.exports = {
-//     createANewUser: function(username, password, callback) {
-//       const newUserDbDocument = new UserModel({
-//         username: username,
-//         password: password
-//       })
-//       newUserDbDocument.save(function(error) {
-//         if (error) {
-//           callback({error: true})
-//         } else {
-//           callback({success: true})
-//         }
-//       })
-//     }
-//   }
+//
 
 /** TODO soon, will be necessary for login */
 // module.exports.getHash = async (req, res) => {

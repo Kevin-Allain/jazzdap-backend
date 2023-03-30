@@ -16,6 +16,7 @@ module.exports.saveJazzDap = async (req, res) => {
             console.log(data)
             res.send(data)
         })
+        .catch((err) => {console.log(err)} ) 
 }
 
 module.exports.updateJazzDap = async (req, res) => {
