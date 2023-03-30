@@ -66,11 +66,7 @@ module.exports.registerUser = async (req, res) => {
     console.log(`user: ${user}, pwd: ${passwordEnteredByUser}`)
     const saltRounds = 10
 
-    // bcrypt.genSalt(saltRounds, function (saltError, salt) {
-    //     if (saltError) {
-    //         throw saltError
-    //     } else {
-
+    /**
     bcrypt.hash(passwordEnteredByUser, saltRounds, async function (hashError, generatedHash) {
         if (hashError) { throw hashError }
         console.log("generatedHash: ", generatedHash) // e.g.: $2a$10$FEBywZh8u9M0Cec/0mWep.1kXrwKeiWDba6tdKvDfEBjyePJnDT7K
@@ -173,8 +169,31 @@ module.exports.registerUser = async (req, res) => {
                 res.send(data);
             })
             .catch((err) => { console.log(err) })
-
     })
+    */
+
+    const findOutput = await UserModel.findOne({ username: user }).sort({ _id: -1 });
+    if (findOutput !== null) {
+        console.log(`findOutput: `, JSON.stringify(findOutput))
+        const foundHash = await UserModel.findOne({ username: user }).select('password');
+        console.log(`foundHash.password: `, JSON.stringify(foundHash.password))
+        // ----
+        // #### hashItself match
+        bcrypt.compare(passwordEnteredByUser, foundHash.password, function (err, result) { console.log("#### passwordEnteredByUser and foundHash.password match ", result); })
+        // ####
+    }
+
+    UserModel
+    .create({ username: user, password: passwordEnteredByUser })
+    .then((data) => {
+        console.log('Registered user successfully');
+        console.log(data);
+        console.log("data.password: ",data.password,", passwordEnteredByUser: ",passwordEnteredByUser);
+        console.log("data.password === passwordEnteredByUser: ", data.password === passwordEnteredByUser);
+        res.send(data);
+    })
+    .catch((err) => { console.log(err) })
+
 }
 
 
