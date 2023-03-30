@@ -62,66 +62,118 @@ module.exports.loginUser = async (req, res) => {
 // module.exports = router;
 module.exports.registerUser = async (req, res) => {
     console.log("req.body:", JSON.stringify(req.body))
-    const { user, pwd } = req.body;
-    console.log(`user: ${user}, pwd: ${pwd}`)
+    const { user, pwd: passwordEnteredByUser } = req.body;
+    console.log(`user: ${user}, pwd: ${passwordEnteredByUser}`)
     const saltRounds = 10
 
-    bcrypt.genSalt(saltRounds, function (saltError, salt) {
-        if (saltError) {
-            throw saltError
-        } else {
-            bcrypt.hash(pwd, salt, async function (hashError, hash) {
-                if (hashError) {
-                    throw hashError
+    // bcrypt.genSalt(saltRounds, function (saltError, salt) {
+    //     if (saltError) {
+    //         throw saltError
+    //     } else {
+
+    bcrypt.hash(passwordEnteredByUser, saltRounds, async function (hashError, generatedHash) {
+        if (hashError) { throw hashError }
+        console.log("generatedHash: ", generatedHash) // e.g.: $2a$10$FEBywZh8u9M0Cec/0mWep.1kXrwKeiWDba6tdKvDfEBjyePJnDT7K
+        console.log("generatedHash.length: ", generatedHash.length)
+
+        // ---- Password matching database
+        const findOutput = await UserModel.findOne({ username: user }).sort({ _id: -1 });
+        if (findOutput !== null) {
+            console.log(`findOutput: `, JSON.stringify(findOutput))
+            const foundHash = await UserModel.findOne({ username: user }).select('password');
+            console.log(`foundHash.password: `, JSON.stringify(foundHash.password))
+            const foundPwd = String(foundHash.password);
+
+            // ----
+            // #### hashItself match
+            bcrypt.compare(passwordEnteredByUser, generatedHash, function (err, result) { console.log("#### hashItself match ", result); })
+            // ####
+            // // +++++ test with written password
+            // const pwd8888 = "Pwd!8888"
+            // const isPwdTest = passwordEnteredByUser === pwd8888;
+            // console.log(`isPwdTest:`, isPwdTest);
+            // const testPwd_8888_1 = "$2a$10$IdGfszkEGetEzCRThCJ0l.fT7RmsjFlcvmPBgzyLWCnIiGEgF1tXC"
+            // console.log("+++++ testPwd_8888_1.length: ", testPwd_8888_1.length);
+            const testPwd_8888_2 = "$2a$10$OuKMiLSwWRyyVKNucTQU6O8SfC57XExB/5J3MaPad7XQyS..DmS8."
+            // console.log("+++++ testPwd_8888_2.length: ", testPwd_8888_2.length);
+            // bcrypt.hash(pwd8888, saltRounds, function (err2, hash8888) {
+            //     console.log("hash8888: ", hash8888);
+            //     console.log("hash8888.length: ", hash8888.length);
+            //     if (err2) { throw (err2); }
+            //     bcrypt.compare(pwd8888, hash8888, function (err, result) {
+            //         if (err) { throw (err); }
+            //         console.log("Hash 8888_1 match ", result);
+            //     });
+            //     bcrypt.compare(pwd8888, testPwd_8888_1, function (err, result) {
+            //         if (err) { throw (err); }
+            //         console.log("testPwd_8888_1 match ", result);
+            //     });
+            //     bcrypt.compare(pwd8888, testPwd_8888_2, function (err, result) {
+            //         if (err) { throw (err); }
+            //         console.log("testPwd_8888_2 match ", result);
+            //     });
+            //     bcrypt.compare(passwordEnteredByUser, hash8888, function (err, result) {
+            //         if (err) { throw (err); }
+            //         console.log("match passwordEnteredByUser and hash8888 match ", result);
+            //     });
+            // });
+            // // +++++
+
+            // ~~~~ double hash
+            bcrypt.hash(passwordEnteredByUser, saltRounds, async function (hashError2, hash2) {
+                if (hashError2) { throw hashError2 }
+                bcrypt.compare(passwordEnteredByUser, hash2, function (err, result) {
+                    if (err) { throw (err); }
+                    console.log("~~~~ match passwordEnteredByUser and hash2 match ", result);
+                });
+            })
+            // ~~~~
+            // ¬¬¬¬ About passwordEnteredByUser
+            const string_passwordEnteredByUser = String(passwordEnteredByUser);
+            console.log("string_passwordEnteredByUser === passwordEnteredByUser", string_passwordEnteredByUser === passwordEnteredByUser)
+            bcrypt.hash(string_passwordEnteredByUser, saltRounds, async function (hashError2, hash2) {
+                if (hashError2) { throw hashError2 }
+                bcrypt.compare(passwordEnteredByUser, hash2, function (err, result) {
+                    if (err) { throw (err); }
+                    console.log("¬¬¬¬ match string_passwordEnteredByUser and hash2 match ", result);
+                });
+            })
+            // ¬¬¬¬
+
+            // ¦¦¦¦ Copied object from the database
+            const copiedObject = { "_id": { "$oid": "64245158cec24d6bc876da71" }, "username": "testPwd_8888", "password": "$2a$10$OuKMiLSwWRyyVKNucTQU6O8SfC57XExB/5J3MaPad7XQyS..DmS8.", "__v": { "$numberInt": "0" } }
+            bcrypt.compare(passwordEnteredByUser, copiedObject.password, function (err, result) {
+                if (err) { throw (err); }
+                console.log("¦¦¦¦ match passwordEnteredByUser and copiedObject.password match ", result);
+                console.log("¦¦¦¦ testPwd_8888_2 same as copiedObject.password?: ", copiedObject.password === testPwd_8888_2);
+                console.log("¦¦¦¦ foundPwd same as copiedObject.password: ", copiedObject.password === foundPwd);
+            });
+            // ¦¦¦¦
+
+            console.log("what is this.password: ", JSON.stringify(this.password));
+
+            bcrypt.compare(passwordEnteredByUser, foundPwd, function (error, isMatch) {
+                if (error) {
+                    throw error
+                } else if (!isMatch) {
+                    console.log("-> Password doesn't match!")
                 } else {
-                    console.log("hash: ", hash) // e.g.: $2a$10$FEBywZh8u9M0Cec/0mWep.1kXrwKeiWDba6tdKvDfEBjyePJnDT7K
-
-                    // ----
-                    const passwordEnteredByUser = pwd;
-
-                    const findOutput = await UserModel.findOne({ username: user })
-                    if (findOutput !== null) {
-                        console.log(`findOutput: `, JSON.stringify(findOutput))
-                        const foundHash = await UserModel.findOne({ username: user }).select('password');
-                        console.log(`foundHash.password: `, JSON.stringify(foundHash.password))
-                        const foundPwd = foundHash.password;
-
-                        bcrypt.compare(passwordEnteredByUser, foundPwd, function (error, isMatch) {
-                            if (error) {
-                                throw error
-                            } else if (!isMatch) {
-                                console.log("Password doesn't match!")
-                            } else {
-                                console.log("Password matches!")
-                            }
-                        })
-                    }
-                    // ----
-
-
-                    // ####
-                    bcrypt.hash('mypassword', 10, function (err, hash) {
-                        if (err) { throw (err); }
-
-                        bcrypt.compare('mypassword', hash, function (err, result) {
-                            if (err) { throw (err); }
-                            console.log("IS NORMAL HASH WORKING AS EXPECTED WHEN COMPARED? ", result);
-                        });
-                    });
-                    // ###                    
-
-
-                    UserModel
-                        .create({ username: user, password: hash })
-                        .then((data) => {
-                            console.log('Registered user successfully')
-                            console.log(data)
-                            res.send(data)
-                        })
-                        .catch((err) => { console.log(err) })
+                    console.log("-> Password matches!")
                 }
             })
         }
+
+        UserModel
+            .create({ username: user, password: generatedHash })
+            .then((data) => {
+                console.log('Registered user successfully');
+                console.log(data);
+                console.log("data.password: ",data.password,", generatedHash: ",generatedHash);
+                console.log("data.password === generatedHash: ", data.password === generatedHash);
+                res.send(data);
+            })
+            .catch((err) => { console.log(err) })
+
     })
 }
 
@@ -142,33 +194,28 @@ module.exports.registerUser = async (req, res) => {
 //     }
 //   }
 
+/** TODO soon, will be necessary for login */
+// module.exports.getHash = async (req, res) => {
+//     console.log("req.body:", JSON.stringify(req.body))
+//     const { user, pwd } = req.body;
+//     console.log(`user: ${user}, pwd: ${pwd}`)
+//     const saltRounds = 10
 
-module.exports.getHash = async (req, res) => {
-    console.log("req.body:", JSON.stringify(req.body))
-    const { user, pwd } = req.body;
-    console.log(`user: ${user}, pwd: ${pwd}`)
-    const saltRounds = 10
+//     const passwordEnteredByUser = pwd;
 
-    const passwordEnteredByUser = pwd;
+//     const findOutput = await JazzDapModel.findOne({ username: user })
+//     console.log(`findOutput: `, JSON.stringify(findOutput))
 
-    const findOutput = await JazzDapModel.findOne({ username: user })
-    console.log(`findOutput: `, JSON.stringify(findOutput))
+//     const foundHash = await JazzDapModel.findOne({ username: user }).select('password');
+//     console.log(`foundHash: `, JSON.stringify(foundHash))
 
-    const foundHash = await JazzDapModel.findOne({ username: user }).select('password');
-    console.log(`foundHash: `, JSON.stringify(foundHash))
-
-
-    const hash = "TODO GET HASH";
-
-    bcrypt.compare(passwordEnteredByUser, foundHash, function (error, isMatch) {
-        if (error) {
-            throw error
-        } else if (!isMatch) {
-            console.log("Password doesn't match!")
-        } else {
-            console.log("Password matches!")
-        }
-    })
-
-
-}
+//     bcrypt.compare(passwordEnteredByUser, foundHash, function (error, isMatch) {
+//         if (error) {
+//             throw error
+//         } else if (!isMatch) {
+//             console.log("Password doesn't match!")
+//         } else {
+//             console.log("Password matches!")
+//         }
+//     })
+// }
