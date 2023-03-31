@@ -11,7 +11,7 @@ router.post('/update', updateJazzDap)
 router.post('/delete', deleteJazzDap)
 
 router.get('/loginTest', loginTest)
-// router.post('/loginUser', loginUser)
+router.post('/loginUser', loginUser)
 
 router.post('/register', registerUser)
 

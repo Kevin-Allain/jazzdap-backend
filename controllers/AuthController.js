@@ -4,7 +4,27 @@ const bcrypt = require("bcryptjs")
 
 module.exports.loginTest = async (req, res) => { res.send({ token: 'test123' }) }
 
-// module.exports.loginUser = async (req, res) => { var keys = Object.keys(req); var keys2 = Object.keys(req.body); console.log(`keys2: ${keys2}`); const { username, password } = req.body; return fetch('http://localhost:5000/loginUser', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({username,password}) }) .then(data => data.json()) }
+module.exports.loginUser = async (req, res) => {
+    console.log("req.body:", JSON.stringify(req.body))
+    const { username, password } = req.body;
+    try {
+        var user = await UserModel.findOne({ username: username });
+        console.log("user: ",user);
+        if(!user) {
+            console.log("The username does not exist")
+            return res.status(400).send({ message: "The username does not exist" });
+        }
+        if(!bcrypt.compareSync(password, user.password)) {
+            console.log("The password is invalid")
+            return res.status(400).send({ message: "The password is invalid" });
+        }
+        console.log("The username and password combination is correct!");
+        res.send({ message: "The username and password combination is correct!" });
+    } catch (error) {
+        console.log("Something unexpected happened. error: ",error);
+        res.status(500).send(error);
+    }
+}
 
 // async function loginUser(req,res) { console.log(`loginUser AuthController. credentials: ${req}`); return fetch( `${baseUrl}/loginUser` , { method: 'POST', headers: { 'Content-Type': 'application/json' }, body:  JSON.stringify(req) }) .then(data =>  res.send(data)) }
 
@@ -129,7 +149,7 @@ module.exports.registerUser = async (req, res) => {
         // console.log(`foundHash.password: `, JSON.stringify(foundHash.password))
         // bcrypt.compare(passwordEnteredByUser, foundHash.password, function (err, result) { console.log("#### passwordEnteredByUser and foundHash.password match ", result); })
         console.log("USER ALREADY EXISTS");
-        return res.status(400).send({message:"User already exists"});
+        return res.status(400).send({ message: "User already exists" });
     }
 
     UserModel
