@@ -1,13 +1,14 @@
 const JazzDapModel = require('../models/JazzDapModel')
 
 module.exports.getJazzDap = async (req, res) => {
-    console.log("---getJazzDap---")
+    console.log("---module.exports.getJazzDap---")
     const jazzDap = await JazzDapModel.find()
     res.send(jazzDap)
 }
 
 // module.exports = router;
 module.exports.saveJazzDap = async (req, res) => {
+    console.log("module.exports.saveJazzDap");
     const { text } = req.body;
     JazzDapModel
         .create({ text })

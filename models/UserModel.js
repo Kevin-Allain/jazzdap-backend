@@ -10,10 +10,20 @@ const userSchema = new mongoose.Schema({
         type: String,
         require: true
     },
+    email: {
+        type: String,
+        require: true
+    },
     created_at: {
         type: Date,
         require: true
-    }
+    }, 
+    roles: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Role"
+        }
+      ]
 })
 
 userSchema.pre("save", function (next) {
