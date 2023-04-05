@@ -17,13 +17,15 @@ const userSchema = new mongoose.Schema({
     created_at: {
         type: Date,
         require: true
-    }, 
+    },
     roles: [
         {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Role"
+            type: String,
+            require: true
+            //   type: mongoose.Schema.Types.ObjectId,
+            //   ref: "Role"
         }
-      ]
+    ]
 })
 
 userSchema.pre("save", function (next) {

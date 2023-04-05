@@ -1,33 +1,53 @@
-const AuthModel = require('../models/AuthModel')
+// const AuthModel = require('../models/AuthModel')
 const UserModel = require('../models/UserModel')
-const bcrypt = require("bcryptjs")
+const bcrypt = require("bcryptjs");
+const jwt = require('jsonwebtoken');
+
+// -- doubt about this...
+const AuthModel = require('../models/AuthModel')
+
+const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
+const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
 
 module.exports.loginTest = async (req, res) => { res.send({ token: 'test123' }) }
 
 module.exports.loginUser = async (req, res) => {
     console.log("module.exports.loginUser");
     console.log("req.body:", JSON.stringify(req.body))
+    console.log("req.headers:", JSON.stringify(req.headers))
     const { username, password } = req.body;
     try {
+
         var user = await UserModel.findOne({ username: username });
-        console.log("user: ",user);
         if(!user) {
-            console.log("The username does not exist")
             return res.status(400).send({ message: "The username does not exist" });
         }
         if(!bcrypt.compare(password, user.password)) {
-            console.log("The password is invalid")
             return res.status(400).send({ message: "The password is invalid" });
         }
         console.log("The username and password combination is correct!");
-        res.send({ message: "The username and password combination is correct!" });
+
+        // -- token part
+        const accessToken = jwt.sign(username, ACCESS_TOKEN_SECRET);
+
+        // TODO verify if this makes sense!
+        AuthModel.create({
+            token:accessToken
+        }).then((data) => {
+            console.log('Wrote the accessToken. data: ',JSON.stringify(data));
+        })
+        .catch((err) => { console.log(err) })
+
+        res.send({ 
+            message: "The username and password combination is correct!", 
+            accessToken: accessToken 
+        });
+
     } catch (error) {
         console.log("Something unexpected happened. error: ",error);
         res.status(500).send(error);
     }
 }
-
-// async function loginUser(req,res) { console.log(`loginUser AuthController. credentials: ${req}`); return fetch( `${baseUrl}/loginUser` , { method: 'POST', headers: { 'Content-Type': 'application/json' }, body:  JSON.stringify(req) }) .then(data =>  res.send(data)) }
 
 // module.exports = router;
 module.exports.registerUser = async (req, res) => {
@@ -39,11 +59,6 @@ module.exports.registerUser = async (req, res) => {
     const findOutput = await UserModel.findOne({ username: user }).sort({ _id: -1 });
     const findEmail = await UserModel.findOne({ email: email }).sort({ _id: -1 });
     if (findOutput !== null  ) {
-        // // Bit of code to keep an reuse for login...
-        // console.log(`findOutput: `, JSON.stringify(findOutput))
-        // const foundHash = await UserModel.findOne({ username: user }).select('password');
-        // console.log(`foundHash.password: `, JSON.stringify(foundHash.password))
-        // bcrypt.compare(passwordEnteredByUser, foundHash.password, function (err, result) { console.log("#### passwordEnteredByUser and foundHash.password match ", result); })
         console.log("USER ALREADY EXISTS");
         return res.status(400).send({ message: "User already exists" });
     }
@@ -53,11 +68,10 @@ module.exports.registerUser = async (req, res) => {
     }
 
     UserModel
-        .create({ username: user, password: passwordEnteredByUser, email:email, created_at: new Date() })
+        .create({ username: user, password: passwordEnteredByUser, email:email, created_at: new Date(), roles:['user'] })
         .then((data) => {
             console.log('Registered user successfully');
             console.log(data);
-            // console.log("data.password: ", data.password, ", passwordEnteredByUser: ", passwordEnteredByUser); console.log("data.password === passwordEnteredByUser: ", data.password === passwordEnteredByUser);
             res.send(data);
         })
         .catch((err) => { console.log(err) })
@@ -87,3 +101,4 @@ module.exports.registerUser = async (req, res) => {
 //         }
 //     })
 // }
+

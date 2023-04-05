@@ -1,14 +1,10 @@
 const mongoose = require('mongoose')
 
-const AuthSchema = new mongoose.Schema({
-    user:{
+const authSchema = new mongoose.Schema({
+    token : {
         type:String,
         require:true
-    },
-    password:{
-        type:String,
-        require:true
-    },
+    }
 })
 
-module.exports=mongoose.model('Auth',AuthSchema)
+module.exports = mongoose.model('Auth', authSchema)
