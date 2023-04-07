@@ -4,6 +4,14 @@ const authSchema = new mongoose.Schema({
     token : {
         type:String,
         require:true
+    },
+    created_at: {
+        type: Date,
+        require: true
+    },
+    username: {
+        type: String,
+        require: true
     }
 })
 

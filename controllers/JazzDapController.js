@@ -9,9 +9,13 @@ module.exports.getJazzDap = async (req, res) => {
 // module.exports = router;
 module.exports.saveJazzDap = async (req, res) => {
     console.log("module.exports.saveJazzDap. req.headers: ",JSON.stringify(req.headers));
-    const { text } = req.body;
+    const { text, user } = req.body;
+
+    
+
+    // TODO change according to users recognized in request
     JazzDapModel
-        .create({ text })
+        .create({ text:text, users: user })
         .then((data) => {
             console.log('Added successfully')
             console.log(data)
@@ -22,8 +26,14 @@ module.exports.saveJazzDap = async (req, res) => {
 
 module.exports.updateJazzDap = async (req, res) => {
     const { _id, text } = req.body;
+
+    const users = (localStorage.username)? localStorage.username : [];
+
+
+
+    // TODO change according to users recognized in request
     JazzDapModel
-        .findByIdAndUpdate(_id, {text} )
+        .findByIdAndUpdate(_id, {text:text, users:[]} )
         .then(() => {
             console.log('Updated successfully')
             res.send("Updated successfully")})
@@ -32,6 +42,9 @@ module.exports.updateJazzDap = async (req, res) => {
 
 module.exports.deleteJazzDap = async (req, res) => {
     const { _id } = req.body;
+
+    // TODO change according to users recognized in request... and consider who can do what?! Admin to remove queries?
+
     JazzDapModel
         .findByIdAndDelete(_id )
         .then(() => {

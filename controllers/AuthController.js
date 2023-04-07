@@ -28,11 +28,15 @@ module.exports.loginUser = async (req, res) => {
         console.log("The username and password combination is correct!");
 
         // -- token part
+        // expiration time of 1 hour
+        // const accessToken = jwt.sign(username, ACCESS_TOKEN_SECRET,  { expiresIn: '1h' });
         const accessToken = jwt.sign(username, ACCESS_TOKEN_SECRET);
 
         // TODO verify if this makes sense!
         AuthModel.create({
-            token:accessToken
+            token:accessToken,
+            username: username,
+            created_at: new Date()
         }).then((data) => {
             console.log('Wrote the accessToken. data: ',JSON.stringify(data));
         })
@@ -79,28 +83,4 @@ module.exports.registerUser = async (req, res) => {
         .catch((err) => { console.log(err) })
 }
 
-
-//
-
-/** TODO soon, will be necessary for login */
-// module.exports.getHash = async (req, res) => {
-//     console.log("req.body:", JSON.stringify(req.body))
-//     const { user, pwd } = req.body;
-//     console.log(`user: ${user}, pwd: ${pwd}`)
-//     const saltRounds = 10
-//     const passwordEnteredByUser = pwd;
-//     const findOutput = await JazzDapModel.findOne({ username: user })
-//     console.log(`findOutput: `, JSON.stringify(findOutput))
-//     const foundHash = await JazzDapModel.findOne({ username: user }).select('password');
-//     console.log(`foundHash: `, JSON.stringify(foundHash))
-//     bcrypt.compare(passwordEnteredByUser, foundHash, function (error, isMatch) {
-//         if (error) {
-//             throw error
-//         } else if (!isMatch) {
-//             console.log("Password doesn't match!")
-//         } else {
-//             console.log("Password matches!")
-//         }
-//     })
-// }
 
