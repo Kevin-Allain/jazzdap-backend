@@ -38,9 +38,11 @@ module.exports.loginUser = async (req, res) => {
         })
         .catch((err) => { console.log(err) })
 
+        // TODO later: consider approaches for multiple roles
         res.send({ 
             message: "The username and password combination is correct!", 
-            accessToken: accessToken 
+            accessToken: accessToken,
+            roles:['user']
         });
 
     } catch (error) {

@@ -8,7 +8,7 @@ module.exports.getJazzDap = async (req, res) => {
 
 // module.exports = router;
 module.exports.saveJazzDap = async (req, res) => {
-    console.log("module.exports.saveJazzDap");
+    console.log("module.exports.saveJazzDap. req.headers: ",JSON.stringify(req.headers));
     const { text } = req.body;
     JazzDapModel
         .create({ text })
