@@ -14,7 +14,6 @@ module.exports.saveJazzDap = async (req, res) => {
   );
   const { text, user } = req.body;
 
-  // TODO change according to users recognized in request
   JazzDapModel.create({ text: text, users: user })
     .then((data) => {
       console.log("Added successfully");
