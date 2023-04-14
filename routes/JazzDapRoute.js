@@ -1,5 +1,6 @@
 const {Router} = require("express")
 const {getJazzDap, saveJazzDap, updateJazzDap, deleteJazzDap} = require('../controllers/JazzDapController')
+const {getMusicMIDI} = require('../controllers/MusicMIDIController')
 const {loginTest, loginUser, registerUser} = require ('../controllers/AuthController')
 const router = Router()
 
@@ -13,6 +14,9 @@ router.post('/delete', deleteJazzDap)
 router.get('/loginTest', loginTest)
 router.post('/loginUser', loginUser)
 router.post('/register', registerUser)
+
+
+router.get('/getMusicMIDI', getMusicMIDI )
 
 
 module.exports = router;
