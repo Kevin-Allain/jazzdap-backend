@@ -47,3 +47,16 @@ module.exports.getMusicMIDI = async (req, res) => {
   };
 
 
+
+  module.exports.getMatchLevenshteinDistance  =async (req,res) => {
+    console.log("---module.exports.getMatchLevenshteinDistance--- req.headers:", JSON.stringify(req.headers));
+    console.log("req.query: ",JSON.stringify(req.query));
+    console.log("req.body: ",JSON.stringify(req.body));
+    console.log("req.params: ",JSON.stringify(req.params));
+
+
+    // loading the entirety of the database will be a massive problem... 
+    // we have to consider clever approaches to do so
+
+    res.send("TODO")
+  }

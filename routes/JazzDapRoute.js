@@ -1,6 +1,6 @@
 const {Router} = require("express")
 const {getJazzDap, saveJazzDap, updateJazzDap, deleteJazzDap} = require('../controllers/JazzDapController')
-const {getMusicMIDI, getSampleMIDI} = require('../controllers/MusicMIDIController')
+const {getMusicMIDI, getSampleMIDI, getMatchLevenshteinDistance} = require('../controllers/MusicMIDIController')
 const {loginTest, loginUser, registerUser} = require ('../controllers/AuthController')
 const router = Router()
 
@@ -18,6 +18,7 @@ router.post('/register', registerUser)
 
 router.get('/getMusicMIDI', getMusicMIDI )
 router.get('/getSampleMIDI', getSampleMIDI )
+router.get('/getMatchLevenshteinDistance', getMatchLevenshteinDistance)
 
 
 module.exports = router;
