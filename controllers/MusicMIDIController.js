@@ -60,9 +60,6 @@ module.exports.getMusicMIDI = async (req, res) => {
     const arrayNotes = arrayStrNotes.map( a => parseInt(a))
     const firstNote = arrayNotes[0];
     const lengthSearch = arrayNotes.length;
-
-
-
     console.log("firstNote: ",firstNote,", lengthSearch: ",lengthSearch);
 
       // First approach is imperfect, but will somehow be something...
@@ -100,7 +97,9 @@ module.exports.getMusicMIDI = async (req, res) => {
                     //   console.log(d[0])
                       console.log("d[0]._id.toString(): ", d[0]._id.toString())
                       console.log("uniqueStrIds[0]: ",uniqueStrIds[0])
-                      d[0].forcingTest = "heeeeeeeyyyyyy";
+
+                      d = d.sort( (a,b) => a.recording-b.recording || a.m_id-b.m_id )
+
                       // identify where the sequence started
                       d.forEach(a =>
                           a.startSequence = (uniqueStrIds.findIndex(b => b === a._id.toString()) !== -1)? true : false
