@@ -61,9 +61,11 @@ module.exports.getMusicMIDI = async (req, res) => {
     const firstNote = arrayNotes[0];
     const lengthSearch = arrayNotes.length;
 
+
+
     console.log("firstNote: ",firstNote,", lengthSearch: ",lengthSearch);
 
-      // First approach is... imperfect, but will somehow be something...
+      // First approach is imperfect, but will somehow be something...
       // get all notes matching the first one 
       // and then return all the following notes according to m_id
       MusicMIDIModel.find({ pitch: firstNote })
@@ -73,33 +75,43 @@ module.exports.getMusicMIDI = async (req, res) => {
               console.log("====")
               // then find back other matches...
               // get all the recordings, tracks, and matching m_id to push through
-              arr_m_id = data.map(a => a.m_id);
-              arr_recording = data.map(a => a.recording);
-
-            // const l_search = data.map( a => {"recording"=a.recording, "m_id"=a.m_id})
-            // console.log("l_search[0]: ", l_search[0])
-
-            // this is a test
-            //   const searches = [
-            //     { recording: "BGR0082-T1", m_id: 0 },
-            //     { recording: "BGR0082-T2", m_id: 1 },
-            //     { recording: "BGR0083-T1", m_id: 0 }              
-            //   ]
+              const arr_m_id = data.map(a => a.m_id);
+              const arr_recording = data.map(a => a.recording);
+              const uniqueIds = data.map(a => a._id);
+              console.log("uniqueIds[0]: ",uniqueIds[0]);
+              const uniqueStrIds = data.map( a => a._id.toString());
+              console.log("uniqueStrIds[0]: ",uniqueStrIds[0]);
+              // myObjectId = ObjectId("507c7f79bcf86cd7994f6c0e")
 
               const query = {
-                $or: data.map(({ recording, m_id }) => {
-                  const minMId = m_id;
-                  const maxMId = m_id + 3;
-                  return { recording, m_id: { $lte: maxMId, $gte: minMId } };
-                })
+                  $or: data.map(({ recording, m_id }) => {
+                      const minMId = m_id;
+                      const maxMId = m_id + lengthSearch;
+                      return {
+                          recording,
+                          m_id: { $lte: maxMId, $gte: minMId }
+                      };
+                  })
               };
 
               MusicMIDIModel.find(query)
-                .then(d => {
-                    console.log("query passed.")
-                    console.log("d[0]: ",d[0])
-                    res.send(d);
-                })
+                  .lean()
+                  .then(d => {
+                    //   console.log(d[0])
+                      console.log("d[0]._id.toString(): ", d[0]._id.toString())
+                      console.log("uniqueStrIds[0]: ",uniqueStrIds[0])
+                      d[0].forcingTest = "heeeeeeeyyyyyy";
+                      // identify where the sequence started
+                      d.forEach(a =>
+                          a.startSequence = (uniqueStrIds.findIndex(b => b === a._id.toString()) !== -1)? true : false
+                      );
+                      //   for( let k in d){ if ( uniqueStrIds.findIndex(b => ) ) }
+                      console.log("query passed.")
+                      console.log("d[0]: ", d[0])
+                      console.log("d[0].forcingTest: ",d[0].forcingTest)
+                      console.log("d[0].startSequence: ",d[0].startSequence)
+                      res.send(d);
+                  })
 
           })
           .catch(error => { res.status(500).json(error); })
