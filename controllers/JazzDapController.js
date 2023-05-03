@@ -1,7 +1,7 @@
 const JazzDapModel = require("../models/JazzDapModel");
 
 module.exports.getJazzDap = async (req, res) => {
-  console.log("---module.exports.getJazzDap---");
+  console.log("---module.exports.getJazzDap---, req.headers: ",req.headers);
   const jazzDap = await JazzDapModel.find();
   res.send(jazzDap);
 };
@@ -10,7 +10,7 @@ module.exports.getJazzDap = async (req, res) => {
 module.exports.saveJazzDap = async (req, res) => {
   console.log(
     "module.exports.saveJazzDap. req.headers: ",
-    JSON.stringify(req.headers)
+    req.headers
   );
   const { text, user } = req.body;
 
@@ -28,7 +28,7 @@ module.exports.saveJazzDap = async (req, res) => {
 module.exports.updateJazzDap = async (req, res) => {
   const { _id, text, userId } = req.body;
 
-  console.log(JSON.stringify(req.body));
+  console.log( "module.exports.updateJazzDap. req.body: ",req.body);
 
   JazzDapModel.findByIdAndUpdate(_id, {
     $set: { text: text },
