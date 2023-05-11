@@ -17,3 +17,20 @@ module.exports.getTrackMetadata = async (req, res) => {
         })
         .catch(error=>{res.status(500).json(error);})
   };
+
+
+module.exports.getTracksMetadata = async (req,res) => {
+    console.log("---module.exports.getTracksMetadata--- req.headers:", req.headers);
+    console.log("req.params: ",req.params);
+    const { lognumbers } = req.query.lognumers;
+
+    MusicInfoControllerModel.find({lognumber:lognumbers})
+        .then(data =>{
+            console.log("Searched successfully.")
+            console.log("data.length: ", data.length);
+            res.send(data);
+        })
+        .catch(error=>{res.status(500).json(error);})
+
+
+}  
