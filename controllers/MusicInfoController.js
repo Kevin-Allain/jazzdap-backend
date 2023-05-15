@@ -22,9 +22,12 @@ module.exports.getTrackMetadata = async (req, res) => {
 module.exports.getTracksMetadata = async (req,res) => {
     console.log("---module.exports.getTracksMetadata--- req.headers:", req.headers);
     console.log("req.params: ",req.params);
-    const { lognumbers } = req.query.lognumers;
+    console.log("req.query: ",req.query);
+    console.log("req.body: ",req.body);
+    const lognumbers = req.query.lognumbers;
+    console.log("lognumbers: ", lognumbers);
 
-    MusicInfoControllerModel.find({lognumber:lognumbers})
+    MusicInfoControllerModel.find( {lognumber: { $in: lognumbers} } )
         .then(data =>{
             console.log("Searched successfully.")
             console.log("data.length: ", data.length);
