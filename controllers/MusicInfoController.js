@@ -34,6 +34,4 @@ module.exports.getTracksMetadata = async (req,res) => {
             res.send(data);
         })
         .catch(error=>{res.status(500).json(error);})
-
-
 }  
