@@ -3,16 +3,16 @@ const {getJazzDap, saveJazzDap, updateJazzDap, deleteJazzDap} = require('../cont
 const {getMusicMIDI, getSampleMIDI, getMatchLevenshteinDistance} = require('../controllers/MusicMIDIController')
 const {getTrackMetadata, getTracksMetadata} = require('../controllers/MusicInfoController')
 const {loginTest, loginUser, registerUser} = require ('../controllers/AuthController')
-const {addAnnotation, getAnnotations} = require ('../controllers/AnnotationController')
+const {addAnnotation, getAnnotations, deleteAnnotation} = require ('../controllers/AnnotationController')
 const router = Router()
 
 // router.get('/',(req,res) => { res.json({message:"Hi there"})  })
 
 // Jazzdaps
 router.get('/', getJazzDap ) // TODO later on this will have to be replaced. Eventually we will have a file that will be too big
-router.post('/save', saveJazzDap)
-router.post('/update', updateJazzDap)
-router.post('/delete', deleteJazzDap)
+router.post('/saveJazzDap', saveJazzDap)
+router.post('/updateJazzDap', updateJazzDap)
+router.post('/deleteJazzDap', deleteJazzDap)
 
 // User
 router.get('/loginTest', loginTest)
@@ -31,6 +31,7 @@ router.get('/getTrackMetadata', getTrackMetadata)
 // Annotations
 router.post('/addAnnotation', addAnnotation )
 router.get('/getAnnotations',getAnnotations)
+router.post("/deleteAnnotation",deleteAnnotation)
 
 
 module.exports = router;

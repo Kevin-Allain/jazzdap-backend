@@ -44,9 +44,9 @@ module.exports.updateJazzDap = async (req, res) => {
 };
 
 module.exports.deleteJazzDap = async (req, res) => {
-  const { _id } = req.body;
+  console.log( "module.exports.deleteJazzDap. req.body: ",req.body);
 
-  // TODO change according to users recognized in request... and consider who can do what?! Admin to remove queries?
+  const { _id } = req.body;
 
   JazzDapModel.findByIdAndDelete(_id)
     .then(() => {

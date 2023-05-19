@@ -28,3 +28,18 @@ module.exports.getAnnotations = async (req, res) => {
         })
         .catch(error => { res.status(500).json(error); })
 };
+
+module.exports.deleteAnnotation = async (req, res) => {
+    console.log("---module.exports.deleteAnnotation--- req.query:", req.query,", req.body: ",req.body);
+    
+    const { _id } = req.body;
+
+    AnnotationModel.findByIdAndDelete(_id)
+      .then(() => {
+        console.log("Deleted successfully");
+        res.send("Deleted successfully");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+}
