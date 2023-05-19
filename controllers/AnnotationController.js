@@ -2,9 +2,9 @@ const AnnotationModel = require("../models/AnnotationModel");
 
 module.exports.addAnnotation = async (req, res) => {
     console.log("---module.exports.addAnnotation--- req.headers:", req.headers);
-    const { type, info, text, user, privacy } = req.body;
+    const { type, info, annotationInput, user, privacy } = req.body;
 
-    AnnotationModel.create({ type: type, info: info, text: text, user: user, privacy: privacy })
+    AnnotationModel.create({ type: type, info: info, annotationInput: annotationInput, user: user, privacy: privacy })
         .then((data) => {
             console.log("Added successfully");
             console.log(data);
@@ -17,8 +17,8 @@ module.exports.addAnnotation = async (req, res) => {
 
 
 module.exports.getAnnotations = async (req, res) => {
-    console.log("---module.exports.getAnnotations--- req.headers:", req.headers);
-    const { type, info, user } = req.query;
+    console.log("---module.exports.getAnnotations--- req.query:", req.query);
+    const { type, info } = req.query;
 
     AnnotationModel.find({ type: type, info: info })
         .then(data => {

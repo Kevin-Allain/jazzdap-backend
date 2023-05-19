@@ -24,6 +24,10 @@ router.get('/getMusicMIDI', getMusicMIDI )
 router.get('/getSampleMIDI', getSampleMIDI )
 router.get('/getMatchLevenshteinDistance', getMatchLevenshteinDistance)
 
+// Metadatda
+router.get('/getTracksMetadata', getTracksMetadata )
+router.get('/getTrackMetadata', getTrackMetadata)
+
 // Annotations
 router.post('/addAnnotation', addAnnotation )
 router.get('/getAnnotations',getAnnotations)
