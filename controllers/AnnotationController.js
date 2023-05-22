@@ -43,3 +43,20 @@ module.exports.deleteAnnotation = async (req, res) => {
         console.log(err);
       });
 }
+
+module.exports.updateAnnotation = async (req, res) => {  
+    console.log( "module.exports.updateAnnotation. req.body: ",req.body);
+    const { _id, annotationInput, userId } = req.body;
+  
+    AnnotationModel.findByIdAndUpdate(_id, {
+      $set: { annotationInput: annotationInput, user: userId },
+    })
+      .then(() => {
+        console.log("Updated successfully");
+        res.send("Updated successfully");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+  
