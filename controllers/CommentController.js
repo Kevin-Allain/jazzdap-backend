@@ -2,9 +2,9 @@ const CommentModel = require("../models/CommentModel");
 
 module.exports.addComment = async (req, res) => {
     console.log("---module.exports.addComment--- req.body:", req.body);
-    const { type, info, index, annotationInput, author, privacy } = req.body;
+    const { type, info, index, commentInput, author, privacy } = req.body;
 
-    CommentModel.create({ type: type, info: info, index:index, annotationInput: annotationInput, author: author, privacy: privacy })
+    CommentModel.create({ type: type, info: info, index:index, commentInput: commentInput, author: author, privacy: privacy })
         .then((data) => {
             console.log("Added successfully");
             console.log(data);
@@ -47,11 +47,11 @@ module.exports.deleteComment = async (req, res) => {
 
 module.exports.updateComment = async (req, res) => {
     console.log("module.exports.updateComment. req.body: ", req.body);
-    const { _id, annotationInput, userId } = req.body;
+    const { _id, commentInput, userId } = req.body;
 
     // TODO change, this should make a modification on collaborators
     CommentModel.findByIdAndUpdate(_id, {
-        $set: { annotationInput: annotationInput }, //, author: userId },
+        $set: { commentInput: commentInput }, //, author: userId },
         $push: { collaborators: userId },
     })
         .then(() => {
