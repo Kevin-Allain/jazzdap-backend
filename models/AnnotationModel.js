@@ -9,7 +9,7 @@ const annotationSchema = new mongoose.Schema({
         type:String,
         require:true
     },
-    index:{
+    indexAnnotation:{
         type: Number,
         require:true
     },

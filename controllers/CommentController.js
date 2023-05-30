@@ -2,9 +2,9 @@ const CommentModel = require("../models/CommentModel");
 
 module.exports.addComment = async (req, res) => {
     console.log("---module.exports.addComment--- req.body:", req.body);
-    const { type, info, index, commentInput, author, privacy } = req.body;
+    const { type, info, indexAnnotation, commentInput, author, privacy } = req.body;
 
-    CommentModel.create({ type: type, info: info, index:index, commentInput: commentInput, author: author, privacy: privacy })
+    CommentModel.create({ type: type, info: info, indexAnnotation:indexAnnotation, commentInput: commentInput, author: author, privacy: privacy })
         .then((data) => {
             console.log("Added successfully");
             console.log(data);
@@ -18,10 +18,10 @@ module.exports.addComment = async (req, res) => {
 
 module.exports.getComments = async (req, res) => {
     console.log("---module.exports.getComments--- req.query:", req.query);
-    const { type, info, index } = req.query;
+    const { type, info, indexAnnotation } = req.query;
 
     // TODO assess with tests if approach correct
-    CommentModel.find({ type: type, info: info, index:index })
+    CommentModel.find({ type: type, info: info, indexAnnotation:indexAnnotation })
         .then(data => {
             console.log("Searched successfully.")
             console.log("data.length: ", data.length);

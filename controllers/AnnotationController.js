@@ -2,9 +2,9 @@ const AnnotationModel = require("../models/AnnotationModel");
 
 module.exports.addAnnotation = async (req, res) => {
     console.log("---module.exports.addAnnotation--- req.body:", req.body);
-    const { type, info, index, annotationInput, author, privacy } = req.body;
+    const { type, info, indexAnnotation, annotationInput, author, privacy } = req.body;
 
-    AnnotationModel.create({ type: type, info: info, index:index, annotationInput: annotationInput, author: author, privacy: privacy })
+    AnnotationModel.create({ type: type, info: info, indexAnnotation:indexAnnotation, annotationInput: annotationInput, author: author, privacy: privacy })
         .then((data) => {
             console.log("Added successfully");
             console.log(data);
@@ -18,10 +18,10 @@ module.exports.addAnnotation = async (req, res) => {
 
 module.exports.getAnnotations = async (req, res) => {
     console.log("---module.exports.getAnnotations--- req.query:", req.query);
-    const { type, info, index } = req.query;
+    const { type, info, indexAnnotation } = req.query;
 
     // TODO assess with tests if approach correct
-    AnnotationModel.find({ type: type, info: info, index:index })
+    AnnotationModel.find({ type: type, info: info, indexAnnotation:indexAnnotation })
         .then(data => {
             console.log("Searched successfully.")
             console.log("data.length: ", data.length);
