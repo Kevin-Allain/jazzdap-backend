@@ -4,7 +4,7 @@ const annotationSchema = new mongoose.Schema({
     type: {
         type:String,
         require:true
-    }, 
+    },
     info: {
         type:String,
         require:true

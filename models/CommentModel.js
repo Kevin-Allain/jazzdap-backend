@@ -4,7 +4,7 @@ const mongoose = require('mongoose')
 const commentSchema = new mongoose.Schema({
     // unsure whether we will have access to it when making the call
     annotationId: {
-        type: mongoose.ObjectId,
+        type: String,
         require: true
     },
     type: {
