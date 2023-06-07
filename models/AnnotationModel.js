@@ -37,6 +37,10 @@ const annotationSchema = new mongoose.Schema({
         type:[String],
         require:true
     },
+    time:{
+        type:Date,
+        require:true
+    }
 })
 
 module.exports=mongoose.model('Annotation',annotationSchema)

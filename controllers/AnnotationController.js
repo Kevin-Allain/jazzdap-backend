@@ -2,9 +2,9 @@ const AnnotationModel = require("../models/AnnotationModel");
 
 module.exports.addAnnotation = async (req, res) => {
     console.log("---module.exports.addAnnotation--- req.body:", req.body);
-    const { type, info, indexAnnotation, annotationInput, author, privacy } = req.body;
+    const { type, info, indexAnnotation, annotationInput, author, privacy, time } = req.body;
 
-    AnnotationModel.create({ type: type, info: info, indexAnnotation:indexAnnotation, annotationInput: annotationInput, author: author, privacy: privacy })
+    AnnotationModel.create({ type: type, info: info, indexAnnotation:indexAnnotation, annotationInput: annotationInput, author: author, privacy: privacy, time: time })
         .then((data) => {
             console.log("Added successfully");
             console.log(data);
@@ -18,10 +18,23 @@ module.exports.addAnnotation = async (req, res) => {
 
 module.exports.getAnnotations = async (req, res) => {
     console.log("---module.exports.getAnnotations--- req.query:", req.query);
-    const { type, info, indexAnnotation } = req.query;
+    const { type, info, indexAnnotation, user } = req.query;
+
+    console.log('user: ', user,', (typeof user): ', (typeof user));
+    const queryCondition = {
+        type: type,
+        info: info,
+        indexAnnotation: parseInt(indexAnnotation),
+        $or: [
+            { privacy: 'public'},
+            { author: user }
+        ]
+        // privacy: 'private',
+        // author: user
+    };
 
     // TODO assess with tests if approach correct
-    AnnotationModel.find({ type: type, info: info, indexAnnotation:indexAnnotation })
+    AnnotationModel.find(queryCondition)
         .then(data => {
             console.log("Searched successfully.")
             console.log("data.length: ", data.length);
