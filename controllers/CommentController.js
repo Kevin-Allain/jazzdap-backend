@@ -2,9 +2,29 @@ const CommentModel = require("../models/CommentModel");
 
 module.exports.addComment = async (req, res) => {
     console.log("---module.exports.addComment--- req.body:", req.body);
-    const { type, info, indexAnnotation, commentInput, author, privacy, time } = req.body;
+    const { 
+        type, 
+        info, 
+        indexAnnotation, 
+        commentInput, 
+        author, 
+        privacy, 
+        time, 
+        annotationId 
+    } = req.body;
 
-    CommentModel.create({ type: type, info: info, indexAnnotation:indexAnnotation, commentInput: commentInput, author: author, privacy: privacy, time: time })
+    console.log("@ addComment of CommentController. annotationId: ",annotationId,", (typeof annotationId): ",(typeof annotationId));
+
+    CommentModel.create({ 
+        type: type, 
+        info: info, 
+        indexAnnotation:indexAnnotation, 
+        commentInput: commentInput, 
+        author: author, 
+        privacy: privacy, 
+        time: time, 
+        annotationId:annotationId
+    })
         .then((data) => {
             console.log("Added successfully");
             console.log(data);
