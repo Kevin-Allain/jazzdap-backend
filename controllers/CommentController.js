@@ -18,12 +18,12 @@ module.exports.addComment = async (req, res) => {
 
 module.exports.getComments = async (req, res) => {
     console.log("---module.exports.getComments--- req.query:", req.query);
-    const { type, info, indexAnnotation } = req.query;
+    const { annotationId } = req.query;
 
-    // TODO assess with tests if approach correct
-    CommentModel.find({ type: type, info: info, indexAnnotation:indexAnnotation })
+    // CommentModel.find({ type: type, info: info, indexAnnotation:indexAnnotation })
+    CommentModel.find({annotationId:annotationId})
         .then(data => {
-            console.log("Searched successfully.")
+            console.log("Searched successfully CommentModel.find")
             console.log("data.length: ", data.length);
             res.send(data);
         })

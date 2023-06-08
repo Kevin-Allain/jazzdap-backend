@@ -12,7 +12,7 @@ module.exports.getMusicMIDI = async (req, res) => {
 
     MusicMIDIModel.find({recording:recording})
         .then(data =>{
-            console.log("Searched successfully.")
+            console.log("Searched successfully MusicMIDIModel.find")
             // console.log(data);
 
             res.send(data);
@@ -36,7 +36,7 @@ module.exports.getMusicMIDI = async (req, res) => {
 
     MusicMIDIModel.find({recording:recording, m_id: {$gte:firstNoteIndex, $lte:lastNodeIndex} })
         .then(data =>{
-            console.log("Searched successfully.")
+            console.log("Searched successfully MusicMIDIModel.find")
             // console.log(data);
 
             res.send(data);
@@ -67,7 +67,7 @@ module.exports.getMatchLevenshteinDistance = async (req, res) => {
     // and then return all the following notes according to m_id
     MusicMIDIModel.find({ pitch: firstNote })
         .then(data => {
-            console.log("Searched successfully.")
+            console.log("Searched successfully MusicMIDIModel.find")
             console.log("data[0]: ", data[0]);
             console.log("====")
             // then find back other matches...

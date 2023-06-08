@@ -15,7 +15,7 @@ module.exports.addAnnotation = async (req, res) => {
         });
 };
 
-
+// index is useful for many samples matching from one song
 module.exports.getAnnotations = async (req, res) => {
     console.log("---module.exports.getAnnotations--- req.query:", req.query);
     const { type, info, indexAnnotation, user } = req.query;
@@ -36,12 +36,13 @@ module.exports.getAnnotations = async (req, res) => {
     // TODO assess with tests if approach correct
     AnnotationModel.find(queryCondition)
         .then(data => {
-            console.log("Searched successfully.")
+            console.log("Searched successfully AnnotationModel.find")
             console.log("data.length: ", data.length);
             res.send(data);
         })
         .catch(error => { res.status(500).json(error); })
 };
+
 
 module.exports.deleteAnnotation = async (req, res) => {
     console.log("---module.exports.deleteAnnotation--- req.query:", req.query, ", req.body: ", req.body);

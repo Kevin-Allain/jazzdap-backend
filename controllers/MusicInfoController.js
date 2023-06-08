@@ -11,7 +11,7 @@ module.exports.getTrackMetadata = async (req, res) => {
 
     MusicInfoControllerModel.find({lognumber:lognumber})
         .then(data =>{
-            console.log("Searched successfully.")
+            console.log("Searched successfully MusicInfoControllerModel.find")
             console.log("data.length: ", data.length);
             res.send(data);
         })
@@ -29,7 +29,7 @@ module.exports.getTracksMetadata = async (req,res) => {
 
     MusicInfoControllerModel.find( {lognumber: { $in: lognumbers} } )
         .then(data =>{
-            console.log("Searched successfully.")
+            console.log("Searched successfully MusicInfoControllerModel.find")
             console.log("data.length: ", data.length);
             res.send(data);
         })
