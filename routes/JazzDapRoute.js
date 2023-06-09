@@ -5,6 +5,7 @@ const {getTrackMetadata, getTracksMetadata} = require('../controllers/MusicInfoC
 const {loginTest, loginUser, registerUser} = require ('../controllers/AuthController')
 const {addAnnotation, getAnnotations, deleteAnnotation, updateAnnotation} = require ('../controllers/AnnotationController')
 const {addComment, getComments, deleteComment, updateComment} = require ('../controllers/CommentController')
+const { getUserAnnotations } = require("../controllers/UserController")
 const router = Router()
 
 // router.get('/',(req,res) => { res.json({message:"Hi there"})  })
@@ -41,5 +42,7 @@ router.get('/getComments',getComments)
 router.post("/deleteComment",deleteComment)
 router.post('/updateComment', updateComment)
 
+// User
+router.get('/getUserAnnotations',getUserAnnotations);
 
 module.exports = router;
