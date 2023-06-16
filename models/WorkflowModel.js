@@ -18,6 +18,7 @@ const workflowSchema = new mongoose.Schema({
         type: String,
         require: true
     },
+    // recoginzed by id of objects stored on the database
     objects: {
         type: [String],
         require: true

@@ -1,7 +1,7 @@
 const WorkflowModel = require("../models/WorkflowModel");
 
-module.exports.addWorkflow = async (req, res) => {
-    console.log("---module.exports.addWorkflow--- req.body:", req.body);
+module.exports.createWorkflow = async (req, res) => {
+    console.log("---module.exports.createWorkflow--- req.body:", req.body);
     const { 
         title, 
         time, 
@@ -20,7 +20,7 @@ module.exports.addWorkflow = async (req, res) => {
         searchesTimes:searchesTimes
     })
         .then((data) => {
-            console.log("Added successfully");
+            console.log("Created successfully");
             console.log(data);
             res.send(data);
         })
