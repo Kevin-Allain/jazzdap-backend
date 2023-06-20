@@ -31,4 +31,8 @@ const trackSchema = new mongoose.Schema({
     }
 })
 
+// Create indexes
+trackSchema.index({ pitch: 1 });
+trackSchema.index({ recording: 1 });
+
 module.exports=mongoose.model('Track',trackSchema)

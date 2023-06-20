@@ -54,6 +54,7 @@ router.post('/updateComment', updateComment)
 router.get('/getUserAnnotations',getUserAnnotations);
 
 // Workflow
-router.get('/getUserAnnotations',getUserAnnotations);
+router.get('/getWorkflows',getWorkflows);
+router.post('/createWorkflow',createWorkflow);
 
 module.exports = router;
