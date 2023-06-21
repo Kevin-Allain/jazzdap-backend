@@ -1,6 +1,11 @@
 const {Router} = require("express")
 const {getJazzDap, saveJazzDap, updateJazzDap, deleteJazzDap} = require('../controllers/JazzDapController')
-const {getMusicMIDI, getSampleMIDI, getMatchLevenshteinDistance} = require('../controllers/MusicMIDIController')
+const {
+    getMusicMIDI, 
+    getSampleMIDI, 
+    getMatchLevenshteinDistance,
+    getMatchLevenshteinDistance2
+} = require('../controllers/TrackController')
 const {getTrackMetadata, getTracksMetadata} = require('../controllers/MusicInfoController')
 const {loginTest, loginUser, registerUser} = require ('../controllers/AuthController')
 const {addAnnotation, getAnnotations, deleteAnnotation, updateAnnotation} = require ('../controllers/AnnotationController')
@@ -33,6 +38,8 @@ router.post('/register', registerUser)
 router.get('/getMusicMIDI', getMusicMIDI )
 router.get('/getSampleMIDI', getSampleMIDI )
 router.get('/getMatchLevenshteinDistance', getMatchLevenshteinDistance)
+router.get('/getMatchLevenshteinDistance2', getMatchLevenshteinDistance2)
+
 
 // Metadatda
 router.get('/getTracksMetadata', getTracksMetadata )
