@@ -13,11 +13,12 @@ const {addComment, getComments, deleteComment, updateComment} = require ('../con
 const { getUserAnnotations } = require("../controllers/UserController")
 const { 
     createWorkflow, 
-    getWorkflows, 
+    getWorkflow,
+    getWorkflowsInfo, 
     deleteWorkflow, 
     changeTitle, 
     changeDescription, 
-    addSearch 
+    addContent 
 } = require("../controllers/WorkflowController")
 const router = Router()
 
@@ -61,7 +62,8 @@ router.post('/updateComment', updateComment)
 router.get('/getUserAnnotations',getUserAnnotations);
 
 // Workflow
-router.get('/getWorkflows',getWorkflows);
+router.get('/getWorkflow',getWorkflow)
+router.get('/getWorkflowsInfo',getWorkflowsInfo);
 router.post('/createWorkflow',createWorkflow);
 
 module.exports = router;
