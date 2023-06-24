@@ -48,6 +48,10 @@ module.exports.deleteJazzDap = async (req, res) => {
 
   const { _id } = req.body;
 
+  // Convert the string _id to a valid ObjectId
+  console.log("_id: ",_id,", typeof _id: ",(typeof _id))
+
+
   JazzDapModel.findByIdAndDelete(_id)
     .then(() => {
       console.log("Deleted successfully");

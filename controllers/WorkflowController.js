@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const WorkflowModel = require("../models/WorkflowModel");
 
 module.exports.createWorkflow = async (req, res) => {
@@ -34,12 +35,17 @@ module.exports.createWorkflow = async (req, res) => {
 // e.g. get list of workflows based on a parameters, and then get the details. It won't look nice to try to show multiple workflows at the same time
 module.exports.getWorkflow = async (req, res) => {
     console.log("---module.exports.getWorkflow--- req.query:", req.query);
-    const { _id } = req.body;
-    // TODO assess whether time of creation is a good way to identify the workflow
-    WorkflowModel.find({_id:_id})
+    const { _id, user } = req.query;
+    
+  // Convert the string _id to a valid ObjectId
+    console.log("_id: ",_id,", typeof _id: ",(typeof _id))
+
+    WorkflowModel.findById(_id)
+        .exec()
         .then(data => {
             console.log("Searched successfully a single Workflow")
-            console.log("data.length: ", data.length);
+            console.log("data: ",data)
+            // console.log("data.length: ", data.length);
             res.send(data);
         })
         .catch(error => { res.status(500).json(error); })
@@ -79,6 +85,8 @@ module.exports.getWorkflowsInfo = async (req, res) => {
     // Should we assess here what parameters are passed, and then base our search accordingly? 
     // Or will it work already if one is undefined or null?
     WorkflowModel.find(query)
+        .select('_id title time user description')
+        .exec()
         .then(data => {
             console.log("Searched successfully WorkflowModel.find")
             console.log("data.length: ", data.length);
