@@ -26,7 +26,15 @@ const workflowSchema = new mongoose.Schema({
     objectsTimes: {
         type: [Date],
         require: true
-    }
+    },
+    objectsIndexes: {
+        type: [Number],
+        require: true
+    },
+    objectsNotes: {
+        type: [String],
+        require: true
+    },
 })
 
 module.exports=mongoose.model('Workflow',workflowSchema)
