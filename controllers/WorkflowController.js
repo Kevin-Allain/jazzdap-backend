@@ -8,8 +8,11 @@ module.exports.createWorkflow = async (req, res) => {
         time, 
         description,
         author,
-        searches = [],
-        searchesTimes= []
+        objects = [],
+        objectsTimes= [],
+        objectsNotes = [],
+        objectsIndexes = [],
+        objectsType = []
     } = req.body;
 
     WorkflowModel.create({ 
@@ -17,8 +20,11 @@ module.exports.createWorkflow = async (req, res) => {
         time:time, 
         description:description,
         author:author,
-        searches:searches,
-        searchesTimes:searchesTimes
+        objects:objects,
+        objectsTimes:objectsTimes,
+        objectsNotes:objectsNotes,
+        objectsIndexes:objectsIndexes,
+        objectsType:objectsType
     })
         .then((data) => {
             console.log("Created successfully");
@@ -59,7 +65,6 @@ module.exports.getWorkflow = async (req, res) => {
 // - title
 // - time?
 // - contains a certain recording, track, sample
-// TODO assess if we want one single function to make that selection?
 module.exports.getWorkflowsInfo = async (req, res) => {
     console.log("---module.exports.getWorkflowsInfo--- req.query:", req.query);
     const { 
@@ -81,7 +86,6 @@ module.exports.getWorkflowsInfo = async (req, res) => {
       query.time = time;
     }
     
-
     // Should we assess here what parameters are passed, and then base our search accordingly? 
     // Or will it work already if one is undefined or null?
     WorkflowModel.find(query)
@@ -111,7 +115,7 @@ module.exports.deleteWorkflow = async (req, res) => {
         });
 }
 
-// TODO change the code inside the functions
+// TODO test
 module.exports.changeTitle = async (req, res) => {
     console.log("module.exports.changeTitle. req.body: ", req.body);
     const { _id, text, userId } = req.body;
@@ -128,6 +132,7 @@ module.exports.changeTitle = async (req, res) => {
         });
 };
 
+// TODO test
 module.exports.changeDescription = async (req, res) => {
     console.log("module.exports.changeTitle. req.body: ", req.body);
     const { _id, text, userId } = req.body;
@@ -146,24 +151,29 @@ module.exports.changeDescription = async (req, res) => {
 };
 
 
-// TODO more functionalities for workflow: 
-// - add search
-// - add recording
-// - add track
-// - add sample
-// - add ... some metadata?
-// - ... WHAT ELSE?
+// TODO test
 module.exports.addContent = async (req, res) => {
     console.log("module.exports.addContent. req.body: ", req.body);
-    const { _id, text, time, userId } = req.body;
+    const {
+        _id, // _id of of the workflow
+        textNote, // text to set note related to the object
+        time, // time of input
+        userId, // identifier of author
+        idContent // _id of object
+    } = req.body;
 
-    // TODO change, this should make a modification on collaborators
     WorkflowModel.findByIdAndUpdate(_id, {
-        $push: { searches: text, searchesTimes:time },
-    })
-        .then(() => {
+        $push: {
+            objects: idContent,
+            objectsTimes: time,
+            objectsNotes: textNote,
+            objectsIndexes: { $size: "$objects" } // Push the length of 'objects' array
+        },
+    }, { new: true })
+        .then((updatedWorkflow ) => {
             console.log("addContent successfully");
-            res.send("addContent successfully");
+            console.log("updatedWorkflow : ", updatedWorkflow );
+            res.send(updatedWorkflow);
         })
         .catch((err) => {
             console.log(err);

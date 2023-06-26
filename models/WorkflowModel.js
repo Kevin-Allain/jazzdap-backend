@@ -18,7 +18,7 @@ const workflowSchema = new mongoose.Schema({
         type: String,
         require: true
     },
-    // recoginzed by id of objects stored on the database
+    // recoginzed by _id of objects stored on the database
     objects: {
         type: [String],
         require: true
@@ -35,6 +35,10 @@ const workflowSchema = new mongoose.Schema({
         type: [String],
         require: true
     },
+    objectsType:{
+        type:[String],
+        require:true
+    }
 })
 
 module.exports=mongoose.model('Workflow',workflowSchema)
