@@ -159,7 +159,8 @@ module.exports.addContent = async (req, res) => {
         textNote, // text to set note related to the object
         time, // time of input
         userId, // identifier of author
-        idContent // _id of object
+        idContent, // _id of object
+        typeContent // type of the content
     } = req.body;
 
     WorkflowModel.findByIdAndUpdate(_id, {
