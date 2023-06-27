@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const WorkflowModel = require("../models/WorkflowModel");
 
+// Let's make the assumption that format of the workflow object(s) is done as elements are passed to the controller
 module.exports.createWorkflow = async (req, res) => {
     console.log("---module.exports.createWorkflow--- req.body:", req.body);
     const { 
@@ -8,11 +9,7 @@ module.exports.createWorkflow = async (req, res) => {
         time, 
         description,
         author,
-        objects = [],
-        objectsTimes= [],
-        objectsNotes = [],
-        objectsIndexes = [],
-        objectsType = []
+        objects = []
     } = req.body;
 
     WorkflowModel.create({ 
@@ -21,10 +18,6 @@ module.exports.createWorkflow = async (req, res) => {
         description:description,
         author:author,
         objects:objects,
-        objectsTimes:objectsTimes,
-        objectsNotes:objectsNotes,
-        objectsIndexes:objectsIndexes,
-        objectsType:objectsType
     })
         .then((data) => {
             console.log("Created successfully");
@@ -152,27 +145,31 @@ module.exports.changeDescription = async (req, res) => {
 
 
 // TODO test
-module.exports.addContent = async (req, res) => {
-    console.log("module.exports.addContent. req.body: ", req.body);
+module.exports.addContentWorkflow = async (req, res) => {
+    console.log("module.exports.addContentWorkflow. req.body: ", req.body);
     const {
         _id, // _id of of the workflow
         textNote, // text to set note related to the object
         time, // time of input
         userId, // identifier of author
         idContent, // _id of object
-        typeContent // type of the content
+        typeContent, // type of the content
+        objectsIndex // index of object passed
     } = req.body;
 
     WorkflowModel.findByIdAndUpdate(_id, {
         $push: {
-            objects: idContent,
-            objectsTimes: time,
-            objectsNotes: textNote,
-            objectsIndexes: { $size: "$objects" } // Push the length of 'objects' array
-        },
-    }, { new: true })
+          objects: {
+            objectId: idContent,
+            objectTime: time,
+            objectNote: textNote,
+            objectType: typeContent,
+            objectIndex: objectsIndex
+          }
+        }
+      }, { new: true })
         .then((updatedWorkflow ) => {
-            console.log("addContent successfully");
+            console.log("addContentWorkflow successfully");
             console.log("updatedWorkflow : ", updatedWorkflow );
             res.send(updatedWorkflow);
         })

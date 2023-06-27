@@ -20,25 +20,17 @@ const workflowSchema = new mongoose.Schema({
     },
     // recoginzed by _id of objects stored on the database
     objects: {
-        type: [String],
+        type: [
+          {
+            objectId: String,
+            objectTime: Date,
+            objectIndex: Number,
+            objectNote: String,
+            objectType: String
+          }
+        ],
         require: true
-    },
-    objectsTimes: {
-        type: [Date],
-        require: true
-    },
-    objectsIndexes: {
-        type: [Number],
-        require: true
-    },
-    objectsNotes: {
-        type: [String],
-        require: true
-    },
-    objectsType:{
-        type:[String],
-        require:true
-    }
+      }    
 })
 
 module.exports=mongoose.model('Workflow',workflowSchema)
