@@ -82,7 +82,7 @@ module.exports.getWorkflowsInfo = async (req, res) => {
     // Should we assess here what parameters are passed, and then base our search accordingly? 
     // Or will it work already if one is undefined or null?
     WorkflowModel.find(query)
-        .select('_id title time user description')
+        // .select('_id title time user description') // this selection might not be necessary...
         .exec()
         .then(data => {
             console.log("Searched successfully WorkflowModel.find")
