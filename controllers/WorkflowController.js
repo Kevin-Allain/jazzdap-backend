@@ -144,7 +144,6 @@ module.exports.changeDescription = async (req, res) => {
 };
 
 
-// TODO test
 module.exports.addContentWorkflow = async (req, res) => {
     console.log("module.exports.addContentWorkflow. req.body: ", req.body);
     const {
@@ -171,6 +170,28 @@ module.exports.addContentWorkflow = async (req, res) => {
         .then((updatedWorkflow ) => {
             console.log("addContentWorkflow successfully");
             console.log("updatedWorkflow : ", updatedWorkflow );
+            res.send(updatedWorkflow);
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+};
+
+module.exports.deleteWorkflowObject = async (req, res) => {
+    console.log("module.exports.deleteWorkflowObject. req.body: ", req.body);
+    const {
+        _id, // _id of of the workflow
+        objectIndex // index of object passed
+    } = req.body;
+
+    WorkflowModel.findOneAndUpdate(
+        { _id },
+        { $pull: { objects: { objectIndex } } },
+        { new: true }
+    )
+        .then((updatedWorkflow) => {
+            console.log("deleteWorkflowObject successfully");
+            console.log("updatedWorkflow : ", updatedWorkflow);
             res.send(updatedWorkflow);
         })
         .catch((err) => {

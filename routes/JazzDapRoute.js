@@ -18,7 +18,8 @@ const {
     deleteWorkflow, 
     changeTitle, 
     changeDescription, 
-    addContentWorkflow 
+    addContentWorkflow,
+    deleteWorkflowObject
 } = require("../controllers/WorkflowController")
 const router = Router()
 
@@ -66,6 +67,7 @@ router.get('/getWorkflow',getWorkflow)
 router.get('/getWorkflowsInfo',getWorkflowsInfo);
 router.post('/createWorkflow',createWorkflow);
 router.post('/addContentWorkflow',addContentWorkflow);
+router.post('/deleteWorkflowObject',deleteWorkflowObject);
 
 
 module.exports = router;
