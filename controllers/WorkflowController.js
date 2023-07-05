@@ -12,6 +12,8 @@ module.exports.createWorkflow = async (req, res) => {
         objects = []
     } = req.body;
 
+    console.log("createWorkflow. objects: ",objects);
+
     WorkflowModel.create({ 
         title:title, 
         time:time, 
