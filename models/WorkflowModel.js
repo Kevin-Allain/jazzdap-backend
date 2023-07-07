@@ -26,11 +26,13 @@ const workflowSchema = new mongoose.Schema({
             objectTime: Date,
             objectIndex: Number,
             objectNote: String,
-            objectType: String
+            objectType: String,
+            // the type "sample" is complicated... We need a range selection.
+            objectIndexRange:Number,
           }
         ],
         require: true
-      }    
+      }
 })
 
 module.exports=mongoose.model('Workflow',workflowSchema)
