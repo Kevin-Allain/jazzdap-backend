@@ -69,5 +69,27 @@ router.post('/createWorkflow',createWorkflow);
 router.post('/addContentWorkflow',addContentWorkflow);
 router.post('/deleteWorkflowObject',deleteWorkflowObject);
 
+// based on _id
+router.get('/get_idContent', (req, res) => {
+    const { _id, typeCaller, indexRange } = req.body;
+    if (typeCaller === 'annotation') {
+
+    } else if (typeCaller === 'comment') {
+
+    } else if (typeCaller == 'recording') {
+
+    } else if (typeCaller=='track'){
+
+    } else if (typeCaller=='sample'){
+
+    } else {
+        console.log("unprepared case. req.body: ",req.body);
+    }
+  
+    // Call the appropriate controller's method
+    controller.getWorkflow(req, res);
+  });
+  
+
 
 module.exports = router;
