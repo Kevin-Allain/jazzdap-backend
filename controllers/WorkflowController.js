@@ -155,7 +155,8 @@ module.exports.addContentWorkflow = async (req, res) => {
         userId, // identifier of author
         idContent, // _id of object
         typeContent, // type of the content
-        objectsIndex // index of object passed
+        objectsIndex, // index of object passed
+        indexRange = 0 // For samples, we need to know how far the search goes beyond first note identified of the sample
     } = req.body;
 
     WorkflowModel.findByIdAndUpdate(_id, {
@@ -165,7 +166,8 @@ module.exports.addContentWorkflow = async (req, res) => {
             objectTime: time,
             objectNote: textNote,
             objectType: typeContent,
-            objectIndex: objectsIndex
+            objectIndex: objectsIndex,
+            objectIndexRange:indexRange
           }
         }
       }, { new: true })
