@@ -1,25 +1,28 @@
 const {Router} = require("express")
 const {getJazzDap, saveJazzDap, updateJazzDap, deleteJazzDap} = require('../controllers/JazzDapController')
 const {
-    getMusicMIDI, 
-    getSampleMIDI, 
+    getMusicMIDI, getSampleMIDI, 
     getMatchLevenshteinDistance,
-    getMatchLevenshteinDistance2
+    getMatchLevenshteinDistance2,
+    get_idContent_sample
 } = require('../controllers/TrackController')
-const {getTrackMetadata, getTracksMetadata} = require('../controllers/MusicInfoController')
+const {
+    getTrackMetadata, getTracksMetadata, 
+    get_idContent_recording, 
+    get_idContent_track
+} = require('../controllers/MusicInfoController')
 const {loginTest, loginUser, registerUser} = require ('../controllers/AuthController')
-const {addAnnotation, getAnnotations, deleteAnnotation, updateAnnotation} = require ('../controllers/AnnotationController')
-const {addComment, getComments, deleteComment, updateComment} = require ('../controllers/CommentController')
+const {
+    addAnnotation, getAnnotations, deleteAnnotation, updateAnnotation, 
+    get_idContent_annotation
+} = require ('../controllers/AnnotationController')
+const {addComment, getComments, deleteComment, updateComment, 
+    get_idContent_comment} = require ('../controllers/CommentController')
 const { getUserAnnotations } = require("../controllers/UserController")
 const { 
-    createWorkflow, 
-    getWorkflow,
-    getWorkflowsInfo, 
-    deleteWorkflow, 
-    changeTitle, 
-    changeDescription, 
-    addContentWorkflow,
-    deleteWorkflowObject
+    createWorkflow, getWorkflow, getWorkflowsInfo, 
+    deleteWorkflow, changeTitle,  changeDescription, 
+    addContentWorkflow, deleteWorkflowObject
 } = require("../controllers/WorkflowController")
 const router = Router()
 
@@ -69,27 +72,13 @@ router.post('/createWorkflow',createWorkflow);
 router.post('/addContentWorkflow',addContentWorkflow);
 router.post('/deleteWorkflowObject',deleteWorkflowObject);
 
-// based on _id
-router.get('/get_idContent', (req, res) => {
-    const { _id, typeCaller, indexRange } = req.body;
-    if (typeCaller === 'annotation') {
-
-    } else if (typeCaller === 'comment') {
-
-    } else if (typeCaller == 'recording') {
-
-    } else if (typeCaller=='track'){
-
-    } else if (typeCaller=='sample'){
-
-    } else {
-        console.log("unprepared case. req.body: ",req.body);
-    }
-  
-    // Call the appropriate controller's method
-    controller.getWorkflow(req, res);
-  });
-  
+// based on _id. One function for each type of controller
+// TODO Dirty and would be better if could be changed to one line
+router.get('/get_idContent_annotation', get_idContent_annotation);
+router.get('/get_idContent_comment', get_idContent_comment);
+router.get('/get_idContent_recording', get_idContent_recording);
+router.get('/get_idContent_track', get_idContent_track);
+router.get('/get_idContent_sample', get_idContent_sample);  
 
 
 module.exports = router;

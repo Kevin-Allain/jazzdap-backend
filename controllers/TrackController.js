@@ -195,3 +195,20 @@ module.exports.getMatchLevenshteinDistance2 = async (req, res) => {
         });
 
 }
+
+
+module.exports.get_idContent_sample = async (req,res) => {
+    const { _id, typeCaller, indexRange } = req.query;
+    console.log("get_idContent_sample: ",{_id, typeCaller, indexRange});
+    // TODO URGENT update for selection of several elements (can just do two queries...)
+    const queryCondition = {
+        _id:_id
+    };
+    TrackModel.find(queryCondition)
+        .then(data => {
+            console.log("Searched successfully TrackModel.find")
+            console.log("data.length: ", data.length);
+            res.send(data);
+        })
+        .catch(error => { res.status(500).json(error); })
+}

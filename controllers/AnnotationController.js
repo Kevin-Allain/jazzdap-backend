@@ -44,6 +44,22 @@ module.exports.getAnnotations = async (req, res) => {
 };
 
 
+module.exports.get_idContent_annotation = async (req,res) => {
+    const { _id, typeCaller, indexRange } = req.query;
+    console.log("get_idContent_annotation: ",{_id, typeCaller, indexRange});
+    const queryCondition = {
+        _id:_id
+    };
+    AnnotationModel.find(queryCondition)
+        .then(data => {
+            console.log("Searched successfully AnnotationModel.find")
+            console.log("data.length: ", data.length);
+            res.send(data);
+        })
+        .catch(error => { res.status(500).json(error); })
+}
+
+
 module.exports.deleteAnnotation = async (req, res) => {
     console.log("---module.exports.deleteAnnotation--- req.query:", req.query, ", req.body: ", req.body);
 

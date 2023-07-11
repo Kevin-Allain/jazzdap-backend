@@ -5,25 +5,25 @@ module.exports.addComment = async (req, res) => {
     const { 
         type, 
         info, 
-        indexAnnotation, 
+        indexComment, 
         commentInput, 
         author, 
         privacy, 
         time, 
-        annotationId 
+        commentId 
     } = req.body;
 
-    console.log("@ addComment of CommentController. annotationId: ",annotationId,", (typeof annotationId): ",(typeof annotationId));
+    console.log("@ addComment of CommentController. commentId: ",commentId,", (typeof commentId): ",(typeof commentId));
 
     CommentModel.create({ 
         type: type, 
         info: info, 
-        indexAnnotation:indexAnnotation, 
+        indexComment:indexComment, 
         commentInput: commentInput, 
         author: author, 
         privacy: privacy, 
         time: time, 
-        annotationId:annotationId
+        commentId:commentId
     })
         .then((data) => {
             console.log("Added successfully");
@@ -38,10 +38,10 @@ module.exports.addComment = async (req, res) => {
 
 module.exports.getComments = async (req, res) => {
     console.log("---module.exports.getComments--- req.query:", req.query);
-    const { annotationId } = req.query;
+    const { commentId } = req.query;
 
-    // CommentModel.find({ type: type, info: info, indexAnnotation:indexAnnotation })
-    CommentModel.find({annotationId:annotationId})
+    // CommentModel.find({ type: type, info: info, indexComment:indexComment })
+    CommentModel.find({commentId:commentId})
         .then(data => {
             console.log("Searched successfully CommentModel.find")
             console.log("data.length: ", data.length);
@@ -49,6 +49,20 @@ module.exports.getComments = async (req, res) => {
         })
         .catch(error => { res.status(500).json(error); })
 };
+
+module.exports.get_idContent_comment = async (req,res) => {
+    const { _id, typeCaller, indexRange } = req.query;
+    console.log("get_idContent_comment: ",{_id, typeCaller, indexRange});
+    const queryCondition = { _id:_id };
+    CommentModel.find(queryCondition)
+        .then(data => {
+            console.log("Searched successfully CommentModel.find")
+            console.log("data.length: ", data.length);
+            res.send(data);
+        })
+        .catch(error => { res.status(500).json(error); })
+}
+
 
 module.exports.deleteComment = async (req, res) => {
     console.log("---module.exports.deleteComment--- req.query:", req.query, ", req.body: ", req.body);

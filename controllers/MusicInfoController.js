@@ -35,3 +35,31 @@ module.exports.getTracksMetadata = async (req,res) => {
         })
         .catch(error=>{res.status(500).json(error);})
 }  
+
+
+module.exports.get_idContent_recording = async (req,res) => {
+    const { _id, typeCaller, indexRange } = req.query;
+    console.log("get_idContent_recording: ",{_id, typeCaller, indexRange});
+    const queryCondition = { _id:_id };
+    MusicInfoControllerModel.find(queryCondition)
+        .then(data => {
+            console.log("Searched successfully MusicInfoControllerModel.find")
+            console.log("data.length: ", data.length);
+            res.send(data);
+        })
+        .catch(error => { res.status(500).json(error); })
+}
+
+module.exports.get_idContent_track = async (req,res) => {
+    const { _id, typeCaller, indexRange } = req.query;
+    console.log("get_idContent_track: ",{_id, typeCaller, indexRange});
+    const queryCondition = { _id:_id };
+    MusicInfoControllerModel.find(queryCondition)
+        .then(data => {
+            console.log("Searched successfully MusicInfoControllerModel.find")
+            console.log("data.length: ", data.length);
+            res.send(data);
+        })
+        .catch(error => { res.status(500).json(error); })
+}
+
