@@ -70,6 +70,7 @@ router.get('/getWorkflow',getWorkflow)
 router.get('/getWorkflowsInfo',getWorkflowsInfo);
 router.post('/createWorkflow',createWorkflow);
 router.post('/addContentWorkflow',addContentWorkflow);
+router.post('/deleteWorkflow',deleteWorkflow);
 router.post('/deleteWorkflowObject',deleteWorkflowObject);
 
 // based on _id. One function for each type of controller

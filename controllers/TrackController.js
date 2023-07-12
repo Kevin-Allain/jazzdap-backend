@@ -197,18 +197,33 @@ module.exports.getMatchLevenshteinDistance2 = async (req, res) => {
 }
 
 
-module.exports.get_idContent_sample = async (req,res) => {
+module.exports.get_idContent_sample = async (req, res) => {
     const { _id, typeCaller, indexRange } = req.query;
-    console.log("get_idContent_sample: ",{_id, typeCaller, indexRange});
-    // TODO URGENT update for selection of several elements (can just do two queries...)
+    console.log("get_idContent_sample: ", { _id, typeCaller, indexRange });
     const queryCondition = {
-        _id:_id
+        _id: _id
     };
     TrackModel.find(queryCondition)
         .then(data => {
-            console.log("Searched successfully TrackModel.find")
+            console.log("Searched successfully TrackModel.find for ", typeCaller);
             console.log("data.length: ", data.length);
-            res.send(data);
+            if (data.length > 0) {
+                const baseM_id = Number(data[0].m_id);
+                const nextM_id = baseM_id + Number(indexRange);
+                const recording = data[0].recording;
+                console.log({recording, baseM_id,nextM_id});
+                const queryCondition2 = {
+                    recording: recording,
+                    m_id: { $lte: nextM_id, $gte: baseM_id }
+                };
+
+                TrackModel.find(queryCondition2)
+                    .then(fullData => {
+                        console.log("Second search successful. length is: ", fullData.length);
+                        res.send(fullData);
+                    })
+            }
+            // res.send(data);
         })
         .catch(error => { res.status(500).json(error); })
 }
