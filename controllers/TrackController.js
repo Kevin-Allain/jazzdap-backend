@@ -159,7 +159,7 @@ module.exports.getMatchLevenshteinDistance2 = async (req, res) => {
             console.log("TIME CALL first query: ", new Date());
             console.log("data: ", data);
             // const recordingIds = data.map(item => item.recording);
-
+            if (data.length===0){ return; }
             // Second Query: Get objects with matching recording and m_id range
             const query2 = {
                 $or: data.map(({ recording, m_id }) => {
@@ -187,8 +187,14 @@ module.exports.getMatchLevenshteinDistance2 = async (req, res) => {
             // finalResult contains the queried documents with the assigned startSequence attribute
             // Rest of your code...
             console.log("TIME AFTER COMPLEX QUERY: ", new Date())
-            console.log("finalResult.length: ", finalResult.length);
-            res.send(finalResult);
+            console.log("typeof finalResult: ", typeof finalResult)
+            if (typeof finalResult === 'undefined') {
+                res.send([]);
+                return; // doubt about usefulness of this one
+            } else {
+                console.log("finalResult.length: ", finalResult.length);
+                res.send(finalResult);
+            }
         })
         .catch(error => {
             res.status(500).json(error);
