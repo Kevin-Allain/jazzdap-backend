@@ -50,6 +50,8 @@ module.exports.get_idContent_recording = async (req,res) => {
         .catch(error => { res.status(500).json(error); })
 }
 
+// TODO modify beforePrivateBeta
+// We need to make the seleciton of RECORDING, not TRACK
 module.exports.get_idContent_track = async (req,res) => {
     const { _id, typeCaller, indexRange } = req.query;
     console.log("get_idContent_track: ",{_id, typeCaller, indexRange});
