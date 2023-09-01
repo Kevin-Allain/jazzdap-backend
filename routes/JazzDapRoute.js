@@ -26,10 +26,10 @@ const {
 } = require("../controllers/WorkflowController")
 const router = Router()
 
-// router.get('/',(req,res) => { res.json({message:"Hi there"})  })
+router.get('/',(req,res) => { res.json({message:"Hi there"})  })
 
 // Jazzdaps
-router.get('/', getJazzDap ) // TODO later on this will have to be replaced. Eventually we will have a file that will be too big
+// router.get('/', getJazzDap ) // TODO later on this will have to be replaced. Eventually we will have a file that will be too big
 router.post('/saveJazzDap', saveJazzDap)
 router.post('/updateJazzDap', updateJazzDap)
 router.post('/deleteJazzDap', deleteJazzDap)
