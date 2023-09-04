@@ -25,8 +25,9 @@ module.exports.loginUser = async (req, res) => {
         if(!bcrypt.compare(password, user.password)) {
             return res.status(400).send({ message: "The password is invalid" });
         }
-        console.log("The username and password combination is correct!");
+        console.log("AuthController, loginUser: The username and password combination is correct!");
 
+        console.log("Do we have access to the ACCESS_TOKEN_SECRET? Its type is: ",(typeof ACCESS_TOKEN_SECRET));
         // -- token part
         // expiration time of 1 hour
         // const accessToken = jwt.sign(username, ACCESS_TOKEN_SECRET,  { expiresIn: '1h' });
