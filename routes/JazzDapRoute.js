@@ -16,7 +16,7 @@ const {
     addAnnotation, getAnnotations, deleteAnnotation, updateAnnotation, 
     get_idContent_annotation
 } = require ('../controllers/AnnotationController')
-const {addComment, getComments, deleteComment, updateComment, 
+const {addComment, getComments, getCommentsOfAnnotation, deleteComment, updateComment, 
     get_idContent_comment} = require ('../controllers/CommentController')
 const { getUserAnnotations } = require("../controllers/UserController")
 const { 
