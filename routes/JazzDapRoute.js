@@ -59,6 +59,7 @@ router.post('/updateAnnotation', updateAnnotation)
 // Comments
 router.post('/addComment', addComment )
 router.get('/getComments',getComments)
+router.get('/getCommentsOfAnnotation',getCommentsOfAnnotation)
 router.post("/deleteComment",deleteComment)
 router.post('/updateComment', updateComment)
 

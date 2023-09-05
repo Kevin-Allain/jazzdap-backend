@@ -36,6 +36,7 @@ module.exports.addComment = async (req, res) => {
 };
 
 
+// This is a very weird function... We select {*}comments{*} based on annotations, not comments
 module.exports.getComments = async (req, res) => {
     console.log("---module.exports.getComments--- req.query:", req.query);
     const { commentId } = req.query;
@@ -49,6 +50,21 @@ module.exports.getComments = async (req, res) => {
         })
         .catch(error => { res.status(500).json(error); })
 };
+
+module.exports.getCommentsOfAnnotation = async (req, res) => {
+    console.log("---module.exports.getCommentsOfAnnotation--- req.query:", req.query);
+    const { annotationId } = req.query;
+
+    // CommentModel.find({ type: type, info: info, indexComment:indexComment })
+    CommentModel.find({annotationId:annotationId})
+        .then(data => {
+            console.log("Searched successfully CommentModel.find")
+            console.log("data.length: ", data.length);
+            res.send(data);
+        })
+        .catch(error => { res.status(500).json(error); })
+};
+
 
 module.exports.get_idContent_comment = async (req,res) => {
     const { _id, typeCaller, indexRange } = req.query;
