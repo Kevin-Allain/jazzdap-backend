@@ -10,10 +10,11 @@ module.exports.addComment = async (req, res) => {
         author, 
         privacy, 
         time, 
-        commentId 
+        commentId,
+        annotationId=null 
     } = req.body;
 
-    console.log("@ addComment of CommentController. commentId: ",commentId,", (typeof commentId): ",(typeof commentId));
+    console.log("@ addComment of CommentController. commentId: ",commentId,", (typeof commentId): ",(typeof commentId),", annotationId: ",annotationId);
 
     CommentModel.create({ 
         type: type, 
@@ -23,7 +24,8 @@ module.exports.addComment = async (req, res) => {
         author: author, 
         privacy: privacy, 
         time: time, 
-        commentId:commentId
+        commentId:commentId,
+        annotationId:annotationId
     })
         .then((data) => {
             console.log("Added successfully");
