@@ -27,13 +27,33 @@ module.exports.getTracksMetadata = async (req,res) => {
     const lognumbers = req.query.lognumbers;
     console.log("lognumbers: ", lognumbers);
 
-    MusicInfoControllerModel.find( {lognumber: { $in: lognumbers} } )
-        .then(data =>{
+    console.log("regex call 1: ", "${lognumbers[4]}_.{2}$");
+    console.log("regex call 2: ", `${lognumbers[4]}_.{2}$`);
+
+    // { $in: lognumbers} 
+            // {lognumber: 
+            //     {
+            //         $regex: `^${lognumbers}_.{2}$` 
+            //     }
+            // } 
+            
+    // We need to change the way we make our selection for SJA. 
+    MusicInfoControllerModel.find(
+        {
+            lognumber:
+                { $in: lognumbers.map(
+                    (lognumber) => lognumber.includes("SJA")? 
+                        new RegExp(`^${lognumber}_.{2}$`)
+                        : lognumber
+                ), }
+        }
+    )
+        .then(data => {
             console.log("Searched successfully MusicInfoControllerModel.find")
             console.log("data.length: ", data.length);
             res.send(data);
         })
-        .catch(error=>{res.status(500).json(error);})
+        .catch(error => { res.status(500).json(error); })
 }  
 
 
