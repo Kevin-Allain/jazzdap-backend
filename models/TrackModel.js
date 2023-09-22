@@ -21,11 +21,15 @@ const trackSchema = new mongoose.Schema({
         type: String,
         require: true
     },
-    recording: {
+    lognumber:{
         type: String,
         require: true
     },
     track: {
+        type: String,
+        require: true
+    },
+    trackCode: {
         type: String,
         require: true
     }
@@ -33,6 +37,6 @@ const trackSchema = new mongoose.Schema({
 
 // Create indexes
 trackSchema.index({ pitch: 1 });
-trackSchema.index({ recording: 1 });
+trackSchema.index({ track: 1 });
 
 module.exports=mongoose.model('Track',trackSchema)
