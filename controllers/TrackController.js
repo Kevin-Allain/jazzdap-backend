@@ -7,10 +7,10 @@ module.exports.getMusicMIDI = async (req, res) => {
     console.log("req.params: ",req.params);
 
 
-    const { recording, user } = req.query;
-    console.log("recording: ",recording,", user: ", user)
+    const { track, user } = req.query;
+    console.log("track: ",track,", user: ", user)
 
-    TrackModel.find({recording:recording})
+    TrackModel.find({track:track})
         .then(data =>{
             console.log("Searched successfully TrackModel.find")
             // console.log(data);
@@ -31,10 +31,10 @@ module.exports.getMusicMIDI = async (req, res) => {
     console.log("req.params: ",req.params);
 
 
-    const { recording, firstNoteIndex, lastNodeIndex , user } = req.query;
-    console.log("recording: ",recording, ", firstNoteIndex: ",firstNoteIndex, ", lastNodeIndex: " ,lastNodeIndex,", user: ", user)
+    const { track, firstNoteIndex, lastNodeIndex , user } = req.query;
+    console.log("track: ",track, ", firstNoteIndex: ",firstNoteIndex, ", lastNodeIndex: " ,lastNodeIndex,", user: ", user)
 
-    TrackModel.find({recording:recording, m_id: {$gte:firstNoteIndex, $lte:lastNodeIndex} })
+    TrackModel.find({track:track, m_id: {$gte:firstNoteIndex, $lte:lastNodeIndex} })
         .then(data =>{
             console.log("Searched successfully TrackModel.find")
             // console.log(data);
@@ -75,9 +75,6 @@ module.exports.getMatchLevenshteinDistance = async (req, res) => {
             console.log("TIME FIRST SEARCG: ",new Date());
 
             // then find back other matches...
-            // get all the recordings, tracks, and matching m_id to push through
-            // const arr_m_id = data.map(a => a.m_id);
-            // const arr_recording = data.map(a => a.recording);
             const uniqueIds = data.map(a => a._id);
             console.log("uniqueIds[0]: ", uniqueIds[0]);
             const uniqueStrIds = data.map(a => a._id.toString());
@@ -89,11 +86,11 @@ module.exports.getMatchLevenshteinDistance = async (req, res) => {
             } else {
 
                 const query = {
-                    $or: data.map(({ recording, m_id }) => {
+                    $or: data.map(({ track, m_id }) => {
                         const minMId = m_id;
                         const maxMId = m_id + lengthSearch;
                         return {
-                            recording,
+                            track,
                             m_id: { $lte: maxMId, $gte: minMId }
                         };
                     })
@@ -101,17 +98,13 @@ module.exports.getMatchLevenshteinDistance = async (req, res) => {
 
                 TrackModel.find(query)
                     .lean()
-                    .sort({ recording: 1, m_id: 1 })
+                    .sort({ track: 1, m_id: 1 })
                     .then(d => {
                         console.log("TIME SECOND CALL: ",new Date());
 
                         //   console.log(d[0])
                         console.log("d[0]._id.toString(): ", d[0]._id.toString())
                         console.log("uniqueStrIds[0]: ", uniqueStrIds[0])
-
-                        // d = d.sort((a, b) => a.recording - b.recording || a.m_id - b.m_id)
-
-                        console.log("ignored the sorting in backend");
 
                         // identify where the sequence started
                         d.forEach(a =>
@@ -158,15 +151,14 @@ module.exports.getMatchLevenshteinDistance2 = async (req, res) => {
 
             console.log("TIME CALL first query: ", new Date());
             console.log("data: ", data);
-            // const recordingIds = data.map(item => item.recording);
             if (data.length===0){ return; }
-            // Second Query: Get objects with matching recording and m_id range
+            // Second Query: Get objects with matching track and m_id range
             const query2 = {
-                $or: data.map(({ recording, m_id }) => {
+                $or: data.map(({ track, m_id }) => {
                     const minMId = m_id;
                     const maxMId = m_id + lengthSearch;
                     return {
-                        recording,
+                        track,
                         m_id: { $lte: maxMId, $gte: minMId }
                     };
                 })
@@ -199,9 +191,7 @@ module.exports.getMatchLevenshteinDistance2 = async (req, res) => {
         .catch(error => {
             res.status(500).json(error);
         });
-
 }
-
 
 module.exports.get_idContent_sample = async (req, res) => {
     const { _id, typeCaller, indexRange } = req.query;
@@ -216,10 +206,10 @@ module.exports.get_idContent_sample = async (req, res) => {
             if (data.length > 0) {
                 const baseM_id = Number(data[0].m_id);
                 const nextM_id = baseM_id + Number(indexRange);
-                const recording = data[0].recording;
-                console.log({recording, baseM_id,nextM_id});
+                const track = data[0].track;
+                console.log({track, baseM_id,nextM_id});
                 const queryCondition2 = {
-                    recording: recording,
+                    track: track,
                     m_id: { $lte: nextM_id, $gte: baseM_id }
                 };
 
