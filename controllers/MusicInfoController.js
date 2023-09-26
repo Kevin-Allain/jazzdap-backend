@@ -24,29 +24,19 @@ module.exports.getTracksMetadata = async (req,res) => {
     console.log("req.params: ",req.params);
     console.log("req.query: ",req.query);
     console.log("req.body: ",req.body);
-    const lognumbers = req.query.lognumbers;
-    console.log("lognumbers: ", lognumbers);
-
-    console.log("regex call 1: ", "${lognumbers[4]}_.{2}$");
-    console.log("regex call 2: ", `${lognumbers[4]}_.{2}$`);
-
+    // Removing doublons from lognumbers
+    const lognumbers = [...new Set(req.query.lognumbers)]; 
+    console.log("~~ At ",(new Date()),"\n# is: ",lognumbers.length,", lognumbers: ", lognumbers);
+    
     // { $in: lognumbers} 
-            // {lognumber: 
-            //     {
-            //         $regex: `^${lognumbers}_.{2}$` 
-            //     }
-            // } 
+    // {lognumber: { $regex: `^${lognumbers}_.{2}$`} } 
             
     // We need to change the way we make our selection for SJA. 
+    // MusicInfoControllerModel.find( { lognumber:
+    //             { $in: lognumbers.map((lognumber) => lognumber.includes("SJA")?  new RegExp(`^${lognumber}_.{2}$`) : lognumber ), } }
+    // )
     MusicInfoControllerModel.find(
-        {
-            lognumber:
-                { $in: lognumbers.map(
-                    (lognumber) => lognumber.includes("SJA")? 
-                        new RegExp(`^${lognumber}_.{2}$`)
-                        : lognumber
-                ), }
-        }
+        { lognumber: { $in: lognumbers} }
     )
         .then(data => {
             console.log("Searched successfully MusicInfoControllerModel.find")
