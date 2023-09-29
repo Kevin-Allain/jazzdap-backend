@@ -18,6 +18,10 @@ const workflowSchema = new mongoose.Schema({
         type: String,
         require: true
     },
+    privacy: {
+      type: String,
+      require: true
+    },
     // recoginzed by _id of objects stored on the database
     objects: {
         type: [

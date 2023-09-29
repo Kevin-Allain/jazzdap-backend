@@ -9,26 +9,25 @@ module.exports.createWorkflow = async (req, res) => {
         time, 
         description,
         author,
-        objects = []
+        objects = [],
+        privacy= 'public'
     } = req.body;
 
-    console.log("createWorkflow. objects: ",objects);
-
-    WorkflowModel.create({ 
-        title:title, 
-        time:time, 
-        description:description,
-        author:author,
-        objects:objects,
+    console.log("createWorkflow. objects: ", objects);
+    WorkflowModel.create({
+        title: title,
+        time: time,
+        description: description,
+        author: author,
+        objects: objects,
+        privacy: privacy
     })
         .then((data) => {
             console.log("Created successfully");
             console.log(data);
             res.send(data);
         })
-        .catch((err) => {
-            console.log(err);
-        });
+        .catch((err) => { console.log(err); });
 };
 
 
@@ -104,6 +103,21 @@ module.exports.deleteWorkflow = async (req, res) => {
         .then(() => {
             console.log("Deleted successfully");
             res.send("Deleted successfully");
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+}
+
+module.exports.changeWorkflowPrivacy = async (req, res) => {
+    console.log("module.exports.changeWorkflowPrivacy. req.body: ", req.body);
+    const { _id, newPrivacy } = req.body;
+    WorkflowModel.findByIdAndUpdate(_id, {
+        $set: { privacy: newPrivacy },
+    })
+        .then(() => {
+            console.log("changeWorkflowPrivacy successfully");
+            res.send("changeWorkflowPrivacy successfully");
         })
         .catch((err) => {
             console.log(err);

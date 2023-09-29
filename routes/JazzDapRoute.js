@@ -22,9 +22,10 @@ const { getUserAnnotations } = require("../controllers/UserController")
 const { 
     createWorkflow, getWorkflow, getWorkflowsInfo, 
     deleteWorkflow, changeTitle,  changeDescription, 
-    addContentWorkflow, deleteWorkflowObject
+    addContentWorkflow, deleteWorkflowObject,
+    changeWorkflowPrivacy
 } = require("../controllers/WorkflowController")
-const router = Router()
+const router = Router();
 
 router.get('/',(req,res) => { res.json({message:"Hi there"})  })
 
@@ -73,6 +74,8 @@ router.post('/createWorkflow',createWorkflow);
 router.post('/addContentWorkflow',addContentWorkflow);
 router.post('/deleteWorkflow',deleteWorkflow);
 router.post('/deleteWorkflowObject',deleteWorkflowObject);
+router.post('/changeWorkflowPrivacy',changeWorkflowPrivacy);
+
 
 // based on _id. One function for each type of controller
 // TODO Dirty and would be better if could be changed to one line
