@@ -124,6 +124,28 @@ module.exports.changeWorkflowPrivacy = async (req, res) => {
         });
 }
 
+// v1. Should be updated for different types of search
+module.exports.getExactMatchWorkflowParameter = async (req,res) => {
+    console.log("module.exports.getExactMatchWorkflowParameter. req.body: ", req.body);
+    const {_id,textSearch,selectionParameter} = req.body;
+
+    const query = {};
+    // Could simply based on the string of selectionParameter, but might be unsafe?
+    if (selectionParameter === 'author') {
+      query.author = textSearch;
+      query.privacy = 'public';
+    }
+
+    WorkflowModel.find(query)
+    .exec()
+    .then(data => {
+        console.log("Searched successfully WorkflowModel.find for getExactMatchWorkflowParameter")
+        console.log("data.length: ", data.length);
+        res.send(data);
+    })
+    .catch(error => { res.status(500).json(error); })
+}
+
 // TODO test
 module.exports.changeTitle = async (req, res) => {
     console.log("module.exports.changeTitle. req.body: ", req.body);

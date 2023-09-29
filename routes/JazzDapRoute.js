@@ -23,7 +23,7 @@ const {
     createWorkflow, getWorkflow, getWorkflowsInfo, 
     deleteWorkflow, changeTitle,  changeDescription, 
     addContentWorkflow, deleteWorkflowObject,
-    changeWorkflowPrivacy
+    changeWorkflowPrivacy, getExactMatchWorkflowParameter
 } = require("../controllers/WorkflowController")
 const router = Router();
 
@@ -75,7 +75,7 @@ router.post('/addContentWorkflow',addContentWorkflow);
 router.post('/deleteWorkflow',deleteWorkflow);
 router.post('/deleteWorkflowObject',deleteWorkflowObject);
 router.post('/changeWorkflowPrivacy',changeWorkflowPrivacy);
-
+router.post('/getExactMatchWorkflowParameter',getExactMatchWorkflowParameter);
 
 // based on _id. One function for each type of controller
 // TODO Dirty and would be better if could be changed to one line
