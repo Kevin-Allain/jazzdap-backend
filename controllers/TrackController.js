@@ -194,8 +194,10 @@ module.exports.getMatchLevenshteinDistance2 = async (req, res) => {
 }
 
 module.exports.get_idContent_sample = async (req, res) => {
-    const { _id, typeCaller, indexRange } = req.query;
+    // Important note: we ignore why we see some cases of indexRange with the samples from recording 03 N!
+    let { _id, typeCaller, indexRange } = req.query;
     console.log("get_idContent_sample: ", { _id, typeCaller, indexRange });
+    if (isNaN(indexRange)){indexRange=0;}
     const queryCondition = {
         _id: _id
     };
