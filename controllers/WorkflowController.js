@@ -129,6 +129,7 @@ module.exports.getExactMatchWorkflowParameter = async (req,res) => {
     console.log("module.exports.getExactMatchWorkflowParameter. req.body: ", req.body);
     const {_id,textSearch,selectionParameter} = req.body;
 
+    // TODO set data so that we can directly query attributes of interest for the workshop, rather than several calls to different databases.
     const query = {};
     // Could simply based on the string of selectionParameter, but might be unsafe?
     if (selectionParameter === 'author') {
