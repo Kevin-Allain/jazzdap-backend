@@ -23,7 +23,10 @@ const trackMetadataSchema = new mongoose.Schema({
     date_sent_engineer:{ type: String },
     date_returned: { type: String },
     engineer_s_notes: { type: String },
-    disc_data_sheets_scanned: { type: String }
+    disc_data_sheets_scanned: { type: String },
+    'Track Title': {
+        type: String
+    },
 })
 
 module.exports=mongoose.model('TrackMetadata',trackMetadataSchema)
