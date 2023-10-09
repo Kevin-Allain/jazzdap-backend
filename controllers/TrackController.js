@@ -194,14 +194,14 @@ module.exports.getMatchLevenshteinDistance2 = async (req, res) => {
 }
 
 module.exports.get_idContent_sample = async (req, res) => {
-    // Important note: we ignore why we see some cases of indexRange with the samples from recording 03 N!
+    console.log("get_idContent_sample. req: ", req, ", res: ",res);
     let { _id, typeCaller, indexRange } = req.query;
     console.log("get_idContent_sample: ", { _id, typeCaller, indexRange });
-    if (isNaN(indexRange)){indexRange=0;}
+    if (isNaN(indexRange)) { indexRange = 0; }
     const queryCondition = {
         _id: _id
     };
-    TrackModel.find(queryCondition)
+    return TrackModel.find(queryCondition)
         .then(data => {
             console.log("Searched successfully TrackModel.find for ", typeCaller);
             console.log("data.length: ", data.length);
@@ -209,19 +209,38 @@ module.exports.get_idContent_sample = async (req, res) => {
                 const baseM_id = Number(data[0].m_id);
                 const nextM_id = baseM_id + Number(indexRange);
                 const track = data[0].track;
-                console.log({track, baseM_id,nextM_id});
+                console.log({ track, baseM_id, nextM_id });
                 const queryCondition2 = {
                     track: track,
                     m_id: { $lte: nextM_id, $gte: baseM_id }
                 };
 
-                TrackModel.find(queryCondition2)
+                return TrackModel.find(queryCondition2)
                     .then(fullData => {
                         console.log("Second search successful. length is: ", fullData.length);
-                        res.send(fullData);
-                    })
+                        if (res) {
+                            console.log("res TrackController if 1: ",res);                            
+                            res.send(fullData);
+                        } else {
+                            console.log("res TrackController if 2: ", res);
+                            return fullData;
+                        }
+                    });
+            } else {
+                if (res) {
+                    console.log("res TrackController if 3: ",res);                            
+                    res.send([]); // Send an empty response if no data is found
+                } else {
+                    console.log("res TrackController if 4: ",res);                            
+                    return []; // Return an empty array if no data is found
+                }
             }
-            // res.send(data);
         })
-        .catch(error => { res.status(500).json(error); })
+        .catch(error => {
+            if (res) {
+                res.status(500).json(error); // Send the error response if res parameter is provided
+            } else {
+                throw error; // Throw the error to be caught by the caller function if res parameter is not provided
+            }
+        });
 }

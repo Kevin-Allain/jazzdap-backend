@@ -19,29 +19,36 @@ module.exports.getTrackMetadata = async (req, res) => {
   };
 
 
-module.exports.getTracksMetadata = async (req,res) => {
+module.exports.getTracksMetadata = async (req, res) => {
     console.log("---module.exports.getTracksMetadata--- req.headers:", req.headers);
-    console.log("req.params: ",req.params);
-    console.log("req.query: ",req.query);
-    console.log("req.body: ",req.body);
+    console.log("req.params: ", req.params);
+    console.log("req.query: ", req.query);
+    console.log("req.body: ", req.body);
     // Removing doublons from lognumbers
-    const lognumbers = [...new Set(req.query.lognumbers)]; 
-    console.log("~~ At ",(new Date()),"\n# is: ",lognumbers.length,", lognumbers: ", lognumbers);
-    
+    const lognumbers = [...new Set(req.query.lognumbers)];
+    console.log("~~ At ", (new Date()), "\n# is: ", lognumbers.length, ", lognumbers: ", lognumbers);
+
     // { $in: lognumbers} 
     // {lognumber: { $regex: `^${lognumbers}_.{2}$`} } 
-            
+
     // We need to change the way we make our selection for SJA. 
     // MusicInfoControllerModel.find( { lognumber:
     //             { $in: lognumbers.map((lognumber) => lognumber.includes("SJA")?  new RegExp(`^${lognumber}_.{2}$`) : lognumber ), } }
     // )
     MusicInfoControllerModel.find(
-        { lognumber: { $in: lognumbers} }
+        { lognumber: { $in: lognumbers } }
     )
         .then(data => {
             console.log("Searched successfully MusicInfoControllerModel.find")
             console.log("data.length: ", data.length);
-            res.send(data);
+            console.log("data[0]: ", data[0]);
+            if (res) {
+                console.log("res MusicInfoControllerModel if 1: ", res);
+                res.send(data);
+            } else {
+                console.log("res MusicInfoControllerModel if 2: ", res, ", data: ",data);
+                return data; 
+            }
         })
         .catch(error => { res.status(500).json(error); })
 }  
@@ -62,6 +69,7 @@ module.exports.get_idContent_recording = async (req,res) => {
 
 // TODO modify beforePrivateBeta
 // We need to make the seleciton of RECORDING, not TRACK
+// after private beta: seems fine?
 module.exports.get_idContent_track = async (req,res) => {
     const { _id, typeCaller, indexRange } = req.query;
     console.log("get_idContent_track: ",{_id, typeCaller, indexRange});
@@ -75,3 +83,16 @@ module.exports.get_idContent_track = async (req,res) => {
         .catch(error => { res.status(500).json(error); })
 }
 
+module.exports.getTracksFromAttribute = async (req,res) => {
+    const { attributeValue, attributeName } = req.query;
+    console.log("getTracksFromAttribute: ",{attributeValue, attributeName});
+    let queryCondition = {};
+    queryCondition[attributeName] = attributeValue;
+    MusicInfoControllerModel.find(queryCondition)
+        .then(data => {
+            console.log("Searched successfully MusicInfoControllerModel.find")
+            console.log("data.length: ", data.length);
+            res.send(data);
+        })
+        .catch(error => { res.status(500).json(error); })
+}

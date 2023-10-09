@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const WorkflowModel = require("../models/WorkflowModel");
+const TrackController = require('./TrackController');
+const MusicInfoController = require('./MusicInfoController');
 
 // Let's make the assumption that format of the workflow object(s) is done as elements are passed to the controller
 module.exports.createWorkflow = async (req, res) => {
@@ -13,6 +15,53 @@ module.exports.createWorkflow = async (req, res) => {
         privacy= 'public'
     } = req.body;
 
+    let arrMeta = []; // TODO update
+    // Might be here an attempt to get metadata first. 
+    if (objects.length>0){
+        // adapt to type of object, and make queries to load the metadata
+        console.log("objects[0]: ", objects[0]);
+        if (objects[0].objectType === 'sample') {
+            // find the track in sample
+
+            try {
+                // Call the function from TrackController to get track details
+                const trackDetails = await TrackController.get_idContent_sample(
+                    {
+                        query: {
+                            _id: objects[0].objectId,
+                            typeCaller: 'sample',  // You might need to adjust this if typeCaller is dynamic
+                            indexRange: 0  // You might need to adjust this based on your requirements
+                        }
+                    }
+                );
+                // Enrich arrMeta with trackDetails
+                arrMeta.push(trackDetails);
+                console.log("trackDetails: ", trackDetails);
+                // TODO set second call based on lognumber (doubt about it being unique... )
+                try {
+
+                    const metaDetails = await MusicInfoController.getTracksMetadata(
+                        {
+                            query: {
+                                lognumbers: [trackDetails[0].lognumber],
+                            }
+                        }
+                    );
+                    console.log("## metaDetails: ", metaDetails);
+                    // Enrich arrMeta with trackDetails
+                    arrMeta.push(metaDetails);
+                } catch (error) {
+                    console.error('Error fetching metadata:', error);
+                }
+            } catch (error) {
+                console.error('Error fetching track details:', error);
+            }
+
+        }
+    }
+
+    console.log("arrMeta (2 queries for test): ", arrMeta);
+    
     console.log("createWorkflow. objects: ", objects);
     WorkflowModel.create({
         title: title,
@@ -20,7 +69,8 @@ module.exports.createWorkflow = async (req, res) => {
         description: description,
         author: author,
         objects: objects,
-        privacy: privacy
+        privacy: privacy,
+        arrMeta: arrMeta // TODO need to be changed later // not added yet... probably need to update workflowmodel
     })
         .then((data) => {
             console.log("Created successfully");
@@ -128,15 +178,12 @@ module.exports.changeWorkflowPrivacy = async (req, res) => {
 module.exports.getExactMatchWorkflowParameter = async (req, res) => {
     console.log("module.exports.getExactMatchWorkflowParameter. req.body: ", req.body);
     const { _id, textSearch, selectionParameter } = req.body;
-
     // TODO set data so that we can directly query attributes of interest for the workshop, rather than several calls to different databases.
     const query = {};
     // Could simply based on the string of selectionParameter, but might be unsafe?
     if (selectionParameter === 'author') {
         query.author = textSearch;
         query.privacy = 'public';
-
-
         WorkflowModel.find(query)
             .exec()
             .then(data => {

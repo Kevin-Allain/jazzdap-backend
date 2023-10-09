@@ -9,7 +9,8 @@ const {
 const {
     getTrackMetadata, getTracksMetadata, 
     get_idContent_recording, 
-    get_idContent_track
+    get_idContent_track,
+    getTracksFromAttribute
 } = require('../controllers/MusicInfoController')
 const {loginTest, loginUser, registerUser} = require ('../controllers/AuthController')
 const {
@@ -50,6 +51,7 @@ router.get('/getMatchLevenshteinDistance2', getMatchLevenshteinDistance2)
 // Metadatda
 router.get('/getTracksMetadata', getTracksMetadata )
 router.get('/getTrackMetadata', getTrackMetadata)
+router.get('./getTracksFromAttribute',getTracksFromAttribute)
 
 // Annotations
 router.post('/addAnnotation', addAnnotation )
