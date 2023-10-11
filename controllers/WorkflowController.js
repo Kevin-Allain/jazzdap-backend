@@ -3,83 +3,141 @@ const WorkflowModel = require("../models/WorkflowModel");
 const TrackController = require('./TrackController');
 const MusicInfoController = require('./MusicInfoController');
 
-// Let's make the assumption that format of the workflow object(s) is done as elements are passed to the controller
+// // Let's make the assumption that format of the workflow object(s) is done as elements are passed to the controller
+// module.exports.createWorkflow = async (req, res) => {
+//     console.log("---module.exports.createWorkflow--- req.body:", req.body);
+//     const { 
+//         title, 
+//         time, 
+//         description,
+//         author,
+//         objects = [],
+//         privacy= 'public'
+//     } = req.body;
+
+//     let arrMeta = []; // TODO update
+//     // Might be here an attempt to get metadata first. 
+//     if (objects.length>0){
+//         // adapt to type of object, and make queries to load the metadata
+//         console.log("objects[0]: ", objects[0]);
+//         if (objects[0].objectType === 'sample') {
+//             // find the track in sample
+
+//             try {
+//                 // Call the function from TrackController to get track details
+//                 const trackDetails = await TrackController.get_idContent_sample(
+//                     {
+//                         query: {
+//                             _id: objects[0].objectId,
+//                             typeCaller: 'sample',  // You might need to adjust this if typeCaller is dynamic
+//                             indexRange: 0  // You might need to adjust this based on your requirements
+//                         }
+//                     }
+//                 );
+//                 // Enrich arrMeta with trackDetails
+//                 // arrMeta.push(trackDetails);
+//                 // console.log("trackDetails: ", trackDetails);
+//                 // TODO set second call based on lognumber (doubt about it being unique... )
+//                 try {
+
+//                     const metaDetails = await MusicInfoController.getTracksMetadata(
+//                         {
+//                             query: {
+//                                 lognumbers: [trackDetails[0].lognumber],
+//                             }
+//                         }
+//                     );
+//                     console.log("## metaDetails: ", metaDetails);
+//                     // Enrich arrMeta with trackDetails
+//                     arrMeta.push(metaDetails);
+//                     console.log("#* right after push; arrMeta: ", arrMeta);
+//                 } catch (error) {
+//                     console.error('Error fetching metadata:', error);
+//                 }
+//             } catch (error) {
+//                 console.error('Error fetching track details:', error);
+//             }
+
+//         }
+//     }
+
+//     console.log("arrMeta (2 queries for test): ", arrMeta);
+    
+//     console.log("createWorkflow. objects: ", objects);
+//     WorkflowModel.create({
+//         title: title,
+//         time: time,
+//         description: description,
+//         author: author,
+//         objects: objects,
+//         privacy: privacy,
+//         arrMeta: arrMeta // TODO need to be changed later // not added yet... probably need to update workflowmodel
+//     })
+//         .then((data) => {
+//             console.log("Created successfully");
+//             console.log(data);
+//             res.send(data);
+//         })
+//         .catch((err) => { console.log(err); });
+// };
+
+
 module.exports.createWorkflow = async (req, res) => {
     console.log("---module.exports.createWorkflow--- req.body:", req.body);
     const { 
-        title, 
-        time, 
-        description,
-        author,
-        objects = [],
-        privacy= 'public'
+        title, time, description, author, objects = [], privacy= 'public'
     } = req.body;
 
     let arrMeta = []; // TODO update
     // Might be here an attempt to get metadata first. 
-    if (objects.length>0){
+    if (objects.length > 0){
         // adapt to type of object, and make queries to load the metadata
         console.log("objects[0]: ", objects[0]);
         if (objects[0].objectType === 'sample') {
             // find the track in sample
-
             try {
                 // Call the function from TrackController to get track details
                 const trackDetails = await TrackController.get_idContent_sample(
-                    {
-                        query: {
-                            _id: objects[0].objectId,
-                            typeCaller: 'sample',  // You might need to adjust this if typeCaller is dynamic
-                            indexRange: 0  // You might need to adjust this based on your requirements
-                        }
-                    }
+                    { query: { _id: objects[0].objectId, typeCaller: 'sample', indexRange: 0 } }
                 );
                 // Enrich arrMeta with trackDetails
-                arrMeta.push(trackDetails);
-                console.log("trackDetails: ", trackDetails);
+                // arrMeta.push(trackDetails);
+                // console.log("trackDetails: ", trackDetails);
                 // TODO set second call based on lognumber (doubt about it being unique... )
                 try {
-
                     const metaDetails = await MusicInfoController.getTracksMetadata(
-                        {
-                            query: {
-                                lognumbers: [trackDetails[0].lognumber],
-                            }
-                        }
+                        { query: { lognumbers: [trackDetails[0].lognumber], } }
                     );
                     console.log("## metaDetails: ", metaDetails);
                     // Enrich arrMeta with trackDetails
+                    arrMeta.push(trackDetails);
                     arrMeta.push(metaDetails);
+                    console.log("#* right after push; arrMeta: ", arrMeta);
+                    // Create the workflow after obtaining all necessary details
+                    console.log("createWorkflow. objects: ", objects);
+                    const data = await WorkflowModel.create({
+                        title: title,
+                        time: time,
+                        description: description,
+                        author: author,
+                        objects: objects,
+                        privacy: privacy,
+                        arrMeta: arrMeta // TODO need to be changed later // not added yet... probably need to update workflowmodel
+                    });
+                    console.log("Created successfully");
+                    console.log(data);
+                    res.send(data);
                 } catch (error) {
                     console.error('Error fetching metadata:', error);
+                    res.status(500).json(error);
                 }
             } catch (error) {
                 console.error('Error fetching track details:', error);
+                res.status(500).json(error);
             }
-
         }
     }
-
-    console.log("arrMeta (2 queries for test): ", arrMeta);
-    
-    console.log("createWorkflow. objects: ", objects);
-    WorkflowModel.create({
-        title: title,
-        time: time,
-        description: description,
-        author: author,
-        objects: objects,
-        privacy: privacy,
-        arrMeta: arrMeta // TODO need to be changed later // not added yet... probably need to update workflowmodel
-    })
-        .then((data) => {
-            console.log("Created successfully");
-            console.log(data);
-            res.send(data);
-        })
-        .catch((err) => { console.log(err); });
 };
-
 
 // unclear when we will want a singular workflow... Maybe based on _id!
 // e.g. get list of workflows based on a parameters, and then get the details. It won't look nice to try to show multiple workflows at the same time
