@@ -153,22 +153,26 @@ module.exports.getExactMatchWorkflowParameter = async (req, res) => {
     const { _id, textSearch, selectionParameter } = req.body;
     // TODO set data so that we can directly query attributes of interest for the workshop, rather than several calls to different databases.
     const query = {};
+    query.privacy = 'public';
     // Could simply based on the string of selectionParameter, but might be unsafe?
+    // more to do soon
     if (selectionParameter === 'author') {
         query.author = textSearch;
-        query.privacy = 'public';
-        WorkflowModel.find(query)
-            .exec()
-            .then(data => {
-                console.log("Searched successfully WorkflowModel.find for getExactMatchWorkflowParameter")
-                console.log("data.length: ", data.length);
-                res.send(data);
-            })
-            .catch(error => { res.status(500).json(error); })
-
     } else if (selectionParameter === 'trackTitle') {
-        
+        query.arrTrackTitle = { $in: [textSearch] }; // Check if textSearch is in arrTrackTitle
+    } else {
+        return res.status(400).json({ error: 'Invalid selection parameter' });
     }
+
+    WorkflowModel.find(query)
+    .exec()
+    .then(data => {
+        console.log("Searched successfully WorkflowModel.find for getExactMatchWorkflowParameter")
+        console.log("data.length: ", data.length);
+        res.send(data);
+    })
+    .catch(error => { res.status(500).json(error); })
+
 }
 
 // TODO test
