@@ -22,6 +22,25 @@ const workflowSchema = new mongoose.Schema({
       type: String,
       require: true
     },
+    // Will need to set more detailed things 
+    // arrMeta:{
+    //   type:Object,
+    // },
+    arrTrackTitle:{
+      type:[String],
+    },
+    arrEventName:{
+      type:[String],
+    },
+    ArrNamedArtists:{
+      type:[String],
+    },
+    arrReleaseYear:{
+      type:[Number],
+    },
+    arrReleaseMonth:{
+      type:[Number],
+    },
     // recoginzed by _id of objects stored on the database
     objects: {
         type: [

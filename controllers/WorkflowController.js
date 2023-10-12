@@ -88,7 +88,12 @@ module.exports.createWorkflow = async (req, res) => {
         title, time, description, author, objects = [], privacy= 'public'
     } = req.body;
 
-    let arrMeta = []; // TODO update
+    let arrMeta = [];
+    let arrTrackTitle = [];
+    let arrEventName = [];
+    let ArrNamedArtists = [];
+    let arrReleaseYear = [];
+    let arrReleaseMonth = [];
     // Might be here an attempt to get metadata first. 
     if (objects.length > 0){
         // adapt to type of object, and make queries to load the metadata
@@ -102,16 +107,51 @@ module.exports.createWorkflow = async (req, res) => {
                 );
                 // Enrich arrMeta with trackDetails
                 // arrMeta.push(trackDetails);
-                // console.log("trackDetails: ", trackDetails);
+                console.log("trackDetails: ", trackDetails);
                 // TODO set second call based on lognumber (doubt about it being unique... )
                 try {
                     const metaDetails = await MusicInfoController.getTracksMetadata(
                         { query: { lognumbers: [trackDetails[0].lognumber], } }
                     );
-                    console.log("## metaDetails: ", metaDetails);
+                    console.log("## metaDetails: ", metaDetails,", metaDetails.length: ",metaDetails.length);
                     // Enrich arrMeta with trackDetails
-                    arrMeta.push(trackDetails);
-                    arrMeta.push(metaDetails);
+                    // arrMeta.push(trackDetails);
+                    console.log("trackDetails[0]: ",trackDetails[0],", metaDetails[0]: ",metaDetails[0]);
+                    console.log("trackDetails[0]['SJA ID']: ",trackDetails[0]['SJA ID'],", metaDetails[0]['SJA ID']: ",metaDetails[0]['SJA ID']);
+                    console.log("trackDetails[0].lognumber: ",trackDetails[0].lognumber,", metaDetails[0].lognumber: ",metaDetails[0].lognumber);
+                    console.log("trackDetails[0]['duration']: ",trackDetails[0]['duration'],
+                    ", metaDetails[0]['Duration']: ",metaDetails[0]['Duration'],
+                    ", metaDetails[0]['Track Title']: ",metaDetails[0]['Track Title']);
+
+                    const firstTrack = trackDetails[0];
+                    const firstMeta = metaDetails[0];
+                    console.log("firstTrack: ",firstTrack,", firstTrack['SJA ID']: ",firstTrack['SJA ID'],"firstTrack['lognumber']: ",firstTrack['lognumber'],"firstTrack['track']: ",firstTrack['track']);
+                    console.log("firstMeta: ", firstMeta, ", firstMeta['SJA ID']: ", firstMeta['SJA ID'], "firstMeta['lognumber']: ", firstMeta['lognumber'], "firstMeta['track']: ", firstMeta['track']);
+                    console.log("firstTrack['track'] === firstMeta['track']: ", firstTrack['track'] === firstMeta['track'])
+                    console.log("firstMeta.track: ", firstMeta.track, ", firstTrack.track: ", firstTrack.track, ", firstTrack.track=== firstMeta.track ", firstTrack.track === firstMeta.track)
+                    console.log("==== metaDetails['Track Title']: ",metaDetails['Track Title'],", typeof metaDetails['Track Title']: ",typeof metaDetails['Track Title']);
+                    console.log("==== metaDetails['SJA ID']: ",metaDetails['SJA ID'],", typeof metaDetails['SJA ID']: ",typeof metaDetails['SJA ID']);
+                    console.log("==== metaDetails[0]['Track Title']: ",metaDetails[0]['Track Title'],", typeof metaDetails[0]['Track Title']: ",typeof metaDetails[0]['Track Title']);
+                    console.log("==== metaDetails[0]['SJA ID']: ",metaDetails[0]['SJA ID'],", typeof metaDetails[0]['SJA ID']: ",typeof metaDetails[0]['SJA ID']);
+
+                    console.log('--*');
+                    for (const key in metaDetails) {
+                        if (metaDetails.hasOwnProperty(key)) {
+                          console.log(`${key}: ${metaDetails[key]}`);
+                        }
+                      }
+                    console.log('*--');
+                    console.log('## ## ## ')
+                    const firstObject = metaDetails[0]; // Assuming metaDetails is an array of objects
+                    for (const key in firstObject) {
+                        if (firstObject.hasOwnProperty(key)) {
+                            console.log(`Key: ${key}, Value: ${firstObject[key]}`);
+                        }
+                    }
+                    console.log('## ## ## ')
+
+                    let filteredArr = metaDetails.filter(a => typeof(a['SJA ID'])!=='undefined' && a['SJA ID']===trackDetails[0]['SJA ID']);
+                    arrMeta.push(filteredArr);
                     console.log("#* right after push; arrMeta: ", arrMeta);
                     // Create the workflow after obtaining all necessary details
                     console.log("createWorkflow. objects: ", objects);
@@ -122,7 +162,11 @@ module.exports.createWorkflow = async (req, res) => {
                         author: author,
                         objects: objects,
                         privacy: privacy,
-                        arrMeta: arrMeta // TODO need to be changed later // not added yet... probably need to update workflowmodel
+                        arrTrackTitle:arrTrackTitle,
+                        arrEventName:arrEventName,
+                        ArrNamedArtists:ArrNamedArtists,
+                        arrReleaseYear:arrReleaseYear,
+                        arrReleaseMonth:arrReleaseMonth,
                     });
                     console.log("Created successfully");
                     console.log(data);
