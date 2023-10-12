@@ -206,15 +206,13 @@ module.exports.getMatchLevenshteinDistance2 = async (req, res) => {
 
 module.exports.get_idContent_sample = async (req, res) => {
     console.log("get_idContent_sample. req: ", req, ", res: ",res);
-    let { id, typeCaller, indexRange } = req.query;
-    console.log("get_idContent_sample: ", { id, typeCaller, indexRange });
+    let { _id, typeCaller, indexRange } = req.query;
+    console.log("get_idContent_sample: ", { _id, typeCaller, indexRange });
     if (isNaN(indexRange)) { indexRange = 0; }
-    const queryCondition = {
-        _id: id
-    };
+    const queryCondition = { _id: _id };
     return TrackModel.find(queryCondition)
         .then(data => {
-            console.log("Searched successfully TrackModel.find for ", typeCaller);
+            console.log("Searched successfully TrackModel.find for ", typeCaller,", _id: ",_id);
             console.log("data.length: ", data.length);
             if (data.length > 0) {
                 const baseM_id = Number(data[0].m_id);
@@ -256,52 +254,3 @@ module.exports.get_idContent_sample = async (req, res) => {
         });
 }
 
-// module.exports.get_idContent_sample = (req, res) => {
-//     return new Promise(async (resolve, reject) => {
-//         try {
-//             console.log("get_idContent_sample. req: ", req, ", res: ", res);
-//             let { _id, typeCaller, indexRange } = req.query;
-//             console.log("get_idContent_sample: ", { _id, typeCaller, indexRange });
-//             if (isNaN(indexRange)) { indexRange = 0; }
-//             const queryCondition = { _id: _id };
-//             const data = await TrackModel.find(queryCondition);
-//             console.log("Searched successfully TrackModel.find for ", typeCaller);
-//             console.log("data.length: ", data.length);
-//             if (data.length > 0) {
-//                 const baseM_id = Number(data[0].m_id);
-//                 const nextM_id = baseM_id + Number(indexRange);
-//                 const track = data[0].track;
-//                 console.log({ track, baseM_id, nextM_id });
-//                 const queryCondition2 = {
-//                     track: track,
-//                     m_id: { $lte: nextM_id, $gte: baseM_id }
-//                 };
-//                 const fullData = await TrackModel.find(queryCondition2);
-//                 console.log("Second search successful. length is: ", fullData.length);
-
-//                 if (res) {
-//                     console.log("res TrackController if 1: ", res);
-//                     res.send(fullData);
-//                 } else {
-//                     console.log("res TrackController if 2: ", res);
-//                     resolve(fullData);
-//                 }
-//             } else {
-//                 if (res) {
-//                     console.log("res TrackController if 3: ", res);
-//                     res.send([]); // Send an empty response if no data is found
-//                 } else {
-//                     console.log("res TrackController if 4: ", res);
-//                     resolve([]); // Resolve the promise with an empty array if no data is found
-//                 }
-//             }
-//         } catch (error) {
-//             if (res) {
-//                 res.status(500).json(error); // Send the error response if res parameter is provided
-//             } else {
-//                 console.log("res TrackController if 5: ", res);
-//                 reject(error); // Reject the promise with the error if res parameter is not provided
-//             }
-//         }
-//     });
-// };
