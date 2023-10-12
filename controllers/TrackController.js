@@ -1,5 +1,16 @@
 const TrackModel = require("../models/TrackModel");
 
+// unsure if useful
+// module.exports.getTrackFrom_Id = async (req, res) => {
+//     console.log("---module.exports.getTrackFrom_Id--- req.query._id: ",req.query.idTrack);
+//     const query1 = { _id:  req.query.idTrack};
+//     TrackModel.find(query1)
+//     .then(data => {
+//         res.seend(data);
+//     })
+// }
+
+
 module.exports.getMusicMIDI = async (req, res) => {
     console.log("---module.exports.getMusicMIDI--- req.headers:", req.headers);
     console.log("req.query: ",req.query);
@@ -150,7 +161,7 @@ module.exports.getMatchLevenshteinDistance2 = async (req, res) => {
         .then(data => {
 
             console.log("TIME CALL first query: ", new Date());
-            console.log("data: ", data);
+            console.log("data[0]: ", data[0]);
             if (data.length===0){ return; }
             // Second Query: Get objects with matching track and m_id range
             const query2 = {
@@ -195,11 +206,11 @@ module.exports.getMatchLevenshteinDistance2 = async (req, res) => {
 
 module.exports.get_idContent_sample = async (req, res) => {
     console.log("get_idContent_sample. req: ", req, ", res: ",res);
-    let { _id, typeCaller, indexRange } = req.query;
-    console.log("get_idContent_sample: ", { _id, typeCaller, indexRange });
+    let { id, typeCaller, indexRange } = req.query;
+    console.log("get_idContent_sample: ", { id, typeCaller, indexRange });
     if (isNaN(indexRange)) { indexRange = 0; }
     const queryCondition = {
-        _id: _id
+        _id: id
     };
     return TrackModel.find(queryCondition)
         .then(data => {

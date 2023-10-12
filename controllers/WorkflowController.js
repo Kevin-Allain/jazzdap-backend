@@ -84,101 +84,50 @@ const MusicInfoController = require('./MusicInfoController');
 
 module.exports.createWorkflow = async (req, res) => {
     console.log("---module.exports.createWorkflow--- req.body:", req.body);
-    const { 
-        title, time, description, author, objects = [], privacy= 'public'
+    const {
+        title, time, description, author, objects = [], privacy = 'public',
+        arrMetadataToWorkflow
     } = req.body;
 
-    let arrMeta = [];
     let arrTrackTitle = [];
     let arrEventName = [];
     let ArrNamedArtists = [];
     let arrReleaseYear = [];
     let arrReleaseMonth = [];
+
+    // Meta parameters have been passed, so let's add them
+    if (arrMetadataToWorkflow.length>0){
+        console.log("metadata was passed. arrMetadataToWorkflow: ",arrMetadataToWorkflow);
+        if (arrMetadataToWorkflow[0]['Track Title']) arrTrackTitle.push(arrMetadataToWorkflow[0]['Track Title'])
+        if (arrMetadataToWorkflow[0]['(E) Event Name']) arrEventName.push(arrMetadataToWorkflow[0]['(E) Event Name'])
+        if (arrMetadataToWorkflow[0]['(N) Named Artist(s)']) ArrNamedArtists.push(arrMetadataToWorkflow[0]['(N) Named Artist(s)'])
+        if (arrMetadataToWorkflow[0]['Event Year']) arrReleaseYear.push(arrMetadataToWorkflow[0]['Event Year'])
+        if (arrMetadataToWorkflow[0]['Event Month']) arrReleaseMonth.push(arrMetadataToWorkflow[0]['Event Month'])
+    }
+
     // Might be here an attempt to get metadata first. 
-    if (objects.length > 0){
+    if (objects.length > 0) {
         // adapt to type of object, and make queries to load the metadata
         console.log("objects[0]: ", objects[0]);
         if (objects[0].objectType === 'sample') {
             // find the track in sample
-            try {
-                // Call the function from TrackController to get track details
-                const trackDetails = await TrackController.get_idContent_sample(
-                    { query: { _id: objects[0].objectId, typeCaller: 'sample', indexRange: 0 } }
-                );
-                // Enrich arrMeta with trackDetails
-                // arrMeta.push(trackDetails);
-                console.log("trackDetails: ", trackDetails);
-                // TODO set second call based on lognumber (doubt about it being unique... )
-                try {
-                    const metaDetails = await MusicInfoController.getTracksMetadata(
-                        { query: { lognumbers: [trackDetails[0].lognumber], } }
-                    );
-                    console.log("## metaDetails: ", metaDetails,", metaDetails.length: ",metaDetails.length);
-                    // Enrich arrMeta with trackDetails
-                    // arrMeta.push(trackDetails);
-                    console.log("trackDetails[0]: ",trackDetails[0],", metaDetails[0]: ",metaDetails[0]);
-                    console.log("trackDetails[0]['SJA ID']: ",trackDetails[0]['SJA ID'],", metaDetails[0]['SJA ID']: ",metaDetails[0]['SJA ID']);
-                    console.log("trackDetails[0].lognumber: ",trackDetails[0].lognumber,", metaDetails[0].lognumber: ",metaDetails[0].lognumber);
-                    console.log("trackDetails[0]['duration']: ",trackDetails[0]['duration'],
-                    ", metaDetails[0]['Duration']: ",metaDetails[0]['Duration'],
-                    ", metaDetails[0]['Track Title']: ",metaDetails[0]['Track Title']);
-
-                    const firstTrack = trackDetails[0];
-                    const firstMeta = metaDetails[0];
-                    console.log("firstTrack: ",firstTrack,", firstTrack['SJA ID']: ",firstTrack['SJA ID'],"firstTrack['lognumber']: ",firstTrack['lognumber'],"firstTrack['track']: ",firstTrack['track']);
-                    console.log("firstMeta: ", firstMeta, ", firstMeta['SJA ID']: ", firstMeta['SJA ID'], "firstMeta['lognumber']: ", firstMeta['lognumber'], "firstMeta['track']: ", firstMeta['track']);
-                    console.log("firstTrack['track'] === firstMeta['track']: ", firstTrack['track'] === firstMeta['track'])
-                    console.log("firstMeta.track: ", firstMeta.track, ", firstTrack.track: ", firstTrack.track, ", firstTrack.track=== firstMeta.track ", firstTrack.track === firstMeta.track)
-                    console.log("==== metaDetails['Track Title']: ",metaDetails['Track Title'],", typeof metaDetails['Track Title']: ",typeof metaDetails['Track Title']);
-                    console.log("==== metaDetails['SJA ID']: ",metaDetails['SJA ID'],", typeof metaDetails['SJA ID']: ",typeof metaDetails['SJA ID']);
-                    console.log("==== metaDetails[0]['Track Title']: ",metaDetails[0]['Track Title'],", typeof metaDetails[0]['Track Title']: ",typeof metaDetails[0]['Track Title']);
-                    console.log("==== metaDetails[0]['SJA ID']: ",metaDetails[0]['SJA ID'],", typeof metaDetails[0]['SJA ID']: ",typeof metaDetails[0]['SJA ID']);
-
-                    console.log('--*');
-                    for (const key in metaDetails) {
-                        if (metaDetails.hasOwnProperty(key)) {
-                          console.log(`${key}: ${metaDetails[key]}`);
-                        }
-                      }
-                    console.log('*--');
-                    console.log('## ## ## ')
-                    const firstObject = metaDetails[0]; // Assuming metaDetails is an array of objects
-                    for (const key in firstObject) {
-                        if (firstObject.hasOwnProperty(key)) {
-                            console.log(`Key: ${key}, Value: ${firstObject[key]}`);
-                        }
-                    }
-                    console.log('## ## ## ')
-
-                    let filteredArr = metaDetails.filter(a => typeof(a['SJA ID'])!=='undefined' && a['SJA ID']===trackDetails[0]['SJA ID']);
-                    arrMeta.push(filteredArr);
-                    console.log("#* right after push; arrMeta: ", arrMeta);
-                    // Create the workflow after obtaining all necessary details
-                    console.log("createWorkflow. objects: ", objects);
-                    const data = await WorkflowModel.create({
-                        title: title,
-                        time: time,
-                        description: description,
-                        author: author,
-                        objects: objects,
-                        privacy: privacy,
-                        arrTrackTitle:arrTrackTitle,
-                        arrEventName:arrEventName,
-                        ArrNamedArtists:ArrNamedArtists,
-                        arrReleaseYear:arrReleaseYear,
-                        arrReleaseMonth:arrReleaseMonth,
-                    });
-                    console.log("Created successfully");
-                    console.log(data);
-                    res.send(data);
-                } catch (error) {
-                    console.error('Error fetching metadata:', error);
-                    res.status(500).json(error);
-                }
-            } catch (error) {
-                console.error('Error fetching track details:', error);
-                res.status(500).json(error);
-            }
+            console.log("createWorkflow. objects: ", objects);
+            const data = await WorkflowModel.create({
+                title: title,
+                time: time,
+                description: description,
+                author: author,
+                objects: objects,
+                privacy: privacy,
+                arrTrackTitle: arrTrackTitle,
+                arrEventName: arrEventName,
+                ArrNamedArtists: ArrNamedArtists,
+                arrReleaseYear: arrReleaseYear,
+                arrReleaseMonth: arrReleaseMonth,
+            });
+            console.log("Created successfully");
+            console.log(data);
+            res.send(data);
         }
     }
 };
