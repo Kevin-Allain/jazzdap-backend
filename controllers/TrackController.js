@@ -218,7 +218,7 @@ module.exports.getMatchFuzzy = async (req,res) => {
           sum += melody[i] - melody[i+1]; 
         }
         return sum;
-      }     
+      }
 
     let fuzzyContourInput = calculateIntervalSum(arrayNotes);
     let characterizationInput = null;
@@ -242,7 +242,36 @@ module.exports.getMatchFuzzy = async (req,res) => {
         characterizationInput = "big jump up";
     }
 
-    
+    TrackModel.aggregate([
+        // Filter tracks
+        {$match: {pitch: firstNote}},
+        // Filter m_id range
+        {$match: {
+          m_id: {
+            $gte: firstNote.m_id,  
+            $lt: firstNote.m_id + lengthSearch
+          }
+        }},      
+        // Calculate fuzzyScore
+        {$addFields: {
+          fuzzyScore: {
+            $reduce: {
+              input: {$slice: ["$pitch", lengthSearch]},  
+              initialValue: 0,
+              in: {
+                $sum: [
+                  "$$value",  
+                  {$subtract: ["$$this", "$$value"]}
+                ]
+              }  
+            }
+          }
+        }},
+        // Filter by fuzzyScore 
+        {$match: {fuzzyScore: {$gte: -4, $lte: 4}}}
+      ]).then(d => {
+        console.log("search done with getMatchFuzzy. d: ",d);
+      })
 
 }
 
