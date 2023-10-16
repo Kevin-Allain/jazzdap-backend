@@ -167,9 +167,15 @@ module.exports.getExactMatchWorkflowParameter = async (req, res) => {
         query.author = textSearch;
     } else if (selectionParameter === 'trackTitle') {
         query.arrTrackTitle = { $in: [textSearch] }; // Check if textSearch is in arrTrackTitle
+    }else if (selectionParameter === 'eventName') {
+        query.arrEventName = { $in: [textSearch] }; // Check if textSearch is in arrEventName
+    }else if (selectionParameter === 'artistName') {
+        query.arrNamedArtists = { $in: [textSearch] }; // Check if textSearch is in arrArtistName
     } else {
         return res.status(400).json({ error: 'Invalid selection parameter' });
     }
+
+    console.log("query: ",query);
 
     WorkflowModel.find(query)
     .exec()
