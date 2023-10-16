@@ -13,7 +13,7 @@ module.exports.createWorkflow = async (req, res) => {
 
     let arrTrackTitle = [];
     let arrEventName = [];
-    let ArrNamedArtists = [];
+    let arrNamedArtists = [];
     let arrReleaseYear = [];
     let arrReleaseMonth = [];
 
@@ -27,7 +27,7 @@ module.exports.createWorkflow = async (req, res) => {
             arrTrackTitle.push(arrMetadataToWorkflow[0]['Track Title'])
         }
         if (arrMetadataToWorkflow[0]['(E) Event Name']) arrEventName.push(arrMetadataToWorkflow[0]['(E) Event Name'])
-        if (arrMetadataToWorkflow[0]['(N) Named Artist(s)']) ArrNamedArtists.push(arrMetadataToWorkflow[0]['(N) Named Artist(s)'])
+        if (arrMetadataToWorkflow[0]['(N) Named Artist(s)']) arrNamedArtists.push(arrMetadataToWorkflow[0]['(N) Named Artist(s)'])
         if (arrMetadataToWorkflow[0]['Event Year']) arrReleaseYear.push(arrMetadataToWorkflow[0]['Event Year'])
         if (arrMetadataToWorkflow[0]['Event Month']) arrReleaseMonth.push(arrMetadataToWorkflow[0]['Event Month'])
     }
@@ -48,7 +48,7 @@ module.exports.createWorkflow = async (req, res) => {
                 privacy: privacy,
                 arrTrackTitle: arrTrackTitle,
                 arrEventName: arrEventName,
-                ArrNamedArtists: ArrNamedArtists,
+                arrNamedArtists: arrNamedArtists,
                 arrReleaseYear: arrReleaseYear,
                 arrReleaseMonth: arrReleaseMonth,
             });
@@ -272,7 +272,7 @@ module.exports.addContentWorkflow = async (req, res) => {
           }, 
           arrTrackTitle: trackTitle,
           arrEventName: eventName,
-          ArrNamedArtists: namedArtists,
+          arrNamedArtists: namedArtists,
           arrReleaseYear: releaseYear,
           arrReleaseMonth: releaseMonth,
         }

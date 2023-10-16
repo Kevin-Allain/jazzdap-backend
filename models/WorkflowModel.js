@@ -32,7 +32,7 @@ const workflowSchema = new mongoose.Schema({
     arrEventName:{
       type:[String],
     },
-    ArrNamedArtists:{
+    arrNamedArtists:{
       type:[String],
     },
     arrReleaseYear:{
