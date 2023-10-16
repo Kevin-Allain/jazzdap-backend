@@ -8,7 +8,7 @@ module.exports.createWorkflow = async (req, res) => {
     console.log("---module.exports.createWorkflow--- req.body:", req.body);
     const {
         title, time, description, author, objects = [], privacy = 'public',
-        arrMetadataToWorkflow
+        arrMetadataToWorkflow = []
     } = req.body;
 
     let arrTrackTitle = [];
@@ -20,7 +20,12 @@ module.exports.createWorkflow = async (req, res) => {
     // Meta parameters have been passed, so let's add them
     if (arrMetadataToWorkflow.length>0){
         console.log("metadata was passed. arrMetadataToWorkflow: ",arrMetadataToWorkflow);
-        if (arrMetadataToWorkflow[0]['Track Title']) arrTrackTitle.push(arrMetadataToWorkflow[0]['Track Title'])
+        // If the object is a recording, it should not be searchable as a single track.
+        // TODO consider if we want to push null, or leave it as is.
+        if ( arrMetadataToWorkflow[0]['Track Title']
+            && (objects.length > 0 && (objects[0].objectType === 'track' || objects[0].objectType === 'sample')) ) {
+            arrTrackTitle.push(arrMetadataToWorkflow[0]['Track Title'])
+        }
         if (arrMetadataToWorkflow[0]['(E) Event Name']) arrEventName.push(arrMetadataToWorkflow[0]['(E) Event Name'])
         if (arrMetadataToWorkflow[0]['(N) Named Artist(s)']) ArrNamedArtists.push(arrMetadataToWorkflow[0]['(N) Named Artist(s)'])
         if (arrMetadataToWorkflow[0]['Event Year']) arrReleaseYear.push(arrMetadataToWorkflow[0]['Event Year'])
@@ -31,7 +36,7 @@ module.exports.createWorkflow = async (req, res) => {
     if (objects.length > 0) {
         // adapt to type of object, and make queries to load the metadata
         console.log("objects[0]: ", objects[0]);
-        if (objects[0].objectType === 'sample') {
+        if (objects[0].objectType === 'sample' || objects[0].objectType === 'recording' || objects[0].objectType === 'track') {
             // find the track in sample
             console.log("createWorkflow. objects: ", objects);
             const data = await WorkflowModel.create({
@@ -50,6 +55,8 @@ module.exports.createWorkflow = async (req, res) => {
             console.log("Created successfully");
             console.log(data);
             res.send(data);
+        } else {
+            console.log("object is neither sample, recording, or track. It is: ",objects[0].objectType);
         }
     }
 };
@@ -221,8 +228,31 @@ module.exports.addContentWorkflow = async (req, res) => {
         idContent, // _id of object
         typeContent, // type of the content
         objectsIndex, // index of object passed
-        indexRange = 0 // For samples, we need to know how far the search goes beyond first note identified of the sample
+        indexRange = 0, // For samples, we need to know how far the search goes beyond first note identified of the sample
+        arrMetadataToWorkflow = [],
     } = req.body;
+
+    // TODO get the same bit of code from the creation, and add it
+    let trackTitle = null;
+    let eventName = null;
+    let namedArtists = null;
+    let releaseYear = null;
+    let releaseMonth = null;
+
+    // Meta parameters have been passed, so let's add them
+    if (arrMetadataToWorkflow.length>0){
+        console.log("metadata was passed. arrMetadataToWorkflow: ",arrMetadataToWorkflow);
+        // If the object is a recording, it should not be searchable as a single track.
+        // TODO consider if we want to push null, or leave it as is.
+        if ( arrMetadataToWorkflow[0]['Track Title']
+            && (typeContent === 'track' || typeContent === 'sample'))  {
+                trackTitle=(arrMetadataToWorkflow[0]['Track Title'])
+        }
+        if (arrMetadataToWorkflow[0]['(E) Event Name']) {eventName=(arrMetadataToWorkflow[0]['(E) Event Name'])}
+        if (arrMetadataToWorkflow[0]['(N) Named Artist(s)']) {namedArtists=(arrMetadataToWorkflow[0]['(N) Named Artist(s)'])}
+        if (arrMetadataToWorkflow[0]['Event Year']) {releaseYear=(arrMetadataToWorkflow[0]['Event Year'])}
+        if (arrMetadataToWorkflow[0]['Event Month']) {releaseMonth=(arrMetadataToWorkflow[0]['Event Month'])}
+    }
 
     WorkflowModel.findByIdAndUpdate(_id, {
         $push: {
@@ -232,8 +262,13 @@ module.exports.addContentWorkflow = async (req, res) => {
             objectNote: textNote,
             objectType: typeContent,
             objectIndex: objectsIndex,
-            objectIndexRange:indexRange
-          }
+            objectIndexRange:indexRange,
+          }, 
+          arrTrackTitle: trackTitle,
+          arrEventName: eventName,
+          ArrNamedArtists: namedArtists,
+          arrReleaseYear: releaseYear,
+          arrReleaseMonth: releaseMonth,
         }
       }, { new: true })
         .then((updatedWorkflow ) => {
