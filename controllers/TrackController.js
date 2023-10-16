@@ -204,6 +204,49 @@ module.exports.getMatchLevenshteinDistance2 = async (req, res) => {
         });
 }
 
+
+module.exports.getMatchFuzzy = async (req,res) => {
+
+    const arrayStrNotes = req.query.stringNotes.split('-')
+    const arrayNotes = arrayStrNotes.map(a => parseInt(a))
+    const firstNote = arrayNotes[0];
+    const lengthSearch = arrayNotes.length;
+
+    function calculateIntervalSum(melody) {
+        let sum = 0;
+        for (let i = 0; i < melody.length-1; i++) {
+          sum += melody[i] - melody[i+1]; 
+        }
+        return sum;
+      }     
+
+    let fuzzyContourInput = calculateIntervalSum(arrayNotes);
+    let characterizationInput = null;
+    if (fuzzyContourInput <= -4){
+        characterizationInput = "big jump down";
+    } else if (fuzzyContourInput === -3){
+        characterizationInput = "jump down";
+    } else if (fuzzyContourInput === -2){
+        characterizationInput = "leap down";
+    } else if (fuzzyContourInput === -1){
+        characterizationInput = "step down";
+    } else if (fuzzyContourInput === 0){
+        characterizationInput = "jump down";
+    } else if (fuzzyContourInput === 1){
+        characterizationInput = "step up";
+    } else if (fuzzyContourInput === 2){
+        characterizationInput = "leap up";
+    }else if (fuzzyContourInput === 3){
+        characterizationInput = "jump up";
+    }else {
+        characterizationInput = "big jump up";
+    }
+
+    
+
+}
+
+
 module.exports.get_idContent_sample = async (req, res) => {
     console.log("get_idContent_sample. req: ", req, ", res: ",res);
     let { _id, typeCaller, indexRange } = req.query;
