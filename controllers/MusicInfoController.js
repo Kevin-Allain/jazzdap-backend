@@ -53,8 +53,6 @@ module.exports.getTracksMetadata = async (req, res) => {
 // module.exports.getTracksMetadata = async (req, res) => {
 //     const lognumbers = [...new Set(req.query.lognumbers)];    
 //     return new Promise((resolve, reject) => {
-//         // ... (your existing code)
-
 //         MusicInfoControllerModel.find({ lognumber: { $in: lognumbers } })
 //             .then(data => {
 //                 console.log("Searched successfully MusicInfoControllerModel.find")
@@ -67,8 +65,6 @@ module.exports.getTracksMetadata = async (req, res) => {
 //             });
 //     });
 // }
-
-
 
 module.exports.get_idContent_recording = async (req,res) => {
     const { _id, typeCaller, indexRange } = req.query;
@@ -83,7 +79,6 @@ module.exports.get_idContent_recording = async (req,res) => {
         .catch(error => { res.status(500).json(error); })
 }
 
-// TODO modify beforePrivateBeta
 // We need to make the seleciton of RECORDING, not TRACK
 // after private beta: seems fine?
 module.exports.get_idContent_track = async (req,res) => {

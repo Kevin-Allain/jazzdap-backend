@@ -4,7 +4,8 @@ const {
     getMusicMIDI, getSampleMIDI, 
     getMatchLevenshteinDistance,
     getMatchLevenshteinDistance2,
-    get_idContent_sample
+    get_idContent_sample,
+    getMatchFuzzy // TODO assess whether we want to use this function
 } = require('../controllers/TrackController')
 const {
     getListFuzzyScores,
@@ -48,6 +49,7 @@ router.get('/getMusicMIDI', getMusicMIDI )
 router.get('/getSampleMIDI', getSampleMIDI )
 router.get('/getMatchLevenshteinDistance', getMatchLevenshteinDistance)
 router.get('/getMatchLevenshteinDistance2', getMatchLevenshteinDistance2)
+router.get('/getMatchFuzzy',getMatchFuzzy)
 
 
 // Metadatda

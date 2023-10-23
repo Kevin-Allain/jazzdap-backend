@@ -204,9 +204,10 @@ module.exports.getMatchLevenshteinDistance2 = async (req, res) => {
         });
 }
 
-
+// TODO should we use this function?!
+// TODO fix: this is wrong
 module.exports.getMatchFuzzy = async (req,res) => {
-
+    console.log("---- module.exports.getMatchFuzzy ---- req.query: ",req.query);
     const arrayStrNotes = req.query.stringNotes.split('-')
     const arrayNotes = arrayStrNotes.map(a => parseInt(a))
     const firstNote = arrayNotes[0];
