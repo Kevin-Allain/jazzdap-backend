@@ -7,18 +7,21 @@ const {
     get_idContent_sample
 } = require('../controllers/TrackController')
 const {
+    getListFuzzyScores,
+    getAllFuzzyScores,
+    getListFuzzyDist
+} = require('../controllers/Fuzzy_scoreController')
+const {
     getTrackMetadata, getTracksMetadata, 
     get_idContent_recording, 
     get_idContent_track,
     getTracksFromAttribute
 } = require('../controllers/MusicInfoController')
 const {loginTest, loginUser, registerUser} = require ('../controllers/AuthController')
-const {
-    addAnnotation, getAnnotations, deleteAnnotation, updateAnnotation, 
+const {addAnnotation, getAnnotations, deleteAnnotation, updateAnnotation, 
     get_idContent_annotation
 } = require ('../controllers/AnnotationController')
-const {addComment, getComments, getCommentsOfAnnotation, deleteComment, updateComment, 
-    get_idContent_comment} = require ('../controllers/CommentController')
+const {addComment, getComments, getCommentsOfAnnotation, deleteComment, updateComment,get_idContent_comment} = require ('../controllers/CommentController')
 const { getUserAnnotations } = require("../controllers/UserController")
 const { 
     createWorkflow, getWorkflow, getWorkflowsInfo, 
@@ -26,10 +29,9 @@ const {
     addContentWorkflow, deleteWorkflowObject,
     changeWorkflowPrivacy, getExactMatchWorkflowParameter
 } = require("../controllers/WorkflowController")
+
 const router = Router();
-
 router.get('/',(req,res) => { res.json({message:"Hi there"})  })
-
 // Jazzdaps
 // router.get('/', getJazzDap ) // TODO later on this will have to be replaced. Eventually we will have a file that will be too big
 router.post('/saveJazzDap', saveJazzDap)
@@ -80,12 +82,16 @@ router.post('/changeWorkflowPrivacy',changeWorkflowPrivacy);
 router.post('/getExactMatchWorkflowParameter',getExactMatchWorkflowParameter);
 
 // based on _id. One function for each type of controller
-// TODO Dirty and would be better if could be changed to one line
+// Dirty and would be better if could be changed to one line
 router.get('/get_idContent_annotation', get_idContent_annotation);
 router.get('/get_idContent_comment', get_idContent_comment);
 router.get('/get_idContent_recording', get_idContent_recording);
 router.get('/get_idContent_track', get_idContent_track);
-router.get('/get_idContent_sample', get_idContent_sample);  
+router.get('/get_idContent_sample', get_idContent_sample);
 
+// Fuzzy_score
+router.get('/getListFuzzyScores',getListFuzzyScores);
+router.get('/getAllFuzzyScores',getAllFuzzyScores);
+router.get('/getListFuzzyDist',getListFuzzyDist);
 
 module.exports = router;
