@@ -96,7 +96,9 @@ getMelodiesFromTrackId = async (data, lengthSearch) => {
             };
         })
     };
-    return TrackModel.find(query2);
+    // Use external sorting to avoid memory limit issues
+    return TrackModel.find(query2)
+    // .sort({ m_id: 1 }).hint({ $natural: 1 });
 }
 
 

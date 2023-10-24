@@ -30,6 +30,9 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
         dataTrack ? console.log("arrTracksMelodies.length: ", arrTracksMelodies.length)
             : console.log("arrTracksMelodies undefined!")
         console.log("arrTracksMelodies[0]: ",arrTracksMelodies[0]);
+        console.log("arrTracksMelodies[distance-1]: ",arrTracksMelodies[distance-1]);
+        console.log("arrTracksMelodies[distance]: ",arrTracksMelodies[distance]);
+        console.log("arrTracksMelodies[2*distance]: ",arrTracksMelodies[2*distance]);
 
         let numMelodies = arrTracksMelodies.length/distance;
         console.log("numMelodies: ",numMelodies);
@@ -38,20 +41,21 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
         console.log("2: make the Levenshtein distance calculation between arrTracksMelodies and notes");
         console.log("Time: ",new Date());
 
-        // Calculate Levenshtein distances for all sections of arrTracksMelodies with caching
-        const levenshteinScores = await Promise.all(arrTracksMelodies.map(async (melody, index) => {
-            const cacheKey = `levenshtein:${melody._id}:${notes}`;
+        // Calculate Levenshtein distances for non-overlapping sections of arrTracksMelodies with caching
+        const levenshteinScores = [];
+        const sectionLength = parseInt(distance); // Convert distance to an integer if it's a string
+        for (let i = 0; i <= arrTracksMelodies.length - sectionLength; i += sectionLength) {
+            const sectionNotes = arrTracksMelodies.slice(i, i + sectionLength).join('').split('-').map(Number);
+            const cacheKey = `levenshtein:${i}:${notes}`;
             const cachedResult = cache.get(cacheKey);
             if (cachedResult) {
-                return { sectionIndex: index, levenshteinDistance: cachedResult };
+                levenshteinScores.push({ sectionIndex: i, levenshteinDistance: cachedResult });
             } else {
-                const melodyNotes = melody.notes.split('-').map(Number);
-                const levenshteinDistance = 
-                CombinedDataService.calcLevenshteinDistance_int(melodyNotes, notes);
+                const levenshteinDistance = CombinedDataService.calcLevenshteinDistance_int(sectionNotes, notes);
                 cache.set(cacheKey, levenshteinDistance);
-                return { sectionIndex: index, levenshteinDistance };
+                levenshteinScores.push({ sectionIndex: i, levenshteinDistance });
             }
-        }));
+        }
 
         console.log("Levenshtein distances calculated. first one: ", levenshteinScores[0]);
         console.log("Time: ",new Date());
