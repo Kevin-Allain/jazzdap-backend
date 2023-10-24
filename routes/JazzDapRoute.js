@@ -12,6 +12,7 @@ const {
     getAllFuzzyScores,
     getListFuzzyDist
 } = require('../controllers/Fuzzy_scoreController')
+const { getFuzzyLevenshtein } = require('../controllers/CombinedDataController')
 const {
     getTrackMetadata, getTracksMetadata, 
     get_idContent_recording, 
@@ -95,5 +96,8 @@ router.get('/get_idContent_sample', get_idContent_sample);
 router.get('/getListFuzzyScores',getListFuzzyScores);
 router.get('/getAllFuzzyScores',getAllFuzzyScores);
 router.get('/getListFuzzyDist',getListFuzzyDist);
+
+// CombinedData
+router.get('/getFuzzyLevenshtein',getFuzzyLevenshtein);
 
 module.exports = router;
