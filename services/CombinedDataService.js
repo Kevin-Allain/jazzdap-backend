@@ -67,6 +67,37 @@ function calcLevenshteinDistance_int(arr1, arr2) {
     return dp[m][n];
   }
 
+  function calcLevenshteinDistance_int_relative(arrInput1, arrInput2) {
+    let arr1 = arrInput1.map(a=> a-Math.min(...arrInput1))
+    let arr2 = arrInput2.map(a=> a-Math.min(...arrInput2))
+    const m = arr1.length;
+    const n = arr2.length;
+    const dp = Array.from({ length: m + 1 }, () =>
+      Array.from({ length: n + 1 }, () => 0)
+    );
+    for (let i = 0; i <= m; i++) {
+      for (let j = 0; j <= n; j++) {
+        if (i === 0) {
+          dp[i][j] = j;
+        } else if (j === 0) {
+          dp[i][j] = i;
+        } else if (arr1[i - 1] === arr2[j - 1]) {
+          dp[i][j] = dp[i - 1][j - 1];
+        } else {
+          dp[i][j] = 1 + Math.min(dp[i][j - 1], dp[i - 1][j], dp[i - 1][j - 1]);
+        }
+      }
+    }
+    return dp[m][n];
+  }
+
+  const calcLevenshteinDistance_int_optimistic = (arrInput1, arrInput2) => {
+    return Math.min(
+        calcLevenshteinDistance_int_relative(arrInput1, arrInput2),
+        calcLevenshteinDistance_int(arrInput1, arrInput2)
+        )
+  }
+
 
 getFuzzyScores = async (score, distance) => {
     let query = {};
@@ -87,23 +118,34 @@ getTracksFromFirstId = async (arrIds) => {
 }
 
 getMelodiesFromTrackId = async (data, lengthSearch) => {
-    const orQueries = data.map(({ track, m_id }) => {
-        const minMId = m_id;
-        const maxMId = m_id + lengthSearch;
-        return {
-            $and: [
-                { track: track },
-                { m_id: { $gte: minMId, $lte: maxMId } }
-            ]
-        };
-    });
+    const batchSize = 100; // Set an appropriate batch size
+    const results = [];
 
-    // Use external sorting to avoid memory limit issues
-    let result = TrackModel.find({ $or: orQueries }).lean()
-    // .explain('executionStats');
-    // console.log("-- getMelodiesFromTrackId - result: ",result);
-    return result;
-    // .sort({ m_id: 1 }).hint({ $natural: 1 });
+    for (let i = 0; i < data.length; i += batchSize) {
+        const batchData = data.slice(i, i + batchSize);
+        const orQueries = batchData.map(({ track, m_id }) => {
+            const minMId = m_id;
+            const maxMId = m_id + lengthSearch;
+            return {
+                track: track,
+                m_id: { $gte: minMId, $lte: maxMId }
+            };
+        });
+        const batchResults = await TrackModel
+            .find({ $or: orQueries })
+            .sort({ m_id: 1 })
+            .lean();
+        results.push(...batchResults);
+    }
+    return results;
+};
+
+    // // Use external sorting to avoid memory limit issues
+    // let result = TrackModel.find({ $or: orQueries }).lean()
+    // // .explain('executionStats');
+    // // console.log("-- getMelodiesFromTrackId - result: ",result);
+    // return result;
+    // // .sort({ m_id: 1 }).hint({ $natural: 1 });
 
     // const query2 = {
     //     $or: data.map(({ track, m_id }) => {
@@ -125,12 +167,14 @@ getMelodiesFromTrackId = async (data, lengthSearch) => {
     //         }
     //     }
     // ]).exec();
-}
+
 
 
 
 module.exports = {
     calcLevenshteinDistance_int,
+    calcLevenshteinDistance_int_relative,
+    calcLevenshteinDistance_int_optimistic,
     getFuzzyScores,
     getTracksFromFirstId,
     getMelodiesFromTrackId

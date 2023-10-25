@@ -7,8 +7,10 @@ const cache = new NodeCache({ stdTTL: 60 * 60 }); // Cache with a TTL of 1 hour
 
 module.exports.getFuzzyLevenshtein = async (req, res) => {
     console.log("---- getFuzzyLevenshtein ---- req.query: ", req.query);
-    const { score, distance, notes } = req.query;
+    const { score, notes } = req.query;
+    console.log("notes: ",notes);
     const notes_int = notes.split('-').map(a=>Number(a));
+    let distance = notes_int.length;
     console.log("Time: ",new Date());
     try {
         // This is fast enough
@@ -20,7 +22,6 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
         let arrIds = fuzzyScores.map(a => a.first_id);
         console.log("arrIds.length: ", arrIds.length);
         console.log("1: get data matching first_id");
-        // TODO SLOW!!! Fix
         // TODO should we make a query to get all the matches in the track database first?
         const dataTrack = await
             CombinedDataService.getTracksFromFirstId(arrIds);
@@ -28,7 +29,9 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
         dataTrack ? console.log("dataTrack.length: ", dataTrack.length)
             : console.log("dataTrack undefined!")
         console.log("dataTrack[0]: ",dataTrack[0]);
-        
+        console.log("Time: ",new Date());
+
+        // TODO SLOW!!! Fix        
         let arrTracksMelodies = await getMelodiesFromTrackId(dataTrack,distance);
         arrTracksMelodies ? console.log("arrTracksMelodies.length: ", arrTracksMelodies.length)
             : console.log("arrTracksMelodies undefined!")
@@ -37,6 +40,7 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
         console.log("arrTracksMelodies[0]: ",arrTracksMelodies[0]);
         console.log("arrTracksMelodies[distance-1]: ",arrTracksMelodies[distance-1]);
         console.log("arrTracksMelodies[distance]: ",arrTracksMelodies[distance]);
+        console.log("arrTracksMelodies[distance+1]: ",arrTracksMelodies[distance+1]);
         console.log("arrTracksMelodies[2*distance]: ",arrTracksMelodies[2*distance]);
 
         // Modulo is not 0?!
@@ -53,22 +57,31 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
         for (let i = 0; i <= arrTracksMelodies.length - sectionLength; i += sectionLength) {
             const sectionNotes = arrTracksMelodies
                 .slice(i, i + sectionLength)
-                .map(a=> a.pitch);
-            const cacheKey = `levenshtein:${i}:${notes}`;
-            const cachedResult = cache.get(cacheKey);
-            // I don't understand the values calculated!
-            if( i===0 || i ===sectionLength || i ===sectionLength-1 || i ===sectionLength+1 ){
-                console.log("i: ",i,". sectionNotes.length: ",sectionNotes.length,", sectionNotes: ",sectionNotes,", notes: ",notes);
+                .map(a => a.pitch);
+                const cacheKey = `levenshtein:${sectionNotes.join(",")}:${notes_int.join(",")}`;
+                const cachedResult = cache.get(cacheKey);
+
+            if ( i%sectionLength === 0 && i<40 ){
+                console.log("------");
+                console.log("i:",i,". sectionNotes.length: ",sectionNotes.length," ,sectionNotes: ",sectionNotes," ,notes_int: ",notes_int)
+                console.log("cacheKey: ",cacheKey);
+                console.log("cache.get(cacheKey): ",cache.get(cacheKey));
             }
+
             if (cachedResult) {
                 levenshteinScores.push({ sectionIndex: i, levenshteinDistance: cachedResult });
             } else {
-                const levenshteinDistance = 
-                    CombinedDataService.calcLevenshteinDistance_int(
-                        sectionNotes, notes_int
-                    );
+                const levenshteinDistance = CombinedDataService.calcLevenshteinDistance_int_optimistic(
+                    sectionNotes, notes_int
+                );
                 cache.set(cacheKey, levenshteinDistance);
-                levenshteinScores.push({ sectionIndex: i, levenshteinDistance });
+                levenshteinScores.push({ 
+                    sectionIndex: i, 
+                    track:arrTracksMelodies[i].track,
+                    first_m_id: arrTracksMelodies[i].m_id,
+                    notes:sectionNotes,
+                    levenshteinDistance 
+                });
             }
         }
 
