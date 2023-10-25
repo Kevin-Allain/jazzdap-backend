@@ -36,8 +36,7 @@ const trackSchema = new mongoose.Schema({
 })
 
 // Create indexes
-// trackSchema.index({ pitch: 1 });
-trackSchema.index({ track: 1 });
-trackSchema.index({ m_id: 1 });
+trackSchema.index({ track: 1, m_id: 1 });
+// TrackModel.createIndex({ track: 1, m_id: 1 });
 
 module.exports=mongoose.model('Track',trackSchema)

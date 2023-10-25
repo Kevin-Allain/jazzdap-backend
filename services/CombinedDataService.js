@@ -87,18 +87,44 @@ getTracksFromFirstId = async (arrIds) => {
 }
 
 getMelodiesFromTrackId = async (data, lengthSearch) => {
-    let query2 = {
-        $or: data.map(({ track, m_id }) => {
-            const minMId = m_id;
-            const maxMId = m_id + lengthSearch;
-            return {
-                track, m_id: { $lte: maxMId, $gte: minMId }
-            };
-        })
-    };
+    const orQueries = data.map(({ track, m_id }) => {
+        const minMId = m_id;
+        const maxMId = m_id + lengthSearch;
+        return {
+            $and: [
+                { track: track },
+                { m_id: { $gte: minMId, $lte: maxMId } }
+            ]
+        };
+    });
+
     // Use external sorting to avoid memory limit issues
-    return TrackModel.find(query2)
+    let result = TrackModel.find({ $or: orQueries }).lean()
+    // .explain('executionStats');
+    // console.log("-- getMelodiesFromTrackId - result: ",result);
+    return result;
     // .sort({ m_id: 1 }).hint({ $natural: 1 });
+
+    // const query2 = {
+    //     $or: data.map(({ track, m_id }) => {
+    //         const minMId = m_id;
+    //         const maxMId = m_id + lengthSearch;
+    //         return {
+    //             track,
+    //             m_id: { $lte: maxMId, $gte: minMId }
+    //         };
+    //     })
+    // };
+    // return TrackModel.aggregate([
+    //     { $match: query2 },
+    //     {
+    //         $addFields: {
+    //             startSequence: {
+    //                 $in: ["$_id", data.map(item => item._id)]
+    //             }
+    //         }
+    //     }
+    // ]).exec();
 }
 
 
