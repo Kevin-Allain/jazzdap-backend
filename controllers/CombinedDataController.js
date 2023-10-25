@@ -7,10 +7,11 @@ const cache = new NodeCache({ stdTTL: 60 * 60 }); // Cache with a TTL of 1 hour
 
 module.exports.getFuzzyLevenshtein = async (req, res) => {
     console.log("---- getFuzzyLevenshtein ---- req.query: ", req.query);
-    const { score, notes } = req.query;
-    console.log("notes: ",notes);
+    const { notes } = req.query;
     const notes_int = notes.split('-').map(a=>Number(a));
     let distance = notes_int.length;
+    let score = CombinedDataService.map_to_fuzzy_score(CombinedDataService.calculateIntervalSum(notes_int))
+    console.log("notes: ",notes,", distance: ",distance,", score: ",score);
     console.log("Time: ",new Date());
     try {
         // This is fast enough

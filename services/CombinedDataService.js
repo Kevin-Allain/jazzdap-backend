@@ -175,6 +175,8 @@ module.exports = {
     calcLevenshteinDistance_int,
     calcLevenshteinDistance_int_relative,
     calcLevenshteinDistance_int_optimistic,
+    map_to_fuzzy_score,
+    calculateIntervalSum,
     getFuzzyScores,
     getTracksFromFirstId,
     getMelodiesFromTrackId
