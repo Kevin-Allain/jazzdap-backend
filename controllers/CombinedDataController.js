@@ -32,7 +32,7 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
         console.log("dataTrack[0]: ",dataTrack[0]);
         console.log("Time: ",new Date());
 
-        // TODO SLOW!!! Fix        
+        // TODO SLOW!!! Fix (slightly better now)
         let arrTracksMelodies = await getMelodiesFromTrackId(dataTrack,distance);
         arrTracksMelodies ? console.log("arrTracksMelodies.length: ", arrTracksMelodies.length)
             : console.log("arrTracksMelodies undefined!")
@@ -44,6 +44,7 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
         console.log("arrTracksMelodies[distance+1]: ",arrTracksMelodies[distance+1]);
         console.log("arrTracksMelodies[2*distance]: ",arrTracksMelodies[2*distance]);
 
+        // TODO assess whether this is okay...!
         // Modulo is not 0?!
         let numMelodies = arrTracksMelodies.length/distance;
         console.log("numMelodies: ",numMelodies);
@@ -80,8 +81,10 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
                     sectionIndex: i, 
                     track:arrTracksMelodies[i].track,
                     first_m_id: arrTracksMelodies[i].m_id,
-                    notes:sectionNotes,
-                    levenshteinDistance 
+                    notes: sectionNotes,
+                    // riffLength: sectionNotes.length,
+                    levenshteinDistance,
+                    
                 });
             }
         }
