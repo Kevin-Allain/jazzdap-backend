@@ -39,10 +39,10 @@ module.exports.getTracksMetadata = async (req, res) => {
             console.log("data.length: ", data.length);
             console.log("data[0]: ", data[0]);
             if (res) {
-                console.log("res MusicInfoControllerModel if 1: ", res);
+                console.log("res MusicInfoControllerModel if 1");
                 res.send(data);
             } else {
-                console.log("res MusicInfoControllerModel if 2: ", res);
+                console.log("res MusicInfoControllerModel if 2");
                 return data;
             }
         })

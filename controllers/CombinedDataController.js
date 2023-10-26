@@ -7,7 +7,8 @@ const cache = new NodeCache({ stdTTL: 60 * 60 }); // Cache with a TTL of 1 hour
 
 module.exports.getFuzzyLevenshtein = async (req, res) => {
     console.log("---- getFuzzyLevenshtein ---- req.query: ", req.query);
-    const { notes } = req.query;
+    const { stringNotes, percMatch, user } = req.query;
+    let notes = stringNotes;
     const notes_int = notes.split('-').map(a=>Number(a));
     let distance = notes_int.length;
     let score = CombinedDataService.map_to_fuzzy_score(CombinedDataService.calculateIntervalSum(notes_int))
@@ -26,13 +27,13 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
         // TODO should we make a query to get all the matches in the track database first?
         const dataTrack = await
             CombinedDataService.getTracksFromFirstId(arrIds);
-
         dataTrack ? console.log("dataTrack.length: ", dataTrack.length)
             : console.log("dataTrack undefined!")
         console.log("dataTrack[0]: ",dataTrack[0]);
         console.log("Time: ",new Date());
 
         // TODO SLOW!!! Fix (slightly better now)
+        // Potentially, storing the _id of other objects in the fuzzy_score database could be useful?!
         let arrTracksMelodies = await getMelodiesFromTrackId(dataTrack,distance);
         arrTracksMelodies ? console.log("arrTracksMelodies.length: ", arrTracksMelodies.length)
             : console.log("arrTracksMelodies undefined!")
@@ -54,18 +55,24 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
         console.log("Time: ",new Date());
 
         // Calculate Levenshtein distances for non-overlapping sections of arrTracksMelodies with caching
+        // MASSIVE ISSUE?!
         const levenshteinScores = [];
         const sectionLength = parseInt(distance); // Convert distance to an integer if it's a string
         for (let i = 0; i <= arrTracksMelodies.length - sectionLength; i += sectionLength) {
-            const sectionNotes = arrTracksMelodies
+            const sectionNotesObj = arrTracksMelodies
                 .slice(i, i + sectionLength)
-                .map(a => a.pitch);
-                const cacheKey = `levenshtein:${sectionNotes.join(",")}:${notes_int.join(",")}`;
+                // .map(a => {
+                //     pitch: a.pitch,
+                //     duration:a.duration,
+                //     onset:a.onset
+                // });
+                const cacheKey = 
+                    `levenshtein:${stringNotes}:${sectionNotesObj.map(a => a.pitch).join(",")}`;
                 const cachedResult = cache.get(cacheKey);
 
             if ( i%sectionLength === 0 && i<40 ){
                 console.log("------");
-                console.log("i:",i,". sectionNotes.length: ",sectionNotes.length," ,sectionNotes: ",sectionNotes," ,notes_int: ",notes_int)
+                console.log("i:",i,". sectionNotesObj.length: ",sectionNotesObj.length," ,sectionNotesObj.map(a => a.pitch): ",sectionNotesObj.map(a => a.pitch)," ,notes_int: ",notes_int)
                 console.log("cacheKey: ",cacheKey);
                 console.log("cache.get(cacheKey): ",cache.get(cacheKey));
             }
@@ -74,17 +81,22 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
                 levenshteinScores.push({ sectionIndex: i, levenshteinDistance: cachedResult });
             } else {
                 const levenshteinDistance = CombinedDataService.calcLevenshteinDistance_int_optimistic(
-                    sectionNotes, notes_int
+                    sectionNotesObj.map(a => a.pitch), notes_int
                 );
                 cache.set(cacheKey, levenshteinDistance);
                 levenshteinScores.push({ 
                     sectionIndex: i, 
                     track:arrTracksMelodies[i].track,
+                    lognumber:arrTracksMelodies[i].lognumber,
                     first_m_id: arrTracksMelodies[i].m_id,
-                    notes: sectionNotes,
+                    notes: sectionNotesObj.map(a => a.pitch),
+                    durations: sectionNotesObj.map(a => a.duration),
+                    onsets: sectionNotesObj.map(a => a.onset),
+                    m_ids: sectionNotesObj.map(a => a.m_id),
+                    sja_ids: sectionNotesObj.map(a => a['SJA ID']? a['SJA ID'] : null),
+                    _ids: sectionNotesObj.map(a => a._id),
                     // riffLength: sectionNotes.length,
                     levenshteinDistance,
-                    
                 });
             }
         }

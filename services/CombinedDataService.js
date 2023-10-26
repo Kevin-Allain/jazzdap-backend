@@ -120,7 +120,6 @@ getTracksFromFirstId = async (arrIds) => {
 getMelodiesFromTrackId = async (data, lengthSearch) => {
     const batchSize = 100; // Set an appropriate batch size
     const results = [];
-
     for (let i = 0; i < data.length; i += batchSize) {
         const batchData = data.slice(i, i + batchSize);
         const orQueries = batchData.map(({ track, m_id }) => {
@@ -139,37 +138,6 @@ getMelodiesFromTrackId = async (data, lengthSearch) => {
     }
     return results;
 };
-
-    // // Use external sorting to avoid memory limit issues
-    // let result = TrackModel.find({ $or: orQueries }).lean()
-    // // .explain('executionStats');
-    // // console.log("-- getMelodiesFromTrackId - result: ",result);
-    // return result;
-    // // .sort({ m_id: 1 }).hint({ $natural: 1 });
-
-    // const query2 = {
-    //     $or: data.map(({ track, m_id }) => {
-    //         const minMId = m_id;
-    //         const maxMId = m_id + lengthSearch;
-    //         return {
-    //             track,
-    //             m_id: { $lte: maxMId, $gte: minMId }
-    //         };
-    //     })
-    // };
-    // return TrackModel.aggregate([
-    //     { $match: query2 },
-    //     {
-    //         $addFields: {
-    //             startSequence: {
-    //                 $in: ["$_id", data.map(item => item._id)]
-    //             }
-    //         }
-    //     }
-    // ]).exec();
-
-
-
 
 module.exports = {
     calcLevenshteinDistance_int,
