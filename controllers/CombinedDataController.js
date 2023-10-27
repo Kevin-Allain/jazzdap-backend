@@ -4,6 +4,8 @@ const CombinedDataService = require('../services/CombinedDataService');
 
 const NodeCache = require('node-cache');
 const cache = new NodeCache({ stdTTL: 60 * 60 }); // Cache with a TTL of 1 hour
+const cacheDisregarded = new NodeCache({ stdTTL: 60 * 60 }); // Cache with a TTL of 1 hour
+
 
 module.exports.getFuzzyLevenshtein = async (req, res) => {
     console.log("---- getFuzzyLevenshtein ---- req.query: ", req.query);
@@ -50,8 +52,6 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
         let numMelodies = arrTracksMelodies.length/distance;
         console.log("numMelodies: ",numMelodies);
 
-        // TODO
-        console.log("2: make the Levenshtein distance calculation between arrTracksMelodies and notes");
         console.log("Time: ",new Date());
 
         // Calculate Levenshtein distances for non-overlapping sections of arrTracksMelodies with caching
@@ -68,12 +68,13 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
                 const cachedResult = cache.get(cacheKey);
 
             // For testing
-            if ( i%sectionLength === 0 && i>1200 &&i<1240 ){
+            if ( i%sectionLength === 0 && i>1220 &&i<1240 ){
                 console.log("------");
                 console.log("i:",i,". sectionNotesObj.length: ",sectionNotesObj.length," ,sectionNotesObj.map(a => a.pitch): ",sectionNotesObj.map(a => a.pitch)," ,notes_int: ",notes_int)
                 console.log("sectionNotesObj['SJA ID']: ",sectionNotesObj['SJA ID']);
                 console.log("cacheKey: ",cacheKey);
                 console.log("cache.get(cacheKey): ",cache.get(cacheKey));
+                console.log("cacheDisregarded.get(cacheKey): ",cacheDisregarded.get(cacheKey));
             }
 
             if (cachedResult) {
@@ -92,24 +93,37 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
                     _ids: sectionNotesObj.map(a => a._id),
                 });
             } else {
-                const levenshteinDistance = CombinedDataService.calcLevenshteinDistance_int_optimistic(
-                    sectionNotesObj.map(a => a.pitch), notes_int
+              const levenshteinDistance =
+                CombinedDataService.calcLevenshteinDistance_int_optimistic(
+                  sectionNotesObj.map((a) => a.pitch),
+                  notes_int
                 );
+              const similarityPercentage =
+                levenshteinDistance / notes_int.length;
+              console.log(
+                `similarityPercentage: ${similarityPercentage}, percMatch: ${percMatch}`
+              );
+              if (similarityPercentage <= 1-percMatch) {
                 cache.set(cacheKey, levenshteinDistance);
-                levenshteinScores.push({ 
-                    sectionIndex: i, 
-                    levenshteinDistance: levenshteinDistance,
-                    track:arrTracksMelodies[i].track,
-                    sja_id: sectionNotesObj[0]['SJA ID']?sectionNotesObj[0]['SJA ID']:null,
-                    lognumber:arrTracksMelodies[i].lognumber,
-                    first_m_id: arrTracksMelodies[i].m_id,
-                    notes: sectionNotesObj.map(a => a.pitch),
-                    durations: sectionNotesObj.map(a => a.duration),
-                    onsets: sectionNotesObj.map(a => a.onset),
-                    m_ids: sectionNotesObj.map(a => a.m_id),
-                    _ids: sectionNotesObj.map(a => a._id),
-                    // riffLength: sectionNotes.length,                    
+                levenshteinScores.push({
+                  sectionIndex: i,
+                  levenshteinDistance: levenshteinDistance,
+                  track: arrTracksMelodies[i].track,
+                  sja_id: sectionNotesObj[0]["SJA ID"]
+                    ? sectionNotesObj[0]["SJA ID"]
+                    : null,
+                  lognumber: arrTracksMelodies[i].lognumber,
+                  first_m_id: arrTracksMelodies[i].m_id,
+                  notes: sectionNotesObj.map((a) => a.pitch),
+                  durations: sectionNotesObj.map((a) => a.duration),
+                  onsets: sectionNotesObj.map((a) => a.onset),
+                  m_ids: sectionNotesObj.map((a) => a.m_id),
+                  _ids: sectionNotesObj.map((a) => a._id),
+                  // riffLength: sectionNotes.length,
                 });
+              } else {
+                cacheDisregarded.set(cacheKey, levenshteinDistance);
+              }
             }
         }
         console.log("~~~ numberCacheMatch: ",numberCacheMatch);
