@@ -57,28 +57,40 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
         // Calculate Levenshtein distances for non-overlapping sections of arrTracksMelodies with caching
         // MASSIVE ISSUE?!
         const levenshteinScores = [];
+        let numberCacheMatch = 0;
         const sectionLength = parseInt(distance); // Convert distance to an integer if it's a string
         for (let i = 0; i <= arrTracksMelodies.length - sectionLength; i += sectionLength) {
             const sectionNotesObj = arrTracksMelodies
                 .slice(i, i + sectionLength)
-                // .map(a => {
-                //     pitch: a.pitch,
-                //     duration:a.duration,
-                //     onset:a.onset
-                // });
+                // .map(a => { pitch: a.pitch, duration:a.duration, onset:a.onset  });
                 const cacheKey = 
                     `levenshtein:${stringNotes}:${sectionNotesObj.map(a => a.pitch).join(",")}`;
                 const cachedResult = cache.get(cacheKey);
 
-            if ( i%sectionLength === 0 && i<40 ){
+            // For testing
+            if ( i%sectionLength === 0 && i>1200 &&i<1240 ){
                 console.log("------");
                 console.log("i:",i,". sectionNotesObj.length: ",sectionNotesObj.length," ,sectionNotesObj.map(a => a.pitch): ",sectionNotesObj.map(a => a.pitch)," ,notes_int: ",notes_int)
+                console.log("sectionNotesObj['SJA ID']: ",sectionNotesObj['SJA ID']);
                 console.log("cacheKey: ",cacheKey);
                 console.log("cache.get(cacheKey): ",cache.get(cacheKey));
             }
 
             if (cachedResult) {
-                levenshteinScores.push({ sectionIndex: i, levenshteinDistance: cachedResult });
+                numberCacheMatch++;
+                levenshteinScores.push({ 
+                    sectionIndex: i, 
+                    levenshteinDistance: cachedResult,
+                    track:arrTracksMelodies[i].track,
+                    sja_id: sectionNotesObj[0]['SJA ID']?sectionNotesObj[0]['SJA ID']:null,
+                    lognumber:arrTracksMelodies[i].lognumber,
+                    first_m_id: arrTracksMelodies[i].m_id,
+                    notes: sectionNotesObj.map(a => a.pitch),
+                    durations: sectionNotesObj.map(a => a.duration),
+                    onsets: sectionNotesObj.map(a => a.onset),
+                    m_ids: sectionNotesObj.map(a => a.m_id),
+                    _ids: sectionNotesObj.map(a => a._id),
+                });
             } else {
                 const levenshteinDistance = CombinedDataService.calcLevenshteinDistance_int_optimistic(
                     sectionNotesObj.map(a => a.pitch), notes_int
@@ -86,21 +98,21 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
                 cache.set(cacheKey, levenshteinDistance);
                 levenshteinScores.push({ 
                     sectionIndex: i, 
+                    levenshteinDistance: levenshteinDistance,
                     track:arrTracksMelodies[i].track,
+                    sja_id: sectionNotesObj[0]['SJA ID']?sectionNotesObj[0]['SJA ID']:null,
                     lognumber:arrTracksMelodies[i].lognumber,
                     first_m_id: arrTracksMelodies[i].m_id,
                     notes: sectionNotesObj.map(a => a.pitch),
                     durations: sectionNotesObj.map(a => a.duration),
                     onsets: sectionNotesObj.map(a => a.onset),
                     m_ids: sectionNotesObj.map(a => a.m_id),
-                    sja_ids: sectionNotesObj.map(a => a['SJA ID']? a['SJA ID'] : null),
                     _ids: sectionNotesObj.map(a => a._id),
-                    // riffLength: sectionNotes.length,
-                    levenshteinDistance,
+                    // riffLength: sectionNotes.length,                    
                 });
             }
         }
-
+        console.log("~~~ numberCacheMatch: ",numberCacheMatch);
         console.log("Levenshtein distances calculated. first one: ", levenshteinScores[0]);
         console.log("Time: ",new Date());
 
