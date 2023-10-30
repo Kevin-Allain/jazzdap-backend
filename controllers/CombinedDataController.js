@@ -24,26 +24,18 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
         console.log("Got the fuzzyScores. Its length: ", fuzzyScores.length);
         console.log("First item is: ", fuzzyScores[0]);
 
+        // filter the results if there are filters set by user
         if (textFilterArtist!=='' || textFilterTrack!=='' || textFilterRecording!==''){
-          console.log("Filters to apply");
-          // TODO 
           // 0 - Prepare the arrays // OK
           let attributeValueArray = [], attributeNameArray = [];
           if(textFilterArtist!==''){attributeValueArray.push('artist');attributeNameArray.push(textFilterArtist);}
           if(textFilterTrack!==''){attributeValueArray.push('track');attributeNameArray.push(textFilterTrack);}
           if(textFilterRecording!==''){attributeValueArray.push('recording');attributeNameArray.push(textFilterRecording);}
-          console.log("attributeValueArray: ",attributeValueArray,", attributeNameArray: ",attributeNameArray);
           // 1 - Code queries to get match track to filter
           let objsMetadata = await CombinedDataService.getMetadataFromAttributes(attributeValueArray, attributeNameArray);
-          objsMetadata ? console.log("objsMetadata[0]: ",objsMetadata[0]) : 'objsMetadata not defined!';
           let lognumbers = [...new Set(objsMetadata.map(a => a.lognumber))];
-          console.log("]]]] lognumbers: ",lognumbers,", length: ",lognumbers.length);
           // 2 - Apply filter over fuzzyScores object, based on matching lognumber (one lognumber can have several event names, artists names, etc.)
-          // Assuming fuzzyScores is your array of objects and lognumbers is your array of lognumbers
-          fuzzyScores = fuzzyScores.filter((item) =>
-            lognumbers.includes(item.lognumber)
-          );
-          console.log("Post filter fuzzyScores length: ",fuzzyScores.length);
+          fuzzyScores = fuzzyScores.filter((item) => lognumbers.includes(item.lognumber) );
         }
 
         let arrIds = fuzzyScores.map(a => a.first_id);
