@@ -1,28 +1,17 @@
 const {Router} = require("express")
 const {getJazzDap, saveJazzDap, updateJazzDap, deleteJazzDap} = require('../controllers/JazzDapController')
 const {
-    getMusicMIDI, getSampleMIDI, 
+    getMusicMIDI, getSampleMIDI,
     getMatchLevenshteinDistance,
     getMatchLevenshteinDistance2,
     get_idContent_sample,
-    getMatchFuzzy // TODO assess whether we want to use this function
+    getMatchFuzzy 
 } = require('../controllers/TrackController')
-const {
-    getListFuzzyScores,
-    getAllFuzzyScores,
-    getListFuzzyDist
-} = require('../controllers/Fuzzy_scoreController')
+const { getListFuzzyScores, getAllFuzzyScores, getListFuzzyDist } = require('../controllers/Fuzzy_scoreController')
 const { getFuzzyLevenshtein } = require('../controllers/CombinedDataController')
-const {
-    getTrackMetadata, getTracksMetadata, 
-    get_idContent_recording, 
-    get_idContent_track,
-    getTracksFromAttribute
-} = require('../controllers/MusicInfoController')
+const { getTrackMetadata, getTracksMetadata, get_idContent_recording, get_idContent_track, getMetadataFromAttribute } = require('../controllers/MusicInfoController')
 const {loginTest, loginUser, registerUser} = require ('../controllers/AuthController')
-const {addAnnotation, getAnnotations, deleteAnnotation, updateAnnotation, 
-    get_idContent_annotation
-} = require ('../controllers/AnnotationController')
+const {addAnnotation, getAnnotations, deleteAnnotation, updateAnnotation, get_idContent_annotation } = require ('../controllers/AnnotationController')
 const {addComment, getComments, getCommentsOfAnnotation, deleteComment, updateComment,get_idContent_comment} = require ('../controllers/CommentController')
 const { getUserAnnotations } = require("../controllers/UserController")
 const { 
@@ -56,7 +45,7 @@ router.get('/getMatchFuzzy',getMatchFuzzy)
 // Metadatda
 router.get('/getTracksMetadata', getTracksMetadata )
 router.get('/getTrackMetadata', getTrackMetadata)
-router.get('./getTracksFromAttribute',getTracksFromAttribute)
+router.get('./getMetadataFromAttribute',getMetadataFromAttribute)
 
 // Annotations
 router.post('/addAnnotation', addAnnotation )
