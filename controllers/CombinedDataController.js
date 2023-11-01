@@ -27,16 +27,45 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
         // filter the results if there are filters set by user
         if (textFilterArtist!=='' || textFilterTrack!=='' || textFilterRecording!==''){
           // 0 - Prepare the arrays // OK
+          // TODO not working with track title yet...
           let attributeValueArray = [], attributeNameArray = [];
           if(textFilterArtist!==''){attributeValueArray.push('artist');attributeNameArray.push(textFilterArtist);}
           if(textFilterTrack!==''){attributeValueArray.push('track');attributeNameArray.push(textFilterTrack);}
           if(textFilterRecording!==''){attributeValueArray.push('recording');attributeNameArray.push(textFilterRecording);}
           // 1 - Code queries to get match track to filter
-          let objsMetadata = await CombinedDataService.getMetadataFromAttributes(attributeValueArray, attributeNameArray);
+          let objsMetadata = await
+            CombinedDataService.getMetadataFromAttributes(
+              attributeValueArray, attributeNameArray
+            );
+          console.log("objsMetadata.length: ",objsMetadata.length);
           let lognumbers = [...new Set(objsMetadata.map(a => a.lognumber))];
-          // 2 - Apply filter over fuzzyScores object, based on matching lognumber (one lognumber can have several event names, artists names, etc.)
+          // 2.1 - Apply filter over fuzzyScores object, based on matching lognumber (one lognumber can have several event names, artists names, etc.)
           fuzzyScores = fuzzyScores.filter((item) => lognumbers.includes(item.lognumber) );
+          // 2.2 - Apply second filter by matching the sja id if the track filter is on
+          if (textFilterTrack !== '') {
+            console.log("objsMetadata[0]: ",objsMetadata[0],", typeof objsMetadata[0]: ",objsMetadata[0]);
+            // let parsedObj = JSON.parse(objsMetadata[0]);
+            let keysMetadata = Object.keys(objsMetadata);
+            console.log("keysMetadata: ",keysMetadata)
+            let keysMetadata0 = Object.keys(objsMetadata[0]);
+            console.log("keysMetadata0: ",keysMetadata0)
+            console.log("---")
+            console.log("objsMetadata[0]._doc: ",objsMetadata[0]._doc);
+            console.log("objsMetadata[0]._doc['SJA ID']: ",objsMetadata[0]._doc['SJA ID'])
+            let sja_id = objsMetadata[0]._doc['SJA ID'];
+            console.log("sja_id: ",sja_id);
+            console.log("---")
+            // let keysParsed = Object.keys(parsedObj);
+            // console.log("keysParsed: ",keysParsed)
+            // console.log("parsedObj: ",parsedObj);
+            console.log("first fuzzy keys score: ", Object.keys(fuzzyScores[0]));
+            console.log("and the firstobject fuzzyScores: ",fuzzyScores[0],", its sja id: ",fuzzyScores[0]['SJA ID']);
+            console.log("size before filtering based on SJA ID. ",fuzzyScores.length);
+            fuzzyScores = fuzzyScores.filter((item) => sja_id === item._doc['SJA ID']);
+            console.log("size after filtering based on SJA ID. ", fuzzyScores.length);
+          }
         }
+
 
         let arrIds = fuzzyScores.map(a => a.first_id);
         console.log("arrIds.length: ", arrIds.length);
