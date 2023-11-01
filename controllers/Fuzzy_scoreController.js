@@ -1,4 +1,4 @@
-const fuzzy_scoreModel = require("../models/fuzzy_scoreModel");
+const Fuzzy_scoreModel = require("../models/Fuzzy_scoreModel");
 
 /**
  * This controller is designed to be called as a filter for other calls searching for melodic similarity. 
@@ -10,7 +10,7 @@ module.exports.getListFuzzyScores = async (req, res) => {
     console.log("---module.exports.getListFuzzyScores--- req.query:", req.query);
     const { first_id } = req.query;
 
-    fuzzy_scoreModel.find({first_id:first_id})
+    Fuzzy_scoreModel.find({first_id:first_id})
     .then( data => {
         console.log("Found data for first_id: ",first_id);
         res.send(data);
@@ -33,7 +33,7 @@ module.exports.getAllFuzzyScores = async (req, res) => {
         query[`fuzzyRange${distance}`] = score;
         try {
             // Use await/async for asynchronous operations
-            const data = await fuzzy_scoreModel.find(query);
+            const data = await Fuzzy_scoreModel.find(query);
             // Store the matching score in the result object
             matchingScores[`fuzzyRange${distance}`] = data.length;
         } catch (error) {
@@ -55,7 +55,7 @@ module.exports.getListFuzzyDist = async (req, res) => {
     let query = {};
     // Use a computed property name to set the attribute based on the distance parameter
     query[`fuzzyRange${distance}`] = score;    
-    fuzzy_scoreModel.find(query)
+    Fuzzy_scoreModel.find(query)
     .then( data => {
         console.log("Found data for getListFuzzyDist");
         res.send(data);

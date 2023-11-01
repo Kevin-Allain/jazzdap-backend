@@ -97,4 +97,4 @@ const fuzzy_scoreSchema = new mongoose.Schema({
 
 fuzzy_scoreSchema.index({ first_id: 1 });
 
-module.exports=mongoose.model('Fuzzy_score',fuzzy_scoreSchema)
+module.exports = mongoose.model('Fuzzy_score',fuzzy_scoreSchema)

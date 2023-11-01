@@ -1,4 +1,4 @@
-const Fuzzy_scoreModel = require("../models/fuzzy_scoreModel");
+const Fuzzy_scoreModel = require("../models/Fuzzy_scoreModel");
 const TrackModel = require("../models/TrackModel");
 const TrackMetadataModel = require("../models/TrackMetadataModel");
 
