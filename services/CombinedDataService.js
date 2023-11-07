@@ -128,6 +128,7 @@ const getTracksFromFirstId = async (arrIds) => {
 const getMelodiesFromTrackId = async (data, lengthSearch) => {
   const batchSize = 100; // Set an appropriate batch size
   const results = [];
+  console.log("getMelodiesFromTrackId. data[0]: ",data[0]);
   for (let i = 0; i < data.length; i += batchSize) {
     const batchData = data.slice(i, i + batchSize);
     const orQueries = batchData.map(({ track, m_id }) => {

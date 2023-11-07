@@ -89,6 +89,66 @@ const fuzzy_scoreSchema = new mongoose.Schema({
         type:Number,
         require: true
     },
+    _idRange1: {
+        type:Number,
+        require: true
+    },
+    _idRange2: {
+        type:Number,
+        require: true
+    },
+    _idRange3: {
+        type:Number,
+        require: true
+    },
+    _idRange4: {
+        type:Number,
+        require: true
+    },
+    _idRange5: {
+        type:Number,
+        require: true
+    },
+    _idRange6: {
+        type:Number,
+        require: true
+    },
+    _idRange7: {
+        type:Number,
+        require: true
+    },
+    _idRange8: {
+        type:Number,
+        require: true
+    },
+    _idRange9: {
+        type:Number,
+        require: true
+    },
+    _idRange10: {
+        type:Number,
+        require: true
+    },
+    _idRange11: {
+        type:Number,
+        require: true
+    },
+    _idRange12: {
+        type:Number,
+        require: true
+    },
+    _idRange13: {
+        type:Number,
+        require: true
+    },
+    _idRange14: {
+        type:Number,
+        require: true
+    },
+    _idRange15: {
+        type:Number,
+        require: true
+    },
     first_id: {
         type:String,
         require: true
