@@ -155,6 +155,20 @@ const fuzzy_scoreSchema = new mongoose.Schema({
     }
 })
 
-fuzzy_scoreSchema.index({ first_id: 1 });
+// Need to consider how many indexes can be valuable for speed increase
+fuzzy_scoreSchema.index({ 
+    lognumber: 1,
+    // first_id: 1,  
+    // fuzzyRange4:1,
+    // fuzzyRange5:1,
+    // fuzzyRange6:1,
+    // fuzzyRange7:1,
+    // fuzzyRange8:1,
+    // fuzzyRange9:1,
+    // fuzzyRange10:1,
+    // fuzzyRange11:1,
+    // fuzzyRange12:1,
+    // fuzzyRange13:1,
+});
 
 module.exports = mongoose.model('Fuzzy_score',fuzzy_scoreSchema)

@@ -109,12 +109,26 @@ const calcLevenshteinDistance_int_optimistic = (arrInput1, arrInput2) => {
   );
 };
 
-const getFuzzyScores = async (score, distance) => {
-  let query = {};
-  query[`fuzzyRange${distance}`] = score;
+// const getFuzzyScores = async (score, distance, lognumbersFilter=[]) => {
+//   let query = {};
+//   if (lognumbersFilter.length>0){
+//     // TODO 
 
-  // Return the promise from the find method
-  return Fuzzy_scoreModel.find(query);
+//   }
+//   query[`fuzzyRange${distance}`] = score;
+
+//   // Return the promise from the find method
+//   return Fuzzy_scoreModel.find(query);
+// };
+const getFuzzyScores = async (score, distance, lognumbersFilter=[]) => {
+  let query = {};
+  if (lognumbersFilter.length > 0) {
+    query.lognumber = { $in: lognumbersFilter };
+  }
+  query[`fuzzyRange${distance}`] = score;
+  return Fuzzy_scoreModel.find(query)
+    .lean()
+    .sort({lognumber: 1})
 };
 
 const getTracksFromFirstId = async (arrIds) => {
@@ -154,15 +168,15 @@ const getMetadataFromAttributes = async (attributeNameArray,attributeValueArray)
   const attributeNameMap = { 'artist': '(N) Named Artist(s)', 'recording': '(E) Event Name', 'track': 'Track Title' };
   // Replace values in attributeValueArray based on the mapping
   const sanitizedAttributeNameArray = attributeNameArray.map(n => attributeNameMap[n] || n);
-  console.log("sanitizedAttributeNameArray: ",sanitizedAttributeNameArray);
+  // console.log("sanitizedAttributeNameArray: ",sanitizedAttributeNameArray);
   const queryCondition = {};
   // Construct the query using the sanitized arrays
   sanitizedAttributeNameArray.forEach((attributeName, index) => { queryCondition[attributeName] = attributeValueArray[index]; });
-  console.log("queryCondition: ",queryCondition);
+  // console.log("queryCondition: ",queryCondition);
   const resultsMeta = await TrackMetadataModel.find(queryCondition)
       // .then(data => { console.log("Searched successfully MusicInfoControllerModel.find"); console.log("data.length: ", data.length,", and first item: ",data[0]); return data;  })
       // .catch(error => { res.status(500).json(error); });
-  console.log("resultsMeta[0]: ",resultsMeta[0])
+  // console.log("resultsMeta[0]: ",resultsMeta[0])
   return(resultsMeta);
   };
 
@@ -175,5 +189,5 @@ module.exports = {
   getFuzzyScores,
   getTracksFromFirstId,
   getMelodiesFromTrackId,
-  getMetadataFromAttributes, // TODO TEST!
+  getMetadataFromAttributes,
 };
