@@ -157,15 +157,15 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
                 sectionNotesObj.map((a) => a.pitch),
                 notes_int
               );
-            const similarityPercentage =
+            const dissimilarityPercentage =
               levenshteinDistance / notes_int.length;
 
             if ( i%sectionLength === 0 && i>1220 &&i<1240 ){              
-              console.log("levenshteinDistance: ",levenshteinDistance,",similarityPercentage: ",similarityPercentage,", passed threshold: ",(similarityPercentage <= 1-percMatch));
+              console.log("levenshteinDistance: ",levenshteinDistance,",dissimilarityPercentage: ",dissimilarityPercentage,", passed threshold: ",(dissimilarityPercentage <= 1-percMatch));
             }
             
-            if (similarityPercentage <= 1-percMatch) {
-              console.log("We passed something. similarityPercentage: ",similarityPercentage);
+            if (dissimilarityPercentage <= 1-percMatch) {
+              console.log("We passed something. dissimilarityPercentage: ",dissimilarityPercentage);
               cache.set(cacheKey, levenshteinDistance);
               levenshteinScores.push({
                 sectionIndex: i,

@@ -110,13 +110,7 @@ const calcLevenshteinDistance_int_optimistic = (arrInput1, arrInput2) => {
 };
 
 // const getFuzzyScores = async (score, distance, lognumbersFilter=[]) => {
-//   let query = {};
-//   if (lognumbersFilter.length>0){
-//     // TODO 
-
-//   }
-//   query[`fuzzyRange${distance}`] = score;
-
+//   let query = {}; query[`fuzzyRange${distance}`] = score;
 //   // Return the promise from the find method
 //   return Fuzzy_scoreModel.find(query);
 // };
