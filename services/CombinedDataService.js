@@ -155,21 +155,104 @@ const getMelodiesFromTrackId = async (data, lengthSearch) => {
   return results;
 };
 
-const getMelodiesFromFuzzyScores = async ( fuzzyScores, distance ) => {
-  console.log("getMelodiesFromFuzzyScores - ",{fuzzyScores, distance});
+// const getMelodiesFromFuzzyScores = async ( fuzzyScores, distance ) => {
+//   console.log("getMelodiesFromFuzzyScores - fuzzyScores length: ",fuzzyScores.length,", distance: ",distance);
+//   let idRanges = [];
+//   for (var i in fuzzyScores) {
+//     for (var n = 0; n < distance; n++) {
+//       idRanges.push(fuzzyScores[i][`_idRange${n}`]);
+//     }
+//   }
+//   console.log("idRanges.length: ", idRanges.length);
+//   const uniqueIdRanges = [...new Set(idRanges)];
+//   console.log("uniqueIdRanges.length: ",uniqueIdRanges.length);
+//   const matchingTracks = await TrackModel.find({
+//     "_id": { "$in": idRanges }
+//   });
+//   console.log("matchingTracks.length: ",matchingTracks.length);
+//   // TODO make new array where, for each item of idRanges, I make a copy of the matchingTracks item with the matching _id attribute
+//   return matchingTracks;
+// }
+
+const getMelodiesFromFuzzyScores = async (fuzzyScores, distance) => {
+  console.log("getMelodiesFromFuzzyScores - fuzzyScores length: ", fuzzyScores.length, ", distance: ", distance);
   let idRanges = [];
-  for (var i in fuzzyScores) {
-    for (var n = 0; n < distance; n++) {
+  for (let i in fuzzyScores) {
+    for (let n = 0; n < distance; n++) {
       idRanges.push(fuzzyScores[i][`_idRange${n}`]);
     }
   }
   console.log("idRanges.length: ", idRanges.length);
+  
+  // Create a set of unique IDs from idRanges
+  const uniqueIdRanges = new Set(idRanges);
+  
+  console.log("uniqueIdRanges.size: ", uniqueIdRanges.size);
+  
+  // Fetch matching tracks from the database based on unique IDs
   const matchingTracks = await TrackModel.find({
-    "_id": { "$in": idRanges }
+    "_id": { "$in": [...uniqueIdRanges] }
   });
   
-  return matchingTracks;
-}
+  console.log("matchingTracks.length: ", matchingTracks.length);
+
+  // Create a lookup object for matching tracks based on their _id attribute
+  const trackLookup = {};
+  matchingTracks.forEach(track => {
+    trackLookup[track._id.toHexString()] = track;
+  });
+  console.log("generated trackLookup");
+  // Map idRanges to the corresponding tracks using the lookup object
+  const resultTracks = idRanges.map(idRange => trackLookup[idRange]);
+
+  console.log("resultTracks.length: ", resultTracks.length);
+  return resultTracks;
+};
+
+
+// -- approach with a loop (stupid slow)
+// const getMelodiesFromFuzzyScores = async (fuzzyScores, distance) => {
+//   console.log("getMelodiesFromFuzzyScores - fuzzyScores length: ", fuzzyScores.length, ", distance: ", distance);
+//   let idRanges = [];
+//   for (let i in fuzzyScores) {
+//     for (let n = 0; n < distance; n++) {
+//       idRanges.push(fuzzyScores[i][`_idRange${n}`]);
+//     }
+//   }
+//   console.log("idRanges.length: ", idRanges.length);
+//   const uniqueIdRanges = [...new Set(idRanges)];
+//   console.log("uniqueIdRanges.length: ", uniqueIdRanges.length);
+//   const matchingTracks = await TrackModel.find({
+//     "_id": { "$in": uniqueIdRanges }
+//   });
+//   console.log("matchingTracks.length: ", matchingTracks.length);
+//   console.log("matchingTracks[0]: ",matchingTracks[0]);
+//   console.log("matchingTracks[0]._id: ",matchingTracks[0]._id);
+//   console.log("matchingTracks[0]._id.toHexString(): ", matchingTracks[0]._id.toHexString())
+//   // Create a new array where each item from idRanges corresponds to a copy of the matching track
+//   const resultTracks = [];
+//   for (let i = 0; i < idRanges.length; i++) {
+//     const idRange = idRanges[i];
+//     const objMatch = matchingTracks.filter(track => String(track._id.toHexString()) === String(idRange));
+//     if (i <3 ){
+//       console.log("idRange: ",idRange);
+//       console.log("objMatch: ",objMatch);
+//     }
+//     if (objMatch) {
+//       // resultTracks.push({ ...matchingTrack.toObject() }); // Create a copy of the matching track
+//       resultTracks.push(objMatch);
+//     }
+//     if (i <3 ){
+//       console.log("resultTracks[i]: ",resultTracks[i]);
+//     }
+//     if (i%333===0){
+//       console.log(i," out of ",idRanges.length);
+//     }
+//   }
+//   console.log("resultTracks.length: ", resultTracks.length);
+//   return resultTracks;
+// };
+
 
 
 

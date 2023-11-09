@@ -111,8 +111,9 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
       arrTracksMelodies ? console.log("arrTracksMelodies.length: ", arrTracksMelodies.length) : console.log("arrTracksMelodies undefined!");
       console.log("Time: ",new Date());
       
-      // console.log("arrTracksMelodies[0]: ",arrTracksMelodies[0]); console.log("arrTracksMelodies[distance-1]: ",arrTracksMelodies[distance-1]);
-      console.log("arrTracksMelodies[distance]: ",arrTracksMelodies[distance]);
+      console.log("arrTracksMelodies[0]: ",arrTracksMelodies[0]); 
+      // console.log("arrTracksMelodies[distance-1]: ",arrTracksMelodies[distance-1]);
+      // console.log("arrTracksMelodies[distance]: ",arrTracksMelodies[distance]);
       // console.log("arrTracksMelodies[distance+1]: ",arrTracksMelodies[distance+1]); console.log("arrTracksMelodies[2*distance]: ",arrTracksMelodies[2*distance]);
 
       // TODO assess whether this is okay...!!! Might note be!!!
@@ -137,11 +138,11 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
               const cachedResult = cache.get(cacheKey);
 
           // For testing
-          if ( i%sectionLength === 0 && i>1220 &&i<1240 ){
+          if ( i%sectionLength === 0 && (i>=0 &&i<10 ) ){
               console.log("------");
               console.log("i:",i,". sectionNotesObj.length: ",sectionNotesObj.length
               ," ,sectionNotesObj.map(a => a.lognumber): ",sectionNotesObj.map(a => a.lognumber)
-              ," ,sectionNotesObj.map(a => a['SJA ID']): ",sectionNotesObj.map(a => a['SJA ID'])
+              ," ,sectionNotesObj.map(a => a['SJA ID']): ",sectionNotesObj.map(a => a['SJA ID']) // this is always undefined?!
               ," ,sectionNotesObj.map(a => a.pitch): ",sectionNotesObj.map(a => a.pitch)," ,notes_int: ",notes_int)
               console.log("sectionNotesObj['SJA ID']: ",sectionNotesObj['SJA ID']); // Undefined... seems wrong
               console.log("cacheKey: ",cacheKey);
@@ -171,11 +172,14 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
                 notes_int
               );
 
-            const dissimilarityPercentage =
-              levenshteinDistance / notes_int.length;
+            const dissimilarityPercentage = levenshteinDistance / notes_int.length;
             
-            if ( i%sectionLength === 0 && i>1220 &&i<1240 ){              
-              console.log("levenshteinDistance: ",levenshteinDistance,", notes_int.length: ",notes_int.length,",dissimilarityPercentage: ",dissimilarityPercentage,", passed threshold: ",(dissimilarityPercentage <= 1-percMatch));
+            if ( i%sectionLength === 0 && ((i>=0 &&i<10)||( dissimilarityPercentage<=0.20 )) ){
+              console.log("--- \nlevenshteinDistance: ",levenshteinDistance,
+              ", sectionNotesObj: ",sectionNotesObj.map((a) => a.pitch),
+              ", notes_int.length: ",notes_int.length,
+              ",dissimilarityPercentage: ",dissimilarityPercentage,
+              ", passed threshold: ",(dissimilarityPercentage <= 1-percMatch));
             }
             
             if (dissimilarityPercentage <= 1-percMatch) {
@@ -203,7 +207,7 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
             }
           }
         }
-        console.log("~~~ numberCacheMatch: ",numberCacheMatch,", numCacheDisregarded: ",numCacheDisregarded);
+        console.log("~~~ numberCacheMatch: ",numberCacheMatch,", numCacheDisregarded: ",numCacheDisregarded,", length of results: ",levenshteinScores.length);
         console.log("Levenshtein distances calculated. first one: ", levenshteinScores[0]);
         console.log("Time: ",new Date());
 
