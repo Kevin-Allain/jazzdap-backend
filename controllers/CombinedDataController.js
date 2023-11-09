@@ -51,9 +51,7 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
       // TODO assess whether this should be only for the case of filterTrack
       // if (textFilterArtist!=='' || textFilterTrack!=='' || textFilterRecording!=='') {
         if ( textFilterTrack !== "" ) {
-          let lognumbersFromFuzzy = [
-            ...new Set(fuzzyScores.map((a) => a["lognumber"])),
-          ];
+          let lognumbersFromFuzzy = [...new Set(fuzzyScores.map((a) => a["lognumber"])),];
           console.log("lognumbersFromFuzzy, ", lognumbersFromFuzzy);
           for (var i in lognumbersFromFuzzy) { console.log( "lognumbersFromFuzzy[i] ", lognumbersFromFuzzy[i], " in lognumbersFilter: ", lognumbersFilter.includes(lognumbersFromFuzzy[i]) ); }
           let matchessjaIdsFromFuzzy = [];
@@ -105,18 +103,17 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
       console.log("dataTrack[0]: ",dataTrack[0]);
       console.log("Time: ",new Date());
 
-      // TODO SLOW!!! Fix (slightly better now, but still should be better! One way could be to directly store the _ids in fuzzyScore structure. (Need to rewrite Python code))
+      // TODO SLOW... and wong?!!! Fix (slightly better now, but still should be better! One way could be to directly store the _ids in fuzzyScore structure. (Need to rewrite Python code))
       // Potentially, storing the _id of other objects in the fuzzy_score database could be useful?!
       // TODO fix code: arrTracksMelodies.length should be dataTrack.length * distance! 2023/11/08
-      let arrTracksMelodies = await CombinedDataService.getMelodiesFromTrackId(dataTrack,distance);
-      arrTracksMelodies ? console.log("arrTracksMelodies.length: ", arrTracksMelodies.length)
-          : console.log("arrTracksMelodies undefined!")
+      // let arrTracksMelodies = await CombinedDataService.getMelodiesFromTrackId(dataTrack,distance);
+      let arrTracksMelodies = await CombinedDataService.getMelodiesFromFuzzyScores(fuzzyScores, distance);
+      arrTracksMelodies ? console.log("arrTracksMelodies.length: ", arrTracksMelodies.length) : console.log("arrTracksMelodies undefined!");
       console.log("Time: ",new Date());
-      console.log("arrTracksMelodies[0]: ",arrTracksMelodies[0]);
-      console.log("arrTracksMelodies[distance-1]: ",arrTracksMelodies[distance-1]);
+      
+      // console.log("arrTracksMelodies[0]: ",arrTracksMelodies[0]); console.log("arrTracksMelodies[distance-1]: ",arrTracksMelodies[distance-1]);
       console.log("arrTracksMelodies[distance]: ",arrTracksMelodies[distance]);
-      console.log("arrTracksMelodies[distance+1]: ",arrTracksMelodies[distance+1]);
-      console.log("arrTracksMelodies[2*distance]: ",arrTracksMelodies[2*distance]);
+      // console.log("arrTracksMelodies[distance+1]: ",arrTracksMelodies[distance+1]); console.log("arrTracksMelodies[2*distance]: ",arrTracksMelodies[2*distance]);
 
       // TODO assess whether this is okay...!!! Might note be!!!
       // Modulo is not 0?!

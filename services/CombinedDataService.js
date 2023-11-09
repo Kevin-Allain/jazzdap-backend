@@ -155,6 +155,24 @@ const getMelodiesFromTrackId = async (data, lengthSearch) => {
   return results;
 };
 
+const getMelodiesFromFuzzyScores = async ( fuzzyScores, distance ) => {
+  console.log("getMelodiesFromFuzzyScores - ",{fuzzyScores, distance});
+  let idRanges = [];
+  for (var i in fuzzyScores) {
+    for (var n = 0; n < distance; n++) {
+      idRanges.push(fuzzyScores[i][`_idRange${n}`]);
+    }
+  }
+  console.log("idRanges.length: ", idRanges.length);
+  const matchingTracks = await TrackModel.find({
+    "_id": { "$in": idRanges }
+  });
+  
+  return matchingTracks;
+}
+
+
+
 const getMetadataFromAttributes = async (attributeNameArray,attributeValueArray) => {
   // Ensure both arrays have the same length
   if (!Array.isArray(attributeValueArray) || !Array.isArray(attributeNameArray) || attributeValueArray.length !== attributeNameArray.length) { return res.status(400).json({ error: "Invalid input arrays" }); }
@@ -184,4 +202,5 @@ module.exports = {
   getTracksFromFirstId,
   getMelodiesFromTrackId,
   getMetadataFromAttributes,
+  getMelodiesFromFuzzyScores,
 };
