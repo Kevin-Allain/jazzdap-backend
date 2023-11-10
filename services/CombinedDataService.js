@@ -177,10 +177,13 @@ const getMelodiesFromTrackId = async (data, lengthSearch) => {
 const getMelodiesFromFuzzyScores = async (fuzzyScores, distance) => {
   console.log( "getMelodiesFromFuzzyScores - fuzzyScores length: ", fuzzyScores.length, ", distance: ", distance );
   let idRanges = [];
+  // TODO we need verifications if the scores are not -20
   for (let i in fuzzyScores) {
-    for (let n = 1; n <  distance+1 ; n++) {
+    for (let n = 1; n <  Math.min(15,distance+1) ; n++) {
       fuzzyScores[i][`_idRange${n}`]
-        ? idRanges.push(fuzzyScores[i][`_idRange${n}`])
+        ? fuzzyScores[i][`_idRange${n}`]!==-20
+          ?idRanges.push(fuzzyScores[i][`_idRange${n}`])
+          :null
         : console.log( "An undefined fuzzyScores[i][`_idRange${n}`]. fuzzyScores[", i, "], with n: ",n," - ", fuzzyScores[i] );
     }
   }
