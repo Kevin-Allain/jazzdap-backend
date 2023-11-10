@@ -175,25 +175,27 @@ const getMelodiesFromTrackId = async (data, lengthSearch) => {
 // }
 
 const getMelodiesFromFuzzyScores = async (fuzzyScores, distance) => {
-  console.log("getMelodiesFromFuzzyScores - fuzzyScores length: ", fuzzyScores.length, ", distance: ", distance);
+  console.log( "getMelodiesFromFuzzyScores - fuzzyScores length: ", fuzzyScores.length, ", distance: ", distance );
   let idRanges = [];
   for (let i in fuzzyScores) {
-    for (let n = 0; n < distance; n++) {
-      idRanges.push(fuzzyScores[i][`_idRange${n}`]);
+    for (let n = 1; n <  distance+1 ; n++) {
+      fuzzyScores[i][`_idRange${n}`]
+        ? idRanges.push(fuzzyScores[i][`_idRange${n}`])
+        : console.log( "An undefined fuzzyScores[i][`_idRange${n}`]. fuzzyScores[", i, "], with n: ",n," - ", fuzzyScores[i] );
     }
   }
   console.log("idRanges.length: ", idRanges.length);
-  
+  const filteredIdRanges = idRanges.filter(a => a);
+  console.log("filteredIdRanges.length: ",filteredIdRanges.length);
+
   // Create a set of unique IDs from idRanges
-  const uniqueIdRanges = new Set(idRanges);
-  
-  console.log("uniqueIdRanges.size: ", uniqueIdRanges.size);
-  
+  const uniqueIdRanges = [...new Set(idRanges)];
+  console.log("uniqueIdRanges.length: ", uniqueIdRanges.length);
+  const filteredUniqueIdRanges = uniqueIdRanges.filter(a => a);
+  console.log("filteredUniqueIdRanges.length: ", filteredUniqueIdRanges.length);
+
   // Fetch matching tracks from the database based on unique IDs
-  const matchingTracks = await TrackModel.find({
-    "_id": { "$in": [...uniqueIdRanges] }
-  });
-  
+  const matchingTracks = await TrackModel.find({ "_id": { "$in": [...uniqueIdRanges] } });  
   console.log("matchingTracks.length: ", matchingTracks.length);
 
   // Create a lookup object for matching tracks based on their _id attribute
@@ -202,11 +204,27 @@ const getMelodiesFromFuzzyScores = async (fuzzyScores, distance) => {
     trackLookup[track._id.toHexString()] = track;
   });
   console.log("generated trackLookup");
-  // Map idRanges to the corresponding tracks using the lookup object
-  const resultTracks = idRanges.map(idRange => trackLookup[idRange]);
 
-  console.log("resultTracks.length: ", resultTracks.length);
-  return resultTracks;
+  // Create an array for looking up tracks based on their _id attribute
+  const trackLookupArray = Array.from(matchingTracks, track => ({ id: track._id.toHexString(), track }));
+  console.log("trackLookupArray.length: ",trackLookupArray.length);
+  console.log("trackLookupArray[0]: ",trackLookupArray[0]);
+
+  // Map idRanges to the corresponding tracks using the lookup object
+  // const resultTracks = idRanges.map((idRange) =>
+  //   trackLookup[idRange]
+  //     ? trackLookup[idRange]
+  //     : console.log("no match for ", idRange)
+  // );
+  const resultTracks = idRanges.map((idRange) => trackLookup[idRange] );
+
+  console.log("resultTracks.length: ",resultTracks.length);
+  // Filter out undefined elements
+  const filteredResultTracks = resultTracks.filter(track => track);
+
+
+  console.log("filteredResultTracks.length: ", filteredResultTracks.length);
+  return filteredResultTracks;
 };
 
 
@@ -215,9 +233,7 @@ const getMelodiesFromFuzzyScores = async (fuzzyScores, distance) => {
 //   console.log("getMelodiesFromFuzzyScores - fuzzyScores length: ", fuzzyScores.length, ", distance: ", distance);
 //   let idRanges = [];
 //   for (let i in fuzzyScores) {
-//     for (let n = 0; n < distance; n++) {
-//       idRanges.push(fuzzyScores[i][`_idRange${n}`]);
-//     }
+//     for (let n = 0; n < distance; n++) { idRanges.push(fuzzyScores[i][`_idRange${n}`]); }
 //   }
 //   console.log("idRanges.length: ", idRanges.length);
 //   const uniqueIdRanges = [...new Set(idRanges)];

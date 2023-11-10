@@ -111,7 +111,19 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
       arrTracksMelodies ? console.log("arrTracksMelodies.length: ", arrTracksMelodies.length) : console.log("arrTracksMelodies undefined!");
       console.log("Time: ",new Date());
       
-      console.log("arrTracksMelodies[0]: ",arrTracksMelodies[0]); 
+      console.log( "First key: ",Object.keys(arrTracksMelodies)[0],", typeof: ",typeof Object.keys(arrTracksMelodies)[0]);
+      console.log("first item: ", arrTracksMelodies[Object.keys(arrTracksMelodies)[0]]);
+      console.log("first item as string: ", arrTracksMelodies['0']);
+
+      console.log("Second key: ",Object.keys(arrTracksMelodies)[1],", typeof: ",typeof Object.keys(arrTracksMelodies)[1]);
+      console.log("Second item: ", arrTracksMelodies[Object.keys(arrTracksMelodies)[1]]);
+
+      console.log("arrTracksMelodies[0]: ",arrTracksMelodies[0]);
+      console.log("arrTracksMelodies[1]: ",arrTracksMelodies[1]);
+
+      let filteredMelodies = arrTracksMelodies.filter(a => (typeof a) !== 'undefined');
+      console.log("filteredMelodies.length: ",filteredMelodies.length);
+
       // console.log("arrTracksMelodies[distance-1]: ",arrTracksMelodies[distance-1]);
       // console.log("arrTracksMelodies[distance]: ",arrTracksMelodies[distance]);
       // console.log("arrTracksMelodies[distance+1]: ",arrTracksMelodies[distance+1]); console.log("arrTracksMelodies[2*distance]: ",arrTracksMelodies[2*distance]);
@@ -120,7 +132,6 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
       // Modulo is not 0?!
       let numMelodies = arrTracksMelodies.length/distance;
       console.log("numMelodies: ",numMelodies);
-
       console.log("Time: ",new Date());
 
       // Calculate Levenshtein distances for non-overlapping sections of arrTracksMelodies with caching
