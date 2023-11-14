@@ -111,25 +111,12 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
       arrTracksMelodies ? console.log("arrTracksMelodies.length: ", arrTracksMelodies.length) : console.log("arrTracksMelodies undefined!");
       console.log("Time: ",new Date());
       
-      console.log( "First key: ",Object.keys(arrTracksMelodies)[0],", typeof: ",typeof Object.keys(arrTracksMelodies)[0]);
-      console.log("first item: ", arrTracksMelodies[Object.keys(arrTracksMelodies)[0]]);
-      console.log("first item as string: ", arrTracksMelodies['0']);
-
-      console.log("Second key: ",Object.keys(arrTracksMelodies)[1],", typeof: ",typeof Object.keys(arrTracksMelodies)[1]);
-      console.log("Second item: ", arrTracksMelodies[Object.keys(arrTracksMelodies)[1]]);
-
       console.log("arrTracksMelodies[0]: ",arrTracksMelodies[0]);
-      console.log("arrTracksMelodies[1]: ",arrTracksMelodies[1]);
 
       let filteredMelodies = arrTracksMelodies.filter(a => (typeof a) !== 'undefined');
       console.log("filteredMelodies.length: ",filteredMelodies.length);
 
-      // console.log("arrTracksMelodies[distance-1]: ",arrTracksMelodies[distance-1]);
-      // console.log("arrTracksMelodies[distance]: ",arrTracksMelodies[distance]);
-      // console.log("arrTracksMelodies[distance+1]: ",arrTracksMelodies[distance+1]); console.log("arrTracksMelodies[2*distance]: ",arrTracksMelodies[2*distance]);
-
-      // TODO assess whether this is okay...!!! Might note be!!!
-      // Modulo is not 0?!
+      // Modulo is now 0
       let numMelodies = arrTracksMelodies.length/distance;
       console.log("numMelodies: ",numMelodies);
       console.log("Time: ",new Date());
@@ -141,25 +128,16 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
       const sectionLength = parseInt(distance); // Convert distance to an integer if it's a string
       console.log("sectionLength: ",sectionLength);
       for (let i = 0; i <= arrTracksMelodies.length - sectionLength; i += sectionLength) {
-          const sectionNotesObj = arrTracksMelodies
-              .slice(i, i + sectionLength)
-              // .map(a => { pitch: a.pitch, duration:a.duration, onset:a.onset  });
-              const cacheKey = 
-                  `levenshtein:${stringNotes}:${sectionNotesObj.map(a => a.pitch).join("-")}`;
-              const cachedResult = cache.get(cacheKey);
+          const sectionNotesObj = arrTracksMelodies.slice(i, i + sectionLength);
+          const cacheKey = `levenshtein:${stringNotes}:${sectionNotesObj.map(a => a.pitch).join("-")}`;
+          const cachedResult = cache.get(cacheKey);
 
-          // For testing
-          if ( i%sectionLength === 0 && (i>=0 &&i<10 ) ){
-              console.log("------");
-              console.log("i:",i,". sectionNotesObj.length: ",sectionNotesObj.length
-              ," ,sectionNotesObj.map(a => a.lognumber): ",sectionNotesObj.map(a => a.lognumber)
-              ," ,sectionNotesObj.map(a => a['SJA ID']): ",sectionNotesObj.map(a => a['SJA ID']) // this is always undefined?!
-              ," ,sectionNotesObj.map(a => a.pitch): ",sectionNotesObj.map(a => a.pitch)," ,notes_int: ",notes_int)
-              console.log("sectionNotesObj['SJA ID']: ",sectionNotesObj['SJA ID']); // Undefined... seems wrong
-              console.log("cacheKey: ",cacheKey);
-              console.log("cache.get(cacheKey): ",cache.get(cacheKey));
-              console.log("cacheDisregarded.get(cacheKey): ",cacheDisregarded.get(cacheKey));
-          }
+          // // For testing
+          // if ( i%sectionLength === 0 && (i>=0 &&i<10 ) ){
+          //     console.log("i:",i,". sectionNotesObj.length: ",sectionNotesObj.length ," ,sectionNotesObj.map(a => a.lognumber): ",sectionNotesObj.map(a => a.lognumber)," ,sectionNotesObj.map(a => a['SJA ID']): ",sectionNotesObj.map(a => a['SJA ID']) ," ,sectionNotesObj.map(a => a.pitch): ",sectionNotesObj.map(a => a.pitch)," ,notes_int: ",notes_int)
+          //     console.log("sectionNotesObj['SJA ID']: ",sectionNotesObj['SJA ID']); // Undefined... seems wrong
+          //     console.log("cacheKey: ",cacheKey);console.log("cache.get(cacheKey): ",cache.get(cacheKey)); console.log("cacheDisregarded.get(cacheKey): ",cacheDisregarded.get(cacheKey));
+          // }
 
           if (cachedResult) {
               numberCacheMatch++;
@@ -183,18 +161,11 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
                 notes_int
               );
 
-            const dissimilarityPercentage = levenshteinDistance / notes_int.length;
-            
-            if ( i%sectionLength === 0 && ((i>=0 &&i<10)||( dissimilarityPercentage<=0.20 )) ){
-              console.log("--- \nlevenshteinDistance: ",levenshteinDistance,
-              ", sectionNotesObj: ",sectionNotesObj.map((a) => a.pitch),
-              ", notes_int.length: ",notes_int.length,
-              ",dissimilarityPercentage: ",dissimilarityPercentage,
-              ", passed threshold: ",(dissimilarityPercentage <= 1-percMatch));
-            }
+            const dissimilarityPercentage = levenshteinDistance / notes_int.length;            
+            // if ( i%sectionLength === 0 && ((i>=0 &&i<10)||( dissimilarityPercentage<=0.20 )) ){console.log("--- \nlevenshteinDistance: ",levenshteinDistance,", sectionNotesObj: ",sectionNotesObj.map((a) => a.pitch),", notes_int.length: ",notes_int.length,",dissimilarityPercentage: ",dissimilarityPercentage,", passed threshold: ",(dissimilarityPercentage <= 1-percMatch));}
             
             if (dissimilarityPercentage <= 1-percMatch) {
-              console.log("We passed something. dissimilarityPercentage: ",dissimilarityPercentage,", with filters ",{textFilterArtist, textFilterTrack, textFilterRecording});
+              // console.log("We passed something. dissimilarityPercentage: ",dissimilarityPercentage,", with filters ",{textFilterArtist, textFilterTrack, textFilterRecording});
               cache.set(cacheKey, levenshteinDistance);
               levenshteinScores.push({
                 sectionIndex: i,
@@ -210,7 +181,6 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
                 onsets: sectionNotesObj.map((a) => a.onset),
                 m_ids: sectionNotesObj.map((a) => a.m_id),
                 _ids: sectionNotesObj.map((a) => a._id),
-                // riffLength: sectionNotes.length,
               });
             } else {
               cacheDisregarded.set(cacheKey, levenshteinDistance);
