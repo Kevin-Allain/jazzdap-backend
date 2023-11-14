@@ -14,9 +14,7 @@ const TrackModel = require("../models/TrackModel");
 module.exports.getMusicMIDI = async (req, res) => {
     console.log("---module.exports.getMusicMIDI--- req.headers:", req.headers);
     console.log("req.query: ",req.query);
-    console.log("req.body: ",req.body);
-    console.log("req.params: ",req.params);
-
+    // console.log("req.body: ",req.body); console.log("req.params: ",req.params);
 
     const { track, user } = req.query;
     console.log("track: ",track,", user: ", user)

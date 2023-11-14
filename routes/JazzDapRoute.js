@@ -20,6 +20,7 @@ const {
     addContentWorkflow, deleteWorkflowObject,
     changeWorkflowPrivacy, getExactMatchWorkflowParameter
 } = require("../controllers/WorkflowController")
+const {getSearchMap, createSearchMap} = require("../controllers/SearchMapController");
 
 const router = Router();
 router.get('/',(req,res) => { res.json({message:"Hi there"})  })
@@ -88,5 +89,9 @@ router.get('/getListFuzzyDist',getListFuzzyDist);
 
 // CombinedData
 router.get('/getFuzzyLevenshtein',getFuzzyLevenshtein);
+
+// SearchMap
+router.get('/getSearchMap',getSearchMap);
+router.post('./createSearchMap',createSearchMap);
 
 module.exports = router;
