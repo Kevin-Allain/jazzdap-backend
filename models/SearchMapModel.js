@@ -28,10 +28,20 @@ const searchMapSchema = new mongoose.Schema({
         type: Number,
         require:true
     },
-    resIds:{
-        type:[[String]],
-        require:true
-    }
+    levenshteinScores:[{
+        sectionIndex:{type:Number,require:true},
+        levenshteinDistance:{type:Number,require:true},
+        track:{type:String,require:true},
+        sja_id:{type:String,require:true},
+        lognumber:{type:String,require:true},
+        first_m_id:{type:Number,require:true},
+        notes:{type:[Number],require:true},
+        durations:{type:[Number],require:true},
+        onsets:{type:[Number],require:true},
+        m_ids:{type:[Number],require:true},
+        _ids:{type:[String],require:true},
+    }]
+    // resIds:{ type:[[String]], require:true  }
 })
 
 // Create indexes

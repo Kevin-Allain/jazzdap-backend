@@ -291,25 +291,25 @@ const getMetadataFromAttributes = async (attributeNameArray,attributeValueArray)
   return(resultsMeta);
   };
 
-const createSearchMap = async (query, filterArtist, filterRecording, filterTrack, percMatch, resIds) => {
+const createSearchMap = async (query, filterArtist, filterRecording, filterTrack, percMatch, levenshteinScores) => {
   console.log("---createSearchMap. ",{query, filterArtist, filterRecording, filterTrack, percMatch});
-  console.log("resIds[0]: ",resIds[0]);
+  // TODO first make a search! THEN if no match, create one
   const data = await SearchMapModel.create({
     query: query,
     filterArtist: filterArtist,
     filterRecording: filterRecording,
     filterTrack: filterTrack,
     percMatch: percMatch,
-    resIds: resIds
+    levenshteinScores: levenshteinScores
   });
 }
 
 const getSearchMap = async( query, filterArtist, filterRecording, filterTrack, percMatch ) => {
-  let queryRes = { query: query, percMatch: percMatch };
+  console.log("getSearchMap. ",{query, filterArtist, filterRecording, filterTrack, percMatch});
+  let queryRes = { query: query, percMatch: Number(percMatch) };
   if (filterArtist === '') { queryRes.filterArtist = filterArtist }
   if (filterRecording === '') { queryRes.filterRecording = filterRecording }
   if (filterTrack === '') { queryRes.filterTrack = filterTrack }
-
   let matchingSearchMap = await SearchMapModel.find(queryRes);
   return matchingSearchMap;
 }
