@@ -1,6 +1,7 @@
 const Fuzzy_scoreModel = require("../models/Fuzzy_scoreModel");
 const TrackModel = require("../models/TrackModel");
 const TrackMetadataModel = require("../models/TrackMetadataModel");
+const SearchMapModel = require("../models/SearchMapModel");
 
 const calculateIntervalSum=(melody)=> {
   let sum = 0;
@@ -33,7 +34,7 @@ const map_to_fuzzy_score=(score)=> {
 }
 
 // This one might be useless
-characterizeFuzzyScore=(fuzzyContourInput)=>{
+const characterizeFuzzyScore=(fuzzyContourInput)=>{
   let characterizationInput = null;
   if (fuzzyContourInput <= -4) {
     characterizationInput = "big jump down";
@@ -230,7 +231,6 @@ const getMelodiesFromFuzzyScores = async (fuzzyScores, distance) => {
   return filteredResultTracks;
 };
 
-
 // -- approach with a loop (stupid slow)
 // const getMelodiesFromFuzzyScores = async (fuzzyScores, distance) => {
 //   console.log("getMelodiesFromFuzzyScores - fuzzyScores length: ", fuzzyScores.length, ", distance: ", distance);
@@ -272,9 +272,6 @@ const getMelodiesFromFuzzyScores = async (fuzzyScores, distance) => {
 //   return resultTracks;
 // };
 
-
-
-
 const getMetadataFromAttributes = async (attributeNameArray,attributeValueArray) => {
   // Ensure both arrays have the same length
   if (!Array.isArray(attributeValueArray) || !Array.isArray(attributeNameArray) || attributeValueArray.length !== attributeNameArray.length) { return res.status(400).json({ error: "Invalid input arrays" }); }
@@ -294,6 +291,29 @@ const getMetadataFromAttributes = async (attributeNameArray,attributeValueArray)
   return(resultsMeta);
   };
 
+const createSearchMap = async (query, filterArtist, filterRecording, filterTrack, percMatch, resIds) => {
+  console.log("---createSearchMap. ",{query, filterArtist, filterRecording, filterTrack, percMatch});
+  console.log("resIds[0]: ",resIds[0]);
+  const data = await SearchMapModel.create({
+    query: query,
+    filterArtist: filterArtist,
+    filterRecording: filterRecording,
+    filterTrack: filterTrack,
+    percMatch: percMatch,
+    resIds: resIds
+  });
+}
+
+const getSearchMap = async( query, filterArtist, filterRecording, filterTrack, percMatch ) => {
+  let queryRes = { query: query, percMatch: percMatch };
+  if (filterArtist === '') { queryRes.filterArtist = filterArtist }
+  if (filterRecording === '') { queryRes.filterRecording = filterRecording }
+  if (filterTrack === '') { queryRes.filterTrack = filterTrack }
+
+  let matchingSearchMap = await SearchMapModel.find(queryRes);
+  return matchingSearchMap;
+}
+
 module.exports = {
   calcLevenshteinDistance_int,
   calcLevenshteinDistance_int_relative,
@@ -305,4 +325,5 @@ module.exports = {
   getMelodiesFromTrackId,
   getMetadataFromAttributes,
   getMelodiesFromFuzzyScores,
+  createSearchMap, getSearchMap
 };

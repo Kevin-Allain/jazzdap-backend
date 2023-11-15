@@ -24,8 +24,12 @@ const searchMapSchema = new mongoose.Schema({
         type: String,
         require: true
     },
+    percMatch: {
+        type: Number,
+        require:true
+    },
     resIds:{
-        type:[String],
+        type:[[String]],
         require:true
     }
 })

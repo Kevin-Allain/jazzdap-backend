@@ -14,7 +14,10 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
     let notes = stringNotes;
     const notes_int = notes.split('-').map(a=>Number(a));
     let distance = notes_int.length;
-    let score = CombinedDataService.map_to_fuzzy_score(CombinedDataService.calculateIntervalSum(notes_int))
+    // - Get the score based on input
+    let score = CombinedDataService.map_to_fuzzy_score(
+      CombinedDataService.calculateIntervalSum(notes_int)
+    );
     console.log("notes: ",notes,", distance: ",distance,", score: ",score,", textFilterArtist: ",textFilterArtist,", textFilterTrack: ",textFilterTrack,", textFilterRecording: ",textFilterRecording);
     console.log("Time: ",new Date());
     try {
@@ -22,19 +25,16 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
       let sjaIdsFilter = [];
       let tracktitlesFilter = [];
       let objsMetadata = [];
+        // - Prepare the arrays and code queries to get match track to filter
       if (textFilterArtist!=='' || textFilterTrack!=='' || textFilterRecording!==''){
-        // 0 - Prepare the arrays
         let attributeValueArray = [], attributeNameArray = [];
         if(textFilterArtist!==''){attributeValueArray.push('artist');attributeNameArray.push(textFilterArtist);}
         if(textFilterTrack!==''){attributeValueArray.push('track');attributeNameArray.push(textFilterTrack);}
         if(textFilterRecording!==''){attributeValueArray.push('recording');attributeNameArray.push(textFilterRecording);}
-        // 1 - Code queries to get match track to filter
         objsMetadata = await CombinedDataService.getMetadataFromAttributes( attributeValueArray, attributeNameArray );
-        console.log("objsMetadata.length: ",objsMetadata.length);
         lognumbersFilter = [...new Set(objsMetadata.map(a => a.lognumber))];
         sjaIdsFilter = [...new Set(objsMetadata.map(a => ''+a._doc['SJA ID']))];
         tracktitlesFilter = [...new Set(objsMetadata.map(a => a['Track Title']))];
-        // console.log("lognumbersFilter: ",lognumbersFilter); console.log("sjaIdsFilter: ",sjaIdsFilter); console.log("objsMetadata[0]a._doc['SJA ID']: ", objsMetadata[0]._doc['SJA ID']) console.log("tracktitlesFilter: ",tracktitlesFilter);
       }
 
       // TODO still SLOW (but a bit better with applied filter)
@@ -43,7 +43,7 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
       // Now fuzzyScores will contain the resolved data
       console.log("Got the fuzzyScores. Its length: ", fuzzyScores.length); // Manually checked without filter and it is fine
       console.log("Time: ",new Date());
-      // filter the results if there are filters set by user
+      // - Filter the results for tracks if there are filters set by user
         if ( textFilterTrack !== "" ) {
           let lognumbersFromFuzzy = [...new Set(fuzzyScores.map((a) => a["lognumber"])),];
           console.log("lognumbersFromFuzzy, ", lognumbersFromFuzzy);
@@ -69,14 +69,10 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
       dataTrack ? console.log("dataTrack.length: ", dataTrack.length) : console.log("dataTrack undefined!");
       // dataTrack has the same length as fuzzyScores without filters
 
-      // TODO SLOW... and wong?!!! Fix (slightly better now, but still should be better! One way could be to directly store the _ids in fuzzyScore structure. (Need to rewrite Python code))
-      // Potentially, storing the _id of other objects in the fuzzy_score database could be useful?!
-      // TODO fix code: arrTracksMelodies.length should be dataTrack.length * distance! 2023/11/08
-      // let arrTracksMelodies = await CombinedDataService.getMelodiesFromTrackId(dataTrack,distance);
+      // TODO Still kind of slow. Assess if it can be enhanced.
       let arrTracksMelodies = await CombinedDataService.getMelodiesFromFuzzyScores(fuzzyScores, distance);
       arrTracksMelodies ? console.log("arrTracksMelodies.length: ", arrTracksMelodies.length) : console.log("arrTracksMelodies undefined!");
       console.log("Time: ",new Date());
-      
       console.log("arrTracksMelodies[0]: ",arrTracksMelodies[0]);
 
       let filteredMelodies = arrTracksMelodies.filter(a => (typeof a) !== 'undefined');
@@ -116,7 +112,7 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
           } else {
             const levenshteinDistance =
               CombinedDataService.calcLevenshteinDistance_int_optimistic( sectionNotesObj.map((a) => a.pitch), notes_int );
-            const dissimilarityPercentage = levenshteinDistance / notes_int.length;            
+            const dissimilarityPercentage = levenshteinDistance / notes_int.length;
             
             if (dissimilarityPercentage <= 1-percMatch) {
               // console.log("We passed something. dissimilarityPercentage: ",dissimilarityPercentage,", with filters ",{textFilterArtist, textFilterTrack, textFilterRecording});
@@ -143,6 +139,13 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
         console.log("~~~ numberCacheMatch: ",numberCacheMatch,", numCacheDisregarded: ",numCacheDisregarded,", length of results: ",levenshteinScores.length);
         console.log("Levenshtein distances calculated. first one: ", levenshteinScores[0]);
         console.log("Time: ",new Date());
+
+        // TODO save the result. Parameters: stringNotes, textFilterArtist, textFilterTrack, textFilterRecording
+        // We need to create the resIds... Let's make it an array of arrays of _ids like the levenshteinScores._ids
+        let resIds = levenshteinScores.map(a => a._ids); // TODO Might have to change to change it somehow, new ObjectId is weird
+        console.log("Prior to creation of searchMap. First resIds: ",resIds[0]);
+        CombinedDataService.createSearchMap(stringNotes, textFilterArtist, textFilterRecording, textFilterTrack, percMatch, resIds)
+
         res.send(levenshteinScores);
     } catch (error) {
         console.error(error);
