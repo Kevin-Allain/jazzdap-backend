@@ -282,8 +282,11 @@ const getMetadataFromAttributes = async (attributeNameArray,attributeValueArray)
   // console.log("sanitizedAttributeNameArray: ",sanitizedAttributeNameArray);
   const queryCondition = {};
   // Construct the query using the sanitized arrays
-  sanitizedAttributeNameArray.forEach((attributeName, index) => { queryCondition[attributeName] = attributeValueArray[index]; });
-  // console.log("queryCondition: ",queryCondition);
+  sanitizedAttributeNameArray.forEach((attributeName, index) => { 
+    queryCondition[attributeName] = { $regex: new RegExp(attributeValueArray[index], 'i') }; 
+  });
+  
+  console.log("queryCondition: ",queryCondition);
   const resultsMeta = await TrackMetadataModel.find(queryCondition)
       // .then(data => { console.log("Searched successfully MusicInfoControllerModel.find"); console.log("data.length: ", data.length,", and first item: ",data[0]); return data;  })
       // .catch(error => { res.status(500).json(error); });
@@ -307,10 +310,12 @@ const createSearchMap = async (query, filterArtist, filterRecording, filterTrack
 const getSearchMap = async( query, filterArtist, filterRecording, filterTrack, percMatch ) => {
   console.log("getSearchMap. ",{query, filterArtist, filterRecording, filterTrack, percMatch});
   let queryRes = { query: query, percMatch: Number(percMatch) };
-  if (filterArtist === '') { queryRes.filterArtist = filterArtist }
-  if (filterRecording === '') { queryRes.filterRecording = filterRecording }
-  if (filterTrack === '') { queryRes.filterTrack = filterTrack }
+  if (filterArtist !== '') { queryRes.filterArtist = filterArtist }
+  if (filterRecording !== '') { queryRes.filterRecording = filterRecording }
+  if (filterTrack !== '') { queryRes.filterTrack = filterTrack }
+  console.log("queryRes: ",queryRes);
   let matchingSearchMap = await SearchMapModel.find(queryRes);
+  console.log("matchingSearchMap.length: ",matchingSearchMap.length);
   return matchingSearchMap;
 }
 

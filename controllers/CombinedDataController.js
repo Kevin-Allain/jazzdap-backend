@@ -21,6 +21,7 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
     console.log("matchSearchMap[0]._id: ", matchSearchMap[0]._id, ", matchSearchMap[0].query: ", matchSearchMap[0].query);
     res.send(matchSearchMap[0].levenshteinScores);
   } else {
+    console.log("Need to make the search");
     // - Get the score based on input
     let score = CombinedDataService.map_to_fuzzy_score(
       CombinedDataService.calculateIntervalSum(notes_int)
@@ -54,11 +55,11 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
       if (textFilterTrack !== "") {
         let lognumbersFromFuzzy = [...new Set(fuzzyScores.map((a) => a["lognumber"])),];
         console.log("lognumbersFromFuzzy, ", lognumbersFromFuzzy);
-        for (var i in lognumbersFromFuzzy) { console.log("lognumbersFromFuzzy[i] ", lognumbersFromFuzzy[i], " in lognumbersFilter: ", lognumbersFilter.includes(lognumbersFromFuzzy[i])); }
+        // for (var i in lognumbersFromFuzzy) { console.log("lognumbersFromFuzzy[i] ", lognumbersFromFuzzy[i], " in lognumbersFilter: ", lognumbersFilter.includes(lognumbersFromFuzzy[i])); }
         let matchessjaIdsFromFuzzy = [];
         let sjaIdsFromFuzzy = [...new Set(fuzzyScores.map((a) => "" + a["SJA ID"])),];
         for (var i in sjaIdsFromFuzzy) {
-          console.log("sjaIdsFromFuzzy[", i, "] ", sjaIdsFromFuzzy[i], " in sjaIdsFilter: ", sjaIdsFilter.join().includes("" + sjaIdsFromFuzzy[i]));
+          // console.log("sjaIdsFromFuzzy[", i, "] ", sjaIdsFromFuzzy[i], " in sjaIdsFilter: ", sjaIdsFilter.join().includes("" + sjaIdsFromFuzzy[i]));
           if (sjaIdsFilter.join().includes("" + sjaIdsFromFuzzy[i])) {
             matchessjaIdsFromFuzzy.push(sjaIdsFromFuzzy[i]);
           }
@@ -98,7 +99,7 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
 
       for (let i = 0; i <= arrTracksMelodies.length - sectionLength; i += sectionLength) {
         const sectionNotesObj = arrTracksMelodies.slice(i, i + sectionLength);
-        const cacheKey = `levenshtein:${stringNotes}:${sectionNotesObj.map(a => a.pitch).join("-")}`;
+        const cacheKey = `levenshtein:${stringNotes}:${sectionNotesObj.map(a => a.pitch).join("-")}_${percMatch}_${textFilterArtist}_${textFilterRecording}_${textFilterTrack}`;
         const cachedResult = cache.get(cacheKey);
 
         if (cachedResult) {
@@ -147,13 +148,11 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
       console.log("Levenshtein distances calculated. first one: ", levenshteinScores[0]);
       console.log("Time: ", new Date());
 
-      // TODO save the result. Parameters: stringNotes, textFilterArtist, textFilterTrack, textFilterRecording
-      // We need to create the resIds... Let's make it an array of arrays of _ids like the levenshteinScores._ids
+      // Saving the result. Parameters: stringNotes, textFilterArtist, textFilterTrack, textFilterRecording, percMatch
       if (!matchSearchMap.length > 0) {
-        // Maybe we should save the entirety of the levenshteinScores objects...
-        // let resIds = levenshteinScores.map(a => a._ids); // TODO Might have to change to change it somehow, new ObjectId is weird
-        // CombinedDataService.createSearchMap(stringNotes, textFilterArtist, textFilterRecording, textFilterTrack, percMatch, resIds);
-        CombinedDataService.createSearchMap(stringNotes, textFilterArtist, textFilterRecording, textFilterTrack, percMatch, levenshteinScores);
+        CombinedDataService.createSearchMap(
+          stringNotes, textFilterArtist, textFilterRecording, textFilterTrack, percMatch, levenshteinScores
+        );
       }
 
 
