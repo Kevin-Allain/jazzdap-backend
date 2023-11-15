@@ -309,10 +309,16 @@ const createSearchMap = async (query, filterArtist, filterRecording, filterTrack
 
 const getSearchMap = async( query, filterArtist, filterRecording, filterTrack, percMatch ) => {
   console.log("getSearchMap. ",{query, filterArtist, filterRecording, filterTrack, percMatch});
-  let queryRes = { query: query, percMatch: Number(percMatch) };
-  if (filterArtist !== '') { queryRes.filterArtist = filterArtist }
-  if (filterRecording !== '') { queryRes.filterRecording = filterRecording }
-  if (filterTrack !== '') { queryRes.filterTrack = filterTrack }
+  let queryRes = { 
+    query: query, 
+    percMatch: Number(percMatch),
+    filterArtist: filterArtist,
+    filterRecording:filterRecording,
+    filterTrack:filterTrack
+  };
+  // if (filterArtist !== '') { queryRes.filterArtist = filterArtist }
+  // if (filterRecording !== '') { queryRes.filterRecording = filterRecording }
+  // if (filterTrack !== '') { queryRes.filterTrack = filterTrack }
   console.log("queryRes: ",queryRes);
   let matchingSearchMap = await SearchMapModel.find(queryRes);
   console.log("matchingSearchMap.length: ",matchingSearchMap.length);

@@ -6,14 +6,20 @@ module.exports.getSearchMap = async (req, res) => {
     console.log("---module.exports.getSearchMap")
     console.log("req.query: ", req.query);
     const { query, filterArtist, filterRecording, filterTrack, percMatch } = req.query;
-    let queryRes = { query: query, percMatch: percMatch };
-    if (filterArtist === '') { queryRes.filterArtist = filterArtist }
-    if (filterRecording === '') { queryRes.filterRecording = filterRecording }
-    if (filterTrack === '') { queryRes.filterTrack = filterTrack }
-    SearchMapModel.find(queryRes)
+    let queryRes = { 
+        query: query, 
+        percMatch: Number(percMatch),
+        filterArtist: filterArtist,
+        filterRecording:filterRecording,
+        filterTrack:filterTrack
+      };
+      // if (filterArtist !== '') { queryRes.filterArtist = filterArtist }
+      // if (filterRecording !== '') { queryRes.filterRecording = filterRecording }
+      // if (filterTrack !== '') { queryRes.filterTrack = filterTrack }
+        console.log("queryRes: ",queryRes);
+      SearchMapModel.find(queryRes)
         .then(data => {
-            console.log("Searched successfully SearchMapModel.find")
-            console.log(data);
+            console.log("Searched successfully SearchMapModel.find, ",data.length," elements.");
             res.send(data);
         })
         .catch(error => { res.status(500).json(error); })
