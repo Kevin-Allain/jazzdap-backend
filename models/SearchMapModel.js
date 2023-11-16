@@ -45,6 +45,6 @@ const searchMapSchema = new mongoose.Schema({
 })
 
 // Create indexes
-searchMapSchema.index({ query: 1, filterArtist: 1, filterRecording: 1, filterTrack: 1 });
+searchMapSchema.index({ query: 1, filterArtist: 1, filterRecording: 1, filterTrack: 1, percMatch:1 });
 
 module.exports = mongoose.model('SearchMap',searchMapSchema);

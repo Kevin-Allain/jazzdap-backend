@@ -56,7 +56,26 @@ module.exports.createWorkflow = async (req, res) => {
             console.log(data);
             res.send(data);
         } else {
-            console.log("object is neither sample, recording, or track. It is: ",objects[0].objectType);
+            console.log("object is neither sample, recording, or track. It is: ", objects[0].objectType);
+            if (objects[0].objectType === 'search') {
+                console.log("createWorkflow. objects: ", objects);
+                const data = await WorkflowModel.create({
+                    title: title,
+                    time: time,
+                    description: description,
+                    author: author,
+                    objects: objects,
+                    privacy: privacy,
+                    arrTrackTitle: arrTrackTitle,
+                    arrEventName: arrEventName,
+                    arrNamedArtists: arrNamedArtists,
+                    arrReleaseYear: arrReleaseYear,
+                    arrReleaseMonth: arrReleaseMonth,
+                });
+                console.log("Created successfully");
+                console.log(data);
+                res.send(data);
+            }
         }
     }
 };
