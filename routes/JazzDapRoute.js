@@ -20,7 +20,7 @@ const {
     addContentWorkflow, deleteWorkflowObject,
     changeWorkflowPrivacy, getExactMatchWorkflowParameter
 } = require("../controllers/WorkflowController")
-const {getSearchMap, createSearchMap} = require("../controllers/SearchMapController");
+const {get_idContent_search, getSearchMap, createSearchMap} = require("../controllers/SearchMapController");
 
 const router = Router();
 router.get('/',(req,res) => { res.json({message:"Hi there"})  })
@@ -81,6 +81,8 @@ router.get('/get_idContent_comment', get_idContent_comment);
 router.get('/get_idContent_recording', get_idContent_recording);
 router.get('/get_idContent_track', get_idContent_track);
 router.get('/get_idContent_sample', get_idContent_sample);
+router.get('/get_idContent_search', get_idContent_search);
+
 
 // Fuzzy_score
 router.get('/getListFuzzyScores',getListFuzzyScores);

@@ -44,3 +44,14 @@ module.exports.createSearchMap = async (req,res) => {
     console.log(data);
     res.send(data);
 }
+
+module.exports.get_idContent_search = async (req, res) => {
+    console.log("---module.exports.get_idContent_search");
+    let { _id, typeCaller, indexRange } = req.query;
+    const queryCondition = { _id: _id };
+    return SearchMapModel.find(queryCondition)
+        .then(data => {
+            console.log("Successfully loaded a search. data.length: ", data.length);
+            res.send(data);
+        })
+}
