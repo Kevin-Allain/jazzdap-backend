@@ -69,18 +69,25 @@ module.exports.get_idContent_recording = async (req, res) => {
     const queryCondition = { _id: _id };
     TrackModel.find(queryCondition)
         .then(trackMatch => {
-            console.log("trackMatch[0]: ",trackMatch[0]);
-            // TODO set the parameters for new queryCondition
-            // get the sja id if we have it, otherwise, we'll use lognumber...
+            // console.log("trackMatch[0]: ",trackMatch[0]);
+            // get the SJA_ID if we have it, otherwise, we'll use lognumber...
             let curTrackMatch = trackMatch[0];
-            console.log("curTrackMatch['SJA ID']: ", curTrackMatch['SJA ID']);
-            const sjaCode = trackMatch[0]['SJA ID']?trackMatch[0]['SJA ID']:'';
-            const queryConditionMeta = sjaCode?{'SJA ID':sjaCode}:{lognumber:trackMatch[0].lognumber};
-            console.log("sjaCode: ",sjaCode,", queryConditionMeta: ",queryConditionMeta);
+            // let keysCTM = Object.keys(curTrackMatch);
+            // console.log("keysCTM: ",keysCTM);
+            // for(let i in keysCTM){ console.log("i: ",i,", curTrackMatch[keysCTM[i]]: ",curTrackMatch[keysCTM[i]]); }
+            let keysCTM_doc = Object.keys(curTrackMatch._doc);
+            for(let i in keysCTM_doc){ console.log("i: ",i,", curTrackMatch._doc[keysCTM_doc[i]]: ",curTrackMatch._doc[keysCTM_doc[i]]); }
+            // console.log("keysCTM_doc: ",keysCTM_doc);
+            // console.log("curTrackMatch._doc['SJA_ID']: ", curTrackMatch._doc['SJA_ID']);
+            // console.log("curTrackMatch._doc.SJA_ID: ",curTrackMatch._doc.SJA_ID);
+            const sjaCode = curTrackMatch._doc.SJA_ID?curTrackMatch._doc.SJA_ID:'';
+            const queryConditionMeta = sjaCode?{'SJA_ID':sjaCode}:{lognumber:trackMatch[0].lognumber};
+            // console.log("sjaCode: ",sjaCode,", queryConditionMeta: ",queryConditionMeta);
             MusicInfoControllerModel.find(queryConditionMeta)
                 .then(data => {
                     console.log("Searched successfully MusicInfoControllerModel.find")
                     console.log("data.length: ", data.length);
+                    // if(data.length===1){ console.log("data: ",data) }
                     res.send(data);
                 })
                 .catch(error => { res.status(500).json(error); })
@@ -96,16 +103,25 @@ module.exports.get_idContent_track = async (req, res) => {
     const queryCondition = { _id: _id };
     TrackModel.find(queryCondition)
         .then(trackMatch => {
-            console.log("trackMatch[0]: ",trackMatch[0]);
-            // TODO set the parameters for new queryCondition
-            // get the sja id if we have it, otherwise, we'll use lognumber...
-            const sjaCode = trackMatch[0]['SJA ID']?trackMatch[0]['SJA ID']:'';
-            const queryConditionMeta = sjaCode?{'SJA ID':sjaCode}:{lognumber:trackMatch[0].lognumber};
-            console.log("sjaCode: ",sjaCode,", queryConditionMeta: ",queryConditionMeta);
+            // console.log("trackMatch[0]: ",trackMatch[0]);
+            // get the SJA_ID if we have it, otherwise, we'll use lognumber...
+            let curTrackMatch = trackMatch[0];
+            // let keysCTM = Object.keys(curTrackMatch);
+            // console.log("keysCTM: ",keysCTM);
+            // for(let i in keysCTM){ console.log("i: ",i,", curTrackMatch[keysCTM[i]]: ",curTrackMatch[keysCTM[i]]); }
+            let keysCTM_doc = Object.keys(curTrackMatch._doc);
+            for (let i in keysCTM_doc) { console.log("i: ", i, ", curTrackMatch._doc[keysCTM_doc[i]]: ", curTrackMatch._doc[keysCTM_doc[i]]); }
+            // console.log("keysCTM_doc: ",keysCTM_doc);
+            // console.log("curTrackMatch._doc['SJA_ID']: ", curTrackMatch._doc['SJA_ID']);
+            // console.log("curTrackMatch._doc.SJA_ID: ",curTrackMatch._doc.SJA_ID);
+            const sjaCode = curTrackMatch._doc.SJA_ID ? curTrackMatch._doc.SJA_ID : '';
+            const queryConditionMeta = sjaCode ? { 'SJA_ID': sjaCode } : { lognumber: trackMatch[0].lognumber };
+            // console.log("sjaCode: ",sjaCode,", queryConditionMeta: ",queryConditionMeta);
             MusicInfoControllerModel.find(queryConditionMeta)
                 .then(data => {
                     console.log("Searched successfully MusicInfoControllerModel.find")
                     console.log("data.length: ", data.length);
+                    // if(data.length===1){ console.log("data: ",data) }
                     res.send(data);
                 })
                 .catch(error => { res.status(500).json(error); })

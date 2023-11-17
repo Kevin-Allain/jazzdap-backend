@@ -41,7 +41,7 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
         if (textFilterRecording !== '') { attributeValueArray.push('recording'); attributeNameArray.push(textFilterRecording); }
         objsMetadata = await CombinedDataService.getMetadataFromAttributes(attributeValueArray, attributeNameArray);
         lognumbersFilter = [...new Set(objsMetadata.map(a => a.lognumber))];
-        sjaIdsFilter = [...new Set(objsMetadata.map(a => '' + a._doc['SJA ID']))];
+        sjaIdsFilter = [...new Set(objsMetadata.map(a => '' + a._doc['SJA_ID']))];
         tracktitlesFilter = [...new Set(objsMetadata.map(a => a['Track Title']))];
       }
 
@@ -57,7 +57,7 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
         console.log("lognumbersFromFuzzy, ", lognumbersFromFuzzy);
         // for (var i in lognumbersFromFuzzy) { console.log("lognumbersFromFuzzy[i] ", lognumbersFromFuzzy[i], " in lognumbersFilter: ", lognumbersFilter.includes(lognumbersFromFuzzy[i])); }
         let matchessjaIdsFromFuzzy = [];
-        let sjaIdsFromFuzzy = [...new Set(fuzzyScores.map((a) => "" + a["SJA ID"])),];
+        let sjaIdsFromFuzzy = [...new Set(fuzzyScores.map((a) => "" + a["SJA_ID"])),];
         for (var i in sjaIdsFromFuzzy) {
           // console.log("sjaIdsFromFuzzy[", i, "] ", sjaIdsFromFuzzy[i], " in sjaIdsFilter: ", sjaIdsFilter.join().includes("" + sjaIdsFromFuzzy[i]));
           if (sjaIdsFilter.join().includes("" + sjaIdsFromFuzzy[i])) {
@@ -65,9 +65,9 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
           }
         }
 
-        console.log("size before filtering based on SJA ID. ", fuzzyScores.length);
-        fuzzyScores = fuzzyScores.filter((item) => matchessjaIdsFromFuzzy.includes(item["SJA ID"]));
-        console.log("size after filtering based on SJA ID. ", fuzzyScores.length);
+        console.log("size before filtering based on SJA_ID. ", fuzzyScores.length);
+        fuzzyScores = fuzzyScores.filter((item) => matchessjaIdsFromFuzzy.includes(item["SJA_ID"]));
+        console.log("size after filtering based on SJA_ID. ", fuzzyScores.length);
       }
 
       let arrIds = fuzzyScores.map(a => a.first_id);
@@ -108,7 +108,7 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
             sectionIndex: i,
             levenshteinDistance: cachedResult,
             track: arrTracksMelodies[i].track,
-            sja_id: sectionNotesObj[0]['SJA ID'] ? sectionNotesObj[0]['SJA ID'] : null,
+            sja_id: sectionNotesObj[0]['SJA_ID'] ? sectionNotesObj[0]['SJA_ID'] : null,
             lognumber: arrTracksMelodies[i].lognumber,
             first_m_id: arrTracksMelodies[i].m_id,
             notes: sectionNotesObj.map(a => a.pitch),
@@ -129,7 +129,7 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
               sectionIndex: i,
               levenshteinDistance: levenshteinDistance,
               track: arrTracksMelodies[i].track,
-              sja_id: sectionNotesObj[0]["SJA ID"] ? sectionNotesObj[0]["SJA ID"] : null,
+              sja_id: sectionNotesObj[0]["SJA_ID"] ? sectionNotesObj[0]["SJA_ID"] : null,
               lognumber: arrTracksMelodies[i].lognumber,
               first_m_id: arrTracksMelodies[i].m_id,
               notes: sectionNotesObj.map((a) => a.pitch),
