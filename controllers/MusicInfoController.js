@@ -1,4 +1,6 @@
 const MusicInfoControllerModel = require("../models/TrackMetadataModel");
+const TrackModel = require("../models/TrackModel");
+
 
 module.exports.getTrackMetadata = async (req, res) => {
     console.log("---module.exports.getTrackMetadata--- req.headers:", req.headers);
@@ -54,42 +56,59 @@ module.exports.getTracksMetadata = async (req, res) => {
 //     const lognumbers = [...new Set(req.query.lognumbers)];    
 //     return new Promise((resolve, reject) => {
 //         MusicInfoControllerModel.find({ lognumber: { $in: lognumbers } })
-//             .then(data => {
-//                 console.log("Searched successfully MusicInfoControllerModel.find")
-//                 console.log("data.length: ", data.length);
-//                 console.log("data[0]: ", data[0]);
-//                 resolve(data);
-//             })
-//             .catch(error => {
-//                 reject(error);
-//             });
+//             .then(data => { console.log("Searched successfully MusicInfoControllerModel.find"); console.log("data.length: ", data.length); console.log("data[0]: ", data[0]); resolve(data); })
+//             .catch(error => { reject(error); });
 //     });
 // }
 
-module.exports.get_idContent_recording = async (req,res) => {
+module.exports.get_idContent_recording = async (req, res) => {
     const { _id, typeCaller, indexRange } = req.query;
-    console.log("get_idContent_recording: ",{_id, typeCaller, indexRange});
-    const queryCondition = { _id:_id };
-    MusicInfoControllerModel.find(queryCondition)
-        .then(data => {
-            console.log("Searched successfully MusicInfoControllerModel.find")
-            console.log("data.length: ", data.length);
-            res.send(data);
+    console.log("get_idContent_recording: ", { _id, typeCaller, indexRange });
+    // Test the updated code, because the _id with typeCaller is actually matching on track database. We need to first get the track and then use its info to get the recording
+    // Do we always have the issue?
+    const queryCondition = { _id: _id };
+    TrackModel.find(queryCondition)
+        .then(trackMatch => {
+            console.log("trackMatch[0]: ",trackMatch[0]);
+            // TODO set the parameters for new queryCondition
+            // get the sja id if we have it, otherwise, we'll use lognumber...
+            let curTrackMatch = trackMatch[0];
+            console.log("curTrackMatch['SJA ID']: ", curTrackMatch['SJA ID']);
+            const sjaCode = trackMatch[0]['SJA ID']?trackMatch[0]['SJA ID']:'';
+            const queryConditionMeta = sjaCode?{'SJA ID':sjaCode}:{lognumber:trackMatch[0].lognumber};
+            console.log("sjaCode: ",sjaCode,", queryConditionMeta: ",queryConditionMeta);
+            MusicInfoControllerModel.find(queryConditionMeta)
+                .then(data => {
+                    console.log("Searched successfully MusicInfoControllerModel.find")
+                    console.log("data.length: ", data.length);
+                    res.send(data);
+                })
+                .catch(error => { res.status(500).json(error); })
         })
         .catch(error => { res.status(500).json(error); })
 }
 
-// We need to make the seleciton of RECORDING, not TRACK
-// after private beta: seems fine?
-module.exports.get_idContent_track = async (req,res) => {
+module.exports.get_idContent_track = async (req, res) => {
     const { _id, typeCaller, indexRange } = req.query;
-    console.log("get_idContent_track: ",{_id, typeCaller, indexRange});
-    const queryCondition = { _id:_id };
-    MusicInfoControllerModel.find(queryCondition)
-        .then(data => {
-            console.log("Searched successfully MusicInfoControllerModel.find")
-            console.log("data.length: ", data.length);
-            res.send(data);
+    console.log("get_idContent_track: ", { _id, typeCaller, indexRange });
+    // Test the updated code, because the _id with typeCaller is actually matching on track database. We need to first get the track and then use its info to get the recording
+    // Do we always have the issue?
+    const queryCondition = { _id: _id };
+    TrackModel.find(queryCondition)
+        .then(trackMatch => {
+            console.log("trackMatch[0]: ",trackMatch[0]);
+            // TODO set the parameters for new queryCondition
+            // get the sja id if we have it, otherwise, we'll use lognumber...
+            const sjaCode = trackMatch[0]['SJA ID']?trackMatch[0]['SJA ID']:'';
+            const queryConditionMeta = sjaCode?{'SJA ID':sjaCode}:{lognumber:trackMatch[0].lognumber};
+            console.log("sjaCode: ",sjaCode,", queryConditionMeta: ",queryConditionMeta);
+            MusicInfoControllerModel.find(queryConditionMeta)
+                .then(data => {
+                    console.log("Searched successfully MusicInfoControllerModel.find")
+                    console.log("data.length: ", data.length);
+                    res.send(data);
+                })
+                .catch(error => { res.status(500).json(error); })
         })
         .catch(error => { res.status(500).json(error); })
 }
