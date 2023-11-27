@@ -7,8 +7,7 @@ const MusicInfoController = require('./MusicInfoController');
 module.exports.createWorkflow = async (req, res) => {
     console.log("---module.exports.createWorkflow--- req.body:", req.body);
     const {
-        title, time, description, author, objects = [], privacy = 'public',
-        arrMetadataToWorkflow = []
+        title, time, description, author, objects = [], privacy = 'public', arrMetadataToWorkflow = []
     } = req.body;
 
     let arrTrackTitle = [];

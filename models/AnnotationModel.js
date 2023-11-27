@@ -40,6 +40,9 @@ const annotationSchema = new mongoose.Schema({
     time:{
         type:Date,
         require:true
+    },
+    objectId: {
+        type: String
     }
 })
 

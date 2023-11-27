@@ -1,10 +1,20 @@
 const AnnotationModel = require("../models/AnnotationModel");
 
+// idCaller is the objectId: an identifier for the object in the database related to the annotation.
 module.exports.addAnnotation = async (req, res) => {
     console.log("---module.exports.addAnnotation--- req.body:", req.body);
-    const { type, info, indexAnnotation, annotationInput, author, privacy, time } = req.body;
+    const { type, info, indexAnnotation, annotationInput, author, privacy, time, idCaller } = req.body;
 
-    AnnotationModel.create({ type: type, info: info, indexAnnotation:indexAnnotation, annotationInput: annotationInput, author: author, privacy: privacy, time: time })
+    AnnotationModel.create({
+        type: type,
+        info: info,
+        indexAnnotation: indexAnnotation,
+        annotationInput: annotationInput,
+        author: author,
+        privacy: privacy,
+        time: time,
+        objectId: idCaller
+    })
         .then((data) => {
             console.log("Added successfully");
             console.log(data);
@@ -18,7 +28,9 @@ module.exports.addAnnotation = async (req, res) => {
 // index is useful for many samples matching from one song
 module.exports.getAnnotations = async (req, res) => {
     console.log("---module.exports.getAnnotations--- req.query:", req.query);
-    const { type, info, indexAnnotation, user } = req.query;
+    const { type, info, indexAnnotation, idCaller, user } = req.query;
+
+    console.log("---- idCaller: ",idCaller);
 
     console.log('user: ', user,', (typeof user): ', (typeof user));
     const queryCondition = {
