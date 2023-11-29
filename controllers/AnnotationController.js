@@ -5,24 +5,32 @@ module.exports.addAnnotation = async (req, res) => {
     console.log("---module.exports.addAnnotation--- req.body:", req.body);
     const { type, info, indexAnnotation, annotationInput, author, privacy, time, idCaller } = req.body;
 
-    AnnotationModel.create({
-        type: type,
-        info: info,
-        indexAnnotation: indexAnnotation,
-        annotationInput: annotationInput,
-        author: author,
-        privacy: privacy,
-        time: time,
-        objectId: idCaller
-    })
-        .then((data) => {
-            console.log("Added successfully");
-            console.log(data);
-            res.send(data);
+    // TODO idCaller is problematic. If the type is a recording or track, idCaller is the _id of the note
+    // if (type === "recording" || type === "track") {
+        /** First get the content... 
+         * (Should we make the hypothesis that the _id is going to be the correct one...?! 
+         * OR should we make the call before so that we have a reliable direct element... Probably.)
+         * */ 
+    // } else {
+        AnnotationModel.create({
+            type: type,
+            info: info,
+            indexAnnotation: indexAnnotation,
+            annotationInput: annotationInput,
+            author: author,
+            privacy: privacy,
+            time: time,
+            objectId: idCaller
         })
-        .catch((err) => {
-            console.log(err);
-        });
+            .then((data) => {
+                console.log("Added successfully");
+                console.log(data);
+                res.send(data);
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    // }
 };
 
 // index is useful for many samples matching from one song
