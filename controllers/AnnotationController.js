@@ -40,6 +40,7 @@ module.exports.getAnnotations = async (req, res) => {
     const { type, info, indexAnnotation, idCaller, user } = req.query;
 
     console.log("---- idCaller: ",idCaller);
+    // In the case of a type recording or track, this is the _id of a note. Need to get the _id of the metadata. Then search based on it. (Logic sohuld be applied everywhere)
 
     console.log('user: ', user,', (typeof user): ', (typeof user));
     const queryCondition = {

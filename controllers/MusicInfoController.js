@@ -25,29 +25,35 @@ module.exports.getTrackMetadata = async (req, res) => {
 module.exports.getTrackMetaFromNoteId = async (req, res) => {
     console.log("---module.exports.getTrackMetaFromNoteId ");
     console.log("req.query: ", req.query);
+    console.log("req.body: ", req.body);
+    console.log("req.params: ", req.params);
     const { idTrack } = req.query;
     console.log("idTrack: ", idTrack);
     TrackModel.find({ _id: new mongoose.Types.ObjectId(idTrack) })
         .then(d => {
             console.log("found a note. d: ", d);
-            const noteObject = d[0];
-            // then look if there is SJA_ID and use it. Otherwise, use lognumber.
-            if (noteObject.SJA_ID) {
-                MusicInfoControllerModel.find({ SJA_ID: noteObject.SJA_ID })
-                    .then(data => {
-                        console.log("SJA_ID defined. Searched successfully MusicInfoControllerModel.find")
-                        console.log("data.length: ", data.length);
-                        res.send(data);
-                    })
-                    .catch(error => { res.status(500).json(error); })
+            if (d.length > 0) {
+                const noteObject = d[0];
+                // then look if there is SJA_ID and use it. Otherwise, use lognumber.
+                if (noteObject.SJA_ID) {
+                    MusicInfoControllerModel.find({ SJA_ID: noteObject.SJA_ID })
+                        .then(data => {
+                            console.log("SJA_ID defined. Searched successfully MusicInfoControllerModel.find")
+                            console.log("data.length: ", data.length);
+                            res.send(data);
+                        })
+                        .catch(error => { res.status(500).json(error); })
+                } else {
+                    MusicInfoControllerModel.find({ lognumber: noteObject.lognumber })
+                        .then(data => {
+                            console.log("SJA_ID not defined. Searched successfully MusicInfoControllerModel.find")
+                            console.log("data.length: ", data.length);
+                            res.send(data);
+                        })
+                        .catch(error => { res.status(500).json(error); })
+                }
             } else {
-                MusicInfoControllerModel.find({ lognumber: noteObject.lognumber })
-                    .then(data => {
-                        console.log("SJA_ID not defined. Searched successfully MusicInfoControllerModel.find")
-                        console.log("data.length: ", data.length);
-                        res.send(data);
-                    })
-                    .catch(error => { res.status(500).json(error); })
+                res.send(d);
             }
         })
         .catch(error => { res.status(500).json(error); })
