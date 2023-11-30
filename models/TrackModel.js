@@ -32,6 +32,9 @@ const trackSchema = new mongoose.Schema({
     trackCode: {
         type: String,
         require: true
+    },
+    SJA_ID:{
+        type: String,
     }
 })
 

@@ -1,30 +1,57 @@
+const mongoose = require('mongoose');
 const MusicInfoControllerModel = require("../models/TrackMetadataModel");
 const TrackModel = require("../models/TrackModel");
 
 
 module.exports.getTrackMetadata = async (req, res) => {
     console.log("---module.exports.getTrackMetadata--- req.headers:", req.headers);
-    console.log("req.query: ",req.query);
-    console.log("req.body: ",req.body);
-    console.log("req.params: ",req.params);
+    console.log("req.query: ", req.query);
+    console.log("req.body: ", req.body);
+    console.log("req.params: ", req.params);
 
     const { lognumber, user } = req.query;
-    console.log("lognumber: ",lognumber,", typeof lognumber: ",(typeof lognumber),", user: ", user)
+    console.log("lognumber: ", lognumber, ", typeof lognumber: ", (typeof lognumber), ", user: ", user)
 
-    MusicInfoControllerModel.find({lognumber:lognumber})
-        .then(data =>{
+    MusicInfoControllerModel.find({ lognumber: lognumber })
+        .then(data => {
             console.log("Searched successfully MusicInfoControllerModel.find")
             console.log("data.length: ", data.length);
             res.send(data);
         })
-        .catch(error=>{res.status(500).json(error);})
-  };
+        .catch(error => { res.status(500).json(error); })
+};
 
 
-  module.exports.getTrackMetaFromNoteId = async (req, res) => {
-    console.log("---module.exports.getTrackMetaFromNoteId");
-    // TODO!
-  }
+module.exports.getTrackMetaFromNoteId = async (req, res) => {
+    console.log("---module.exports.getTrackMetaFromNoteId ");
+    console.log("req.query: ", req.query);
+    const { idTrack } = req.query;
+    console.log("idTrack: ", idTrack);
+    TrackModel.find({ _id: new mongoose.Types.ObjectId(idTrack) })
+        .then(d => {
+            console.log("found a note. d: ", d);
+            const noteObject = d[0];
+            // then look if there is SJA_ID and use it. Otherwise, use lognumber.
+            if (noteObject.SJA_ID) {
+                MusicInfoControllerModel.find({ SJA_ID: noteObject.SJA_ID })
+                    .then(data => {
+                        console.log("SJA_ID defined. Searched successfully MusicInfoControllerModel.find")
+                        console.log("data.length: ", data.length);
+                        res.send(data);
+                    })
+                    .catch(error => { res.status(500).json(error); })
+            } else {
+                MusicInfoControllerModel.find({ lognumber: noteObject.lognumber })
+                    .then(data => {
+                        console.log("SJA_ID not defined. Searched successfully MusicInfoControllerModel.find")
+                        console.log("data.length: ", data.length);
+                        res.send(data);
+                    })
+                    .catch(error => { res.status(500).json(error); })
+            }
+        })
+        .catch(error => { res.status(500).json(error); })
+}
 
 module.exports.getTracksMetadata = async (req, res) => {
     console.log("---module.exports.getTracksMetadata");
@@ -33,7 +60,7 @@ module.exports.getTracksMetadata = async (req, res) => {
     // console.log("req.body: ", req.body);
     // Removing doublons from lognumbers
     const lognumbers = [...new Set(req.query.lognumbers)];
-    console.log("~~ At ", (new Date()), "\n# is: ", lognumbers.length, ", lognumbers: ", lognumbers);
+    // console.log("~~ At ", (new Date()), "\n# is: ", lognumbers.length, ", lognumbers: ", lognumbers);
     // { $in: lognumbers} 
     // {lognumber: { $regex: `^${lognumbers}_.{2}$`} } 
     // We need to change the way we make our selection for SJA. 
@@ -44,27 +71,13 @@ module.exports.getTracksMetadata = async (req, res) => {
         .then(data => {
             console.log("Searched successfully MusicInfoControllerModel.find")
             console.log("data.length: ", data.length);
-            console.log("data[0]: ", data[0]);
-            if (res) {
-                console.log("res MusicInfoControllerModel if 1");
-                res.send(data);
-            } else {
-                console.log("res MusicInfoControllerModel if 2");
-                return data;
-            }
+            // console.log("data[0]: ", data[0]);
+            if (res) { res.send(data); }
+            else { return data; }
         })
         .catch(error => { res.status(500).json(error); })
 }  
 
-// // New approach with a Promise 
-// module.exports.getTracksMetadata = async (req, res) => {
-//     const lognumbers = [...new Set(req.query.lognumbers)];    
-//     return new Promise((resolve, reject) => {
-//         MusicInfoControllerModel.find({ lognumber: { $in: lognumbers } })
-//             .then(data => { console.log("Searched successfully MusicInfoControllerModel.find"); console.log("data.length: ", data.length); console.log("data[0]: ", data[0]); resolve(data); })
-//             .catch(error => { reject(error); });
-//     });
-// }
 
 module.exports.get_idContent_recording = async (req, res) => {
     const { _id, typeCaller, indexRange } = req.query;

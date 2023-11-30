@@ -5,6 +5,7 @@ module.exports.addAnnotation = async (req, res) => {
     console.log("---module.exports.addAnnotation--- req.body:", req.body);
     const { type, info, indexAnnotation, annotationInput, author, privacy, time, idCaller } = req.body;
 
+    
     // TODO idCaller is problematic. If the type is a recording or track, idCaller is the _id of the note
     // if (type === "recording" || type === "track") {
         /** First get the content... 

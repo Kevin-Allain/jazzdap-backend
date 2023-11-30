@@ -9,7 +9,14 @@ const {
 } = require('../controllers/TrackController')
 const { getListFuzzyScores, getAllFuzzyScores, getListFuzzyDist } = require('../controllers/Fuzzy_scoreController')
 const { getFuzzyLevenshtein } = require('../controllers/CombinedDataController')
-const { getTrackMetadata, getTracksMetadata, get_idContent_recording, get_idContent_track, getMetadataFromAttribute, getTrackMetaFromNoteId } = require('../controllers/MusicInfoController')
+const { 
+    getTrackMetadata,
+    getTrackMetaFromNoteId,
+    getTracksMetadata,
+    get_idContent_recording,
+    get_idContent_track,
+    getMetadataFromAttribute,
+} = require('../controllers/MusicInfoController')
 const {loginTest, loginUser, registerUser} = require ('../controllers/AuthController')
 const {addAnnotation, getAnnotations, deleteAnnotation, updateAnnotation, get_idContent_annotation } = require ('../controllers/AnnotationController')
 const {addComment, getComments, getCommentsOfAnnotation, deleteComment, updateComment,get_idContent_comment} = require ('../controllers/CommentController')
@@ -46,8 +53,8 @@ router.get('/getMatchFuzzy',getMatchFuzzy)
 // Metadatda
 router.get('/getTracksMetadata', getTracksMetadata )
 router.get('/getTrackMetadata', getTrackMetadata)
-router.get('./getMetadataFromAttribute',getMetadataFromAttribute)
-router.get('./getTrackMetaFromNoteId',getTrackMetaFromNoteId)
+router.get('/getMetadataFromAttribute',getMetadataFromAttribute)
+router.get('/getTrackMetaFromNoteId',getTrackMetaFromNoteId)
 
 // Annotations
 router.post('/addAnnotation', addAnnotation )
@@ -95,6 +102,6 @@ router.get('/getFuzzyLevenshtein',getFuzzyLevenshtein);
 
 // SearchMap
 router.get('/getSearchMap',getSearchMap);
-router.post('./createSearchMap',createSearchMap);
+router.post('/createSearchMap',createSearchMap);
 
 module.exports = router;
