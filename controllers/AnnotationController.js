@@ -5,14 +5,6 @@ module.exports.addAnnotation = async (req, res) => {
     console.log("---module.exports.addAnnotation--- req.body:", req.body);
     const { type, info, indexAnnotation, annotationInput, author, privacy, time, idCaller } = req.body;
 
-    
-    // TODO idCaller is problematic. If the type is a recording or track, idCaller is the _id of the note
-    // if (type === "recording" || type === "track") {
-        /** First get the content... 
-         * (Should we make the hypothesis that the _id is going to be the correct one...?! 
-         * OR should we make the call before so that we have a reliable direct element... Probably.)
-         * */ 
-    // } else {
         AnnotationModel.create({
             type: type,
             info: info,
@@ -38,31 +30,38 @@ module.exports.addAnnotation = async (req, res) => {
 module.exports.getAnnotations = async (req, res) => {
     console.log("---module.exports.getAnnotations--- req.query:", req.query);
     const { type, info, indexAnnotation, idCaller, user } = req.query;
-
     console.log("---- idCaller: ",idCaller);
-    // In the case of a type recording or track, this is the _id of a note. Need to get the _id of the metadata. Then search based on it. (Logic sohuld be applied everywhere)
-
     console.log('user: ', user,', (typeof user): ', (typeof user));
-    const queryCondition = {
-        type: type,
-        info: info,
-        indexAnnotation: parseInt(indexAnnotation),
-        $or: [
-            { privacy: 'public'},
-            { author: user }
-        ]
-        // privacy: 'private',
-        // author: user
-    };
+    let queryCondition;
+    if (idCaller) {
+        // If idCaller is not null
+        queryCondition = {
+          $and: [
+            { type: type },
+            // { info: info },
+            { objectId: idCaller },
+            { $or: [{ privacy: "public" }, { author: user }] },
+          ],
+        };
+    } else {
+        queryCondition = {
+          $and: [
+            { type: type },
+            { info: info },
+            { $or: [{ privacy: "public" }, { author: user }] },
+          ],
+        };
+    }
 
-    // TODO assess with tests if approach correct
     AnnotationModel.find(queryCondition)
-        .then(data => {
-            console.log("Searched successfully AnnotationModel.find")
-            console.log("data.length: ", data.length);
-            res.send(data);
-        })
-        .catch(error => { res.status(500).json(error); })
+      .then((data) => {
+        console.log("Searched successfully AnnotationModel.find");
+        console.log("data.length: ", data.length);
+        res.send(data);
+      })
+      .catch((error) => {
+        res.status(500).json(error);
+      });
 };
 
 
