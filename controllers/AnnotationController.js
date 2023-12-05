@@ -33,23 +33,33 @@ module.exports.getAnnotations = async (req, res) => {
     console.log("---- idCaller: ",idCaller);
     console.log('user: ', user,', (typeof user): ', (typeof user));
     let queryCondition;
-    if (idCaller) {
+    if (type === "recording") {
+        // for recording, info is the lognumber
+        queryCondition = {
+            $and: [
+                { type: type },
+                { info: info },
+                // { objectId: idCaller },
+                { $or: [{ privacy: "public" }, { author: user }] },
+            ],
+        };
+    } else if (idCaller) {
         // If idCaller is not null
         queryCondition = {
-          $and: [
-            { type: type },
-            // { info: info },
-            { objectId: idCaller },
-            { $or: [{ privacy: "public" }, { author: user }] },
-          ],
+            $and: [
+                { type: type },
+                { objectId: idCaller },
+                { $or: [{ privacy: "public" }, { author: user }] },
+            ],
         };
     } else {
+        // fundamentally we should never have this case...
         queryCondition = {
-          $and: [
-            { type: type },
-            { info: info },
-            { $or: [{ privacy: "public" }, { author: user }] },
-          ],
+            $and: [
+                { type: type },
+                { info: info },
+                { $or: [{ privacy: "public" }, { author: user }] },
+            ],
         };
     }
 
