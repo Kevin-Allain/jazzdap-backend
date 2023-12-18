@@ -19,7 +19,7 @@ mongoose
         useUnifiedTopology: true
     })
     .then(() => {
-        console.log(`Connected to MongoDB`);
+        console.log(`Connected to MongoDB. Port: ${PORT}`);
         // initial();        
     })
     .catch((err) => {console.log(`Error: `,err)})

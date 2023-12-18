@@ -188,3 +188,16 @@ module.exports.getMetadataFromAttributes = async (req, res) => {
             res.status(500).json(error);
         });
 };
+
+module.exports.testMetadata = async (req, res) => {
+  const sjaIdTest = "SJA_AC_A0007_N0020_E0023_Y14031957_07";
+  const queryCondition = { SJA_ID: sjaIdTest };
+  MusicInfoControllerModel.find().then((data) => {
+    console.log("Found the data: ", data);
+    res.send(data);
+  })
+  .catch(error =>{
+    console.log("Error still");
+    res.status(500).json(error);
+  })
+};

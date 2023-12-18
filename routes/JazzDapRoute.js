@@ -16,6 +16,7 @@ const {
     get_idContent_recording,
     get_idContent_track,
     getMetadataFromAttribute,
+    testMetadata
 } = require('../controllers/MusicInfoController')
 const {loginTest, loginUser, registerUser} = require ('../controllers/AuthController')
 const {addAnnotation, getAnnotations, deleteAnnotation, updateAnnotation, get_idContent_annotation } = require ('../controllers/AnnotationController')
@@ -55,6 +56,7 @@ router.get('/getTracksMetadata', getTracksMetadata )
 router.get('/getTrackMetadata', getTrackMetadata)
 router.get('/getMetadataFromAttribute',getMetadataFromAttribute)
 router.get('/getTrackMetaFromNoteId',getTrackMetaFromNoteId)
+router.get('/testMetadata',testMetadata);
 
 // Annotations
 router.post('/addAnnotation', addAnnotation )
