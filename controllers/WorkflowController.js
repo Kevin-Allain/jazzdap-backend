@@ -147,7 +147,7 @@ module.exports.getWorkflow = async (req, res) => {
 // - time?
 // - contains a certain recording, track, sample
 module.exports.getWorkflowsInfo = async (req, res) => {
-    console.log("---module.exports.getWorkflowsInfo--- req.query:", req.query);
+    console.log("---module.exports.getWorkflowsInfo--- req.query:", req.query,", at ",new Date());
     const { 
         title, 
         time, 

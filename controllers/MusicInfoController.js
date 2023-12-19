@@ -197,7 +197,7 @@ module.exports.testMetadata = async (req, res) => {
     res.send(data);
   })
   .catch(error =>{
-    console.log("Error still");
+    console.log("Error still in testMetadata");
     res.status(500).json(error);
   })
 };

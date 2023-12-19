@@ -2,7 +2,7 @@ const AnnotationModel = require("../models/AnnotationModel");
 
 
 module.exports.getUserAnnotations = async (req, res) => {
-    console.log("---module.exports.getUserAnnotations--- req.query:", req.query);
+    console.log("---module.exports.getUserAnnotations--- req.query:", req.query,", at ",new Date());
     const { user } = req.query;
 
     console.log('user: ', user,', (typeof user): ', (typeof user));
