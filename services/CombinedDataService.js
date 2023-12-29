@@ -110,13 +110,8 @@ const calcLevenshteinDistance_int_optimistic = (arrInput1, arrInput2) => {
   );
 };
 
-// const getFuzzyScores = async (score, distance, lognumbersFilter=[]) => {
-//   let query = {}; query[`fuzzyRange${distance}`] = score;
-//   // Return the promise from the find method
-//   return Fuzzy_scoreModel.find(query);
-// };
 const getFuzzyScores = async (score, distance, lognumbersFilter=[]) => {
-  console.log("-- getFuzzyScores. score: ",score,", distance: ",distance,", lognumbersFilter: ",lognumbersFilter);
+  console.log("- Christmas - getFuzzyScores. score: ",score,", distance: ",distance,", lognumbersFilter: ",lognumbersFilter);
   let query = {};
   if (lognumbersFilter.length > 0) {
     query.lognumber = { $in: lognumbersFilter };
@@ -127,13 +122,27 @@ const getFuzzyScores = async (score, distance, lognumbersFilter=[]) => {
     .sort({lognumber: 1})
 };
 
-const getTracksFromFirstId = async (arrIds) => {
+// const getTracks_From_firstId_range = async (first_id,range) => {
+//   TrackModel.find({
+//     _id: first_id,
+//   })
+//   .then(data => {
+//     // Based on the data of the returned item, get all the track documents that are with same:
+//     // lognumber
+//     // track
+//     // m_id equal to this data object m_id and m_id+range
+
+//   });
+// };
+
+const getTracks_From_ArrayIds = async (arrIds) => {
   return TrackModel.find({
     _id: {
       $in: arrIds,
     },
   });
 };
+
 
 const getMelodiesFromTrackId = async (data, lengthSearch) => {
   const batchSize = 100; // Set an appropriate batch size
@@ -156,41 +165,63 @@ const getMelodiesFromTrackId = async (data, lengthSearch) => {
   return results;
 };
 
-// const getMelodiesFromFuzzyScores = async ( fuzzyScores, distance ) => {
-//   console.log("getMelodiesFromFuzzyScores - fuzzyScores length: ",fuzzyScores.length,", distance: ",distance);
-//   let idRanges = [];
-//   for (var i in fuzzyScores) {
-//     for (var n = 0; n < distance; n++) {
-//       idRanges.push(fuzzyScores[i][`_idRange${n}`]);
-//     }
-//   }
-//   console.log("idRanges.length: ", idRanges.length);
-//   const uniqueIdRanges = [...new Set(idRanges)];
-//   console.log("uniqueIdRanges.length: ",uniqueIdRanges.length);
-//   const matchingTracks = await TrackModel.find({
-//     "_id": { "$in": idRanges }
-//   });
-//   console.log("matchingTracks.length: ",matchingTracks.length);
-//   // TODO make new array where, for each item of idRanges, I make a copy of the matchingTracks item with the matching _id attribute
-//   return matchingTracks;
-// }
-
+// TODO make a version without using _idRange: make query to backend to get those idRanges
 const getMelodiesFromFuzzyScores = async (fuzzyScores, distance) => {
   console.log( "getMelodiesFromFuzzyScores - fuzzyScores length: ", fuzzyScores.length, ", distance: ", distance );
+  console.log("- Christmas - fuzzyScores[0]: ",fuzzyScores[0]);
   let idRanges = [];
-  // TODO we need verifications if the scores are not -20
+  let indexes_m_id = {};
   for (let i in fuzzyScores) {
+    indexes_m_id[fuzzyScores[i].first_id] = [];
     for (let n = 1; n <  Math.min(15,distance+1) ; n++) {
       fuzzyScores[i][`_idRange${n}`]
         ? fuzzyScores[i][`_idRange${n}`]!==-20
           ?idRanges.push(fuzzyScores[i][`_idRange${n}`])
           :null
         : console.log( "An undefined fuzzyScores[i][`_idRange${n}`]. fuzzyScores[", i, "], with n: ",n," - ", fuzzyScores[i] );
+
+      typeof (fuzzyScores[i][`fuzzyRange${n}`]) !== "undefined"
+        ? fuzzyScores[i][`fuzzyRange${n}`] !== -20
+          ? indexes_m_id[fuzzyScores[i].first_id]
+            .push(n) // to be used later for call to get the _id based on m_id + info of fuzzyScores[i]
+          : null
+        : console.log("An undefined fuzzyScores[i][`fuzzyRange${n}`]. fuzzyScores[", i, "], with n: ", n, " - ", fuzzyScores[i]);          
     }
   }
+  let allFirstIds = fuzzyScores.map(a => a.first_id);
+  console.log("idRanges[0]: ",idRanges[0]);
   console.log("idRanges.length: ", idRanges.length);
-  const filteredIdRanges = idRanges.filter(a => a);
-  console.log("filteredIdRanges.length: ",filteredIdRanges.length);
+  console.log("indexes_m_id[fuzzyScores[0].first_id]: ",indexes_m_id[fuzzyScores[0].first_id]);
+  console.log("indexes_m_id[fuzzyScores[fuzzyScores.length-1].first_id]: ",indexes_m_id[fuzzyScores[fuzzyScores.length-1].first_id]);
+  
+  let justFirstIds = await TrackModel
+    .find({ "_id": { "$in": [...allFirstIds] } })
+  console.log("justFirstIds.length: ",justFirstIds.length);
+  console.log("justFirstIds[0]: ",justFirstIds[0]);
+
+  console.log("time: ",new Date());
+  // Technically but takes really long!!! About 50 seconds!
+  let trackDocFromFirstIds = await TrackModel.find({ '_id': { $in: justFirstIds } })
+  .then(data => {
+    console.log("inside the then. time: ",new Date());
+    // For every data, get the elements that share its track attribute,
+    // and have m_id between its value and m_id+range
+    const promises = data.map(item => {
+      return TrackModel.find({
+        track: item.track,
+        m_id: { $gte: item.m_id, $lte: item.m_id + distance }
+      });
+    });
+    // Use Promise.all to wait for all queries to complete
+    return Promise.all(promises);
+  })
+  console.log("trackDocFromFirstIds length: ",trackDocFromFirstIds.length)
+  console.log("time: ",new Date());
+
+  // Christmas test
+  // const filteredIdRanges = idRanges.filter(a => a);
+  const filteredIdRanges = trackDocFromFirstIds.filter(a=>a);
+  console.log("~Critical Christmas: For cloud: changed filteredIdRanges. Its length: ",filteredIdRanges.length);
 
   // Create a set of unique IDs from idRanges
   const uniqueIdRanges = [...new Set(idRanges)];
@@ -199,7 +230,8 @@ const getMelodiesFromFuzzyScores = async (fuzzyScores, distance) => {
   console.log("filteredUniqueIdRanges.length: ", filteredUniqueIdRanges.length);
 
   // Fetch matching tracks from the database based on unique IDs
-  const matchingTracks = await TrackModel.find({ "_id": { "$in": [...uniqueIdRanges] } });  
+  const matchingTracks = await TrackModel
+    .find({ "_id": { "$in": [...uniqueIdRanges] } });
   console.log("matchingTracks.length: ", matchingTracks.length);
 
   // Create a lookup object for matching tracks based on their _id attribute
@@ -210,67 +242,24 @@ const getMelodiesFromFuzzyScores = async (fuzzyScores, distance) => {
   console.log("generated trackLookup");
 
   // Create an array for looking up tracks based on their _id attribute
-  const trackLookupArray = Array.from(matchingTracks, track => ({ id: track._id.toHexString(), track }));
+  const trackLookupArray = Array.from(matchingTracks, 
+    track => ({ id: track._id.toHexString(), track })
+  );
   console.log("trackLookupArray.length: ",trackLookupArray.length);
   console.log("trackLookupArray[0]: ",trackLookupArray[0]);
 
   // Map idRanges to the corresponding tracks using the lookup object
-  // const resultTracks = idRanges.map((idRange) =>
-  //   trackLookup[idRange]
-  //     ? trackLookup[idRange]
-  //     : console.log("no match for ", idRange)
-  // );
   const resultTracks = idRanges.map((idRange) => trackLookup[idRange] );
 
   console.log("resultTracks.length: ",resultTracks.length);
   // Filter out undefined elements
   const filteredResultTracks = resultTracks.filter(track => track);
 
-
   console.log("filteredResultTracks.length: ", filteredResultTracks.length);
   return filteredResultTracks;
 };
 
-// -- approach with a loop (stupid slow)
-// const getMelodiesFromFuzzyScores = async (fuzzyScores, distance) => {
-//   console.log("getMelodiesFromFuzzyScores - fuzzyScores length: ", fuzzyScores.length, ", distance: ", distance);
-//   let idRanges = [];
-//   for (let i in fuzzyScores) {
-//     for (let n = 0; n < distance; n++) { idRanges.push(fuzzyScores[i][`_idRange${n}`]); }
-//   }
-//   console.log("idRanges.length: ", idRanges.length);
-//   const uniqueIdRanges = [...new Set(idRanges)];
-//   console.log("uniqueIdRanges.length: ", uniqueIdRanges.length);
-//   const matchingTracks = await TrackModel.find({
-//     "_id": { "$in": uniqueIdRanges }
-//   });
-//   console.log("matchingTracks.length: ", matchingTracks.length);
-//   console.log("matchingTracks[0]: ",matchingTracks[0]);
-//   console.log("matchingTracks[0]._id: ",matchingTracks[0]._id);
-//   console.log("matchingTracks[0]._id.toHexString(): ", matchingTracks[0]._id.toHexString())
-//   // Create a new array where each item from idRanges corresponds to a copy of the matching track
-//   const resultTracks = [];
-//   for (let i = 0; i < idRanges.length; i++) {
-//     const idRange = idRanges[i];
-//     const objMatch = matchingTracks.filter(track => String(track._id.toHexString()) === String(idRange));
-//     if (i <3 ){
-//       console.log("idRange: ",idRange);
-//       console.log("objMatch: ",objMatch);
-//     }
-//     if (objMatch) {
-//       // resultTracks.push({ ...matchingTrack.toObject() }); // Create a copy of the matching track
-//       resultTracks.push(objMatch);
-//     }
-//     if (i <3 ){
-//       console.log("resultTracks[i]: ",resultTracks[i]);
-//     }
-//     if (i%333===0){
-//       console.log(i," out of ",idRanges.length);
-//     }
-//   }
-//   console.log("resultTracks.length: ", resultTracks.length);
-//   return resultTracks;
-// };
+
 
 const getMetadataFromAttributes = async (attributeNameArray,attributeValueArray) => {
   // Ensure both arrays have the same length
@@ -332,7 +321,7 @@ module.exports = {
   map_to_fuzzy_score,
   calculateIntervalSum,
   getFuzzyScores,
-  getTracksFromFirstId,
+  getTracks_From_ArrayIds,
   getMelodiesFromTrackId,
   getMetadataFromAttributes,
   getMelodiesFromFuzzyScores,

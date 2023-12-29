@@ -46,10 +46,13 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
       }
 
       // TODO still SLOW (but a bit better with applied filter)
-      let fuzzyScores = await CombinedDataService.getFuzzyScores(score, distance, lognumbersFilter);
+      // Christmas Critical WIP
+      let fuzzyScores = await CombinedDataService
+        .getFuzzyScores(score, distance, lognumbersFilter);
 
       // Now fuzzyScores will contain the resolved data
       console.log("Got the fuzzyScores. Its length: ", fuzzyScores.length); // Manually checked without filter and it is fine
+      console.log("fuzzyScores[0]: ",fuzzyScores[0]);
       console.log("Time: ", new Date());
       // - Filter the results for tracks if there are filters set by user
       if (textFilterTrack !== "") {
@@ -73,15 +76,18 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
       let arrIds = fuzzyScores.map(a => a.first_id);
       console.log("arrIds.length: ", arrIds.length);
 
-      const dataTrack = await CombinedDataService.getTracksFromFirstId(arrIds);
+      // Christmas Critical WIP      
+      const dataTrack = await CombinedDataService
+        .getTracks_From_ArrayIds(arrIds);
       dataTrack ? console.log("dataTrack.length: ", dataTrack.length) : console.log("dataTrack undefined!");
       // dataTrack has the same length as fuzzyScores without filters
 
       // TODO Still kind of slow. Assess if it can be enhanced.
-      let arrTracksMelodies = await CombinedDataService.getMelodiesFromFuzzyScores(fuzzyScores, distance);
+      let arrTracksMelodies = await CombinedDataService
+        .getMelodiesFromFuzzyScores(fuzzyScores, distance);
       arrTracksMelodies ? console.log("arrTracksMelodies.length: ", arrTracksMelodies.length) : console.log("arrTracksMelodies undefined!");
       console.log("Time: ", new Date());
-      console.log("arrTracksMelodies[0]: ", arrTracksMelodies[0]);
+      console.log("~~~~ arrTracksMelodies[0]: ", arrTracksMelodies[0]);
 
       let filteredMelodies = arrTracksMelodies.filter(a => (typeof a) !== 'undefined');
       console.log("filteredMelodies.length: ", filteredMelodies.length);
@@ -118,8 +124,10 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
             _ids: sectionNotesObj.map(a => a._id),
           });
         } else {
+          // Christmas critical WIP
           const levenshteinDistance =
-            CombinedDataService.calcLevenshteinDistance_int_optimistic(sectionNotesObj.map((a) => a.pitch), notes_int);
+            CombinedDataService
+              .calcLevenshteinDistance_int_optimistic(sectionNotesObj.map((a) => a.pitch), notes_int);
           const dissimilarityPercentage = levenshteinDistance / notes_int.length;
 
           if (dissimilarityPercentage <= 1 - percMatch) {
