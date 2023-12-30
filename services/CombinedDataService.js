@@ -1,3 +1,6 @@
+const mongoose = require('mongoose')
+const ObjectId = require('mongodb').ObjectId;
+
 const Fuzzy_scoreModel = require("../models/Fuzzy_scoreModel");
 const TrackModel = require("../models/TrackModel");
 const TrackMetadataModel = require("../models/TrackMetadataModel");
@@ -31,6 +34,54 @@ const map_to_fuzzy_score=(score)=> {
   } else {
     return 4;
   }
+}
+
+//   const objectId = mongoose.Types.ObjectId(newId);
+
+// Get the next hex _id based on end of its string
+// Dirty but faster: limited to 3 strings end of the currentId for calculation
+const getNextIdLimited = (currentId, indexDiff) => {
+  // console.log(`getNextIdLimited. currentId: ${currentId}, indexDiff: ${indexDiff}`);
+  // Convert the hexadecimal end of the string to a base-10 number
+  let subStrStart = currentId.substring(0,currentId.length - 3);
+  let subStrEnd = currentId.substring(currentId.length - 3);
+  let decimalValue = parseInt( subStrEnd, 16);
+  decimalValue += indexDiff
+  let hexString = ""+decimalValue.toString(16);
+  if (hexString.length === 2){hexString = '0'+hexString;}
+  if (hexString.length === 1){hexString = '00'+hexString;}
+  if (hexString.length === 0){hexString = '000'} // minor doubt about this one
+  fullNewHex = subStrStart + hexString
+
+  let indexRecoil = 4;
+  while (fullNewHex.length === 25){
+    console.log("fullNewHex.length === 25");
+    subStrStart = currentId.substring(0,currentId.length - indexRecoil);
+    subStrEnd = currentId.substring(currentId.length - indexRecoil);
+    decimalValue = parseInt( subStrEnd, 16);
+    decimalValue += indexDiff
+    hexString = ""+decimalValue.toString(16);
+    fullNewHex = subStrStart + hexString;
+    indexRecoil++;
+  }
+
+  if (fullNewHex.length!=24){
+    console.log("---- Massive issue with: ",fullNewHex);
+    console.log("currentId: ",currentId);
+    console.log("subStrStart: ",subStrStart);
+    console.log("subStrEnd: ",subStrEnd);
+    console.log("currentId.length: ",currentId.length);
+    console.log("fullNewHex.length: ",fullNewHex.length);
+    console.log("hexString: ",hexString);
+    console.log("decimalValue: ",decimalValue);
+    console.log("indexDiff: ",indexDiff,", typeof indexDiff: ",typeof indexDiff);
+  }
+  return fullNewHex;
+
+  // Convert the full new hex string to ObjectId
+  // const objectId = mongoose.Types.ObjectId(fullNewHex);
+  // const objectId = mongoose.Types.ObjectId.createFromHexString(fullNewHex);
+  // return objectId;  
 }
 
 // This one might be useless
@@ -171,73 +222,80 @@ const getMelodiesFromFuzzyScores = async (fuzzyScores, distance) => {
   console.log("- Christmas - fuzzyScores[0]: ",fuzzyScores[0]);
   let idRanges = [];
   let indexes_m_id = {};
+  const maxRange = 10; // used to be from 1 to 15
   for (let i in fuzzyScores) {
     indexes_m_id[fuzzyScores[i].first_id] = [];
-    for (let n = 4; n <  Math.min(10,distance+1) ; n++) { // used to be 1 to 15
+    // CRITICAL CHRISTMAS : getting the _ids of next notes is really important for speed (and maybe then filter them if they don't have same... track?)
+    for (let n = 4; n <  Math.min(maxRange,distance+1) ; n++) {
+      idRanges.push(getNextIdLimited(fuzzyScores[i].first_id, n));
       // fuzzyScores[i][`_idRange${n}`]
       //   ? fuzzyScores[i][`_idRange${n}`]!==-20
       //     ?idRanges.push(fuzzyScores[i][`_idRange${n}`])
       //     :null
       //   : console.log( "An undefined fuzzyScores[i][`_idRange${n}`]. fuzzyScores[", i, "], with n: ",n," - ", fuzzyScores[i] );
 
-      typeof (fuzzyScores[i][`fuzzyRange${n}`]) !== "undefined"
-        ? fuzzyScores[i][`fuzzyRange${n}`] !== -20
-          ? indexes_m_id[fuzzyScores[i].first_id]
-            .push(n) // to be used later for call to get the _id based on m_id + info of fuzzyScores[i]
-          : null
-        : console.log("An undefined fuzzyScores[i][`fuzzyRange${n}`]. fuzzyScores[", i, "], with n: ", n, " - ", fuzzyScores[i]);          
+      // typeof (fuzzyScores[i][`fuzzyRange${n}`]) !== "undefined"
+      //   ? fuzzyScores[i][`fuzzyRange${n}`] !== -20
+      //     ? indexes_m_id[fuzzyScores[i].first_id]
+      //       .push(n) // to be used later for call to get the _id based on m_id + info of fuzzyScores[i]
+      //     : null
+      //   : console.log("An undefined fuzzyScores[i][`fuzzyRange${n}`]. fuzzyScores[", i, "], with n: ", n, " - ", fuzzyScores[i]);          
     }
   }
   let allFirstIds = fuzzyScores.map(a => a.first_id);
   console.log("idRanges[0]: ",idRanges[0]);
   console.log("idRanges.length: ", idRanges.length);
-  console.log("indexes_m_id[fuzzyScores[0].first_id]: ",indexes_m_id[fuzzyScores[0].first_id]);
-  console.log("indexes_m_id[fuzzyScores[fuzzyScores.length-1].first_id]: ",indexes_m_id[fuzzyScores[fuzzyScores.length-1].first_id]);
+  // console.log("indexes_m_id[fuzzyScores[0].first_id]: ",indexes_m_id[fuzzyScores[0].first_id]);
+  // console.log("indexes_m_id[fuzzyScores[fuzzyScores.length-1].first_id]: ",indexes_m_id[fuzzyScores[fuzzyScores.length-1].first_id]);
   
-  let justFirstIds = await TrackModel
-    .find({ "_id": { "$in": [...allFirstIds] } })
-  console.log("justFirstIds.length: ",justFirstIds.length);
-  console.log("justFirstIds[0]: ",justFirstIds[0]);
+  // let justFirstIds = await TrackModel
+  //   .find({ "_id": { "$in": [...allFirstIds] } })
+  // console.log("justFirstIds.length: ",justFirstIds.length);
+  // console.log("justFirstIds[0]: ",justFirstIds[0]);
+  // console.log("time: ",new Date());
+  // // Technically but takes really long!!! About 50 seconds!
+  // // Only works on local database?! WTH 4 mminutes!!!
+  // let trackDocFromFirstIds = await TrackModel.find({ '_id': { $in: justFirstIds } })
+  // .then(data => {
+  //   console.log("inside the then. time: ",new Date());
+  //   // For every data, get the elements that share its track attribute,
+  //   // and have m_id between its value and m_id+range
+  //   const promises = data.map(item => {
+  //     return TrackModel.find({
+  //       track: item.track,
+  //       m_id: { $gte: item.m_id, $lte: item.m_id + distance }
+  //     })
+  //     .then(result => ({ status: 'fulfilled', result }))
+  //     .catch(error => ({ status: 'rejected', error }));
+  //   });
+  //   // Use Promise.all to wait for all queries to complete
+  //   return Promise.all(promises);
+  // })
+  // console.log("trackDocFromFirstIds length: ",trackDocFromFirstIds.length)
+  // console.log("time after the requests: ",new Date());
 
-  console.log("time: ",new Date());
-  // Technically but takes really long!!! About 50 seconds!
-  // Only works on local database?! WTH 4 mminutes!!!
-  let trackDocFromFirstIds = await TrackModel.find({ '_id': { $in: justFirstIds } })
-  .then(data => {
-    console.log("inside the then. time: ",new Date());
-    // For every data, get the elements that share its track attribute,
-    // and have m_id between its value and m_id+range
-    const promises = data.map(item => {
-      return TrackModel.find({
-        track: item.track,
-        m_id: { $gte: item.m_id, $lte: item.m_id + distance }
-      })
-      .then(result => ({ status: 'fulfilled', result }))
-      .catch(error => ({ status: 'rejected', error }));
-    });
-    
-    // Use Promise.all to wait for all queries to complete
-    return Promise.all(promises);
-  })
-  console.log("trackDocFromFirstIds length: ",trackDocFromFirstIds.length)
-  console.log("time after the requests: ",new Date());
-
-  // Christmas test
-  // const filteredIdRanges = idRanges.filter(a => a);
-  const filteredIdRanges = trackDocFromFirstIds.filter(a=>a);
-  console.log("~Critical Christmas: For cloud: changed filteredIdRanges. Its length: ",filteredIdRanges.length);
+  // // Christmas test
+  // // const filteredIdRanges = idRanges.filter(a => a);
+  // const filteredIdRanges = trackDocFromFirstIds.filter(a=>a);
+  // console.log("~Critical Christmas: For cloud: changed filteredIdRanges. Its length: ",filteredIdRanges.length);
 
   // Create a set of unique IDs from idRanges
   const uniqueIdRanges = [...new Set(idRanges)];
   console.log("uniqueIdRanges.length: ", uniqueIdRanges.length);
   const filteredUniqueIdRanges = uniqueIdRanges.filter(a => a);
   console.log("filteredUniqueIdRanges.length: ", filteredUniqueIdRanges.length);
+  console.log("uniqueIdRanges[0]: ",uniqueIdRanges[0]);
 
+  // // Fetch matching tracks from the database based on unique IDs
+  // Convert string representations to ObjectId
+  const objectIdRanges = uniqueIdRanges.map(id => new ObjectId(id));
+  console.log("objectIdRanges[0]: ",objectIdRanges[0])
   // Fetch matching tracks from the database based on unique IDs
-  const matchingTracks = await TrackModel
-    .find({ "_id": { "$in": [...uniqueIdRanges] } });
+  const matchingTracks = await TrackModel.find({ "_id": { "$in": objectIdRanges } });
+  // const matchingTracks = await TrackModel
+  //   .find({ "_id": { "$in": [...uniqueIdRanges] } });
   console.log("matchingTracks.length: ", matchingTracks.length);
-
+  console.log("matchingTracks[0]: ",matchingTracks[0]);
   // Create a lookup object for matching tracks based on their _id attribute
   const trackLookup = {};
   matchingTracks.forEach(track => {
