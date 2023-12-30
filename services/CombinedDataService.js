@@ -173,12 +173,12 @@ const getMelodiesFromFuzzyScores = async (fuzzyScores, distance) => {
   let indexes_m_id = {};
   for (let i in fuzzyScores) {
     indexes_m_id[fuzzyScores[i].first_id] = [];
-    for (let n = 1; n <  Math.min(15,distance+1) ; n++) {
-      fuzzyScores[i][`_idRange${n}`]
-        ? fuzzyScores[i][`_idRange${n}`]!==-20
-          ?idRanges.push(fuzzyScores[i][`_idRange${n}`])
-          :null
-        : console.log( "An undefined fuzzyScores[i][`_idRange${n}`]. fuzzyScores[", i, "], with n: ",n," - ", fuzzyScores[i] );
+    for (let n = 4; n <  Math.min(10,distance+1) ; n++) { // used to be 1 to 15
+      // fuzzyScores[i][`_idRange${n}`]
+      //   ? fuzzyScores[i][`_idRange${n}`]!==-20
+      //     ?idRanges.push(fuzzyScores[i][`_idRange${n}`])
+      //     :null
+      //   : console.log( "An undefined fuzzyScores[i][`_idRange${n}`]. fuzzyScores[", i, "], with n: ",n," - ", fuzzyScores[i] );
 
       typeof (fuzzyScores[i][`fuzzyRange${n}`]) !== "undefined"
         ? fuzzyScores[i][`fuzzyRange${n}`] !== -20
@@ -201,6 +201,7 @@ const getMelodiesFromFuzzyScores = async (fuzzyScores, distance) => {
 
   console.log("time: ",new Date());
   // Technically but takes really long!!! About 50 seconds!
+  // Only works on local database?! WTH 4 mminutes!!!
   let trackDocFromFirstIds = await TrackModel.find({ '_id': { $in: justFirstIds } })
   .then(data => {
     console.log("inside the then. time: ",new Date());
@@ -210,13 +211,16 @@ const getMelodiesFromFuzzyScores = async (fuzzyScores, distance) => {
       return TrackModel.find({
         track: item.track,
         m_id: { $gte: item.m_id, $lte: item.m_id + distance }
-      });
+      })
+      .then(result => ({ status: 'fulfilled', result }))
+      .catch(error => ({ status: 'rejected', error }));
     });
+    
     // Use Promise.all to wait for all queries to complete
     return Promise.all(promises);
   })
   console.log("trackDocFromFirstIds length: ",trackDocFromFirstIds.length)
-  console.log("time: ",new Date());
+  console.log("time after the requests: ",new Date());
 
   // Christmas test
   // const filteredIdRanges = idRanges.filter(a => a);
