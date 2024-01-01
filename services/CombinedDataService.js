@@ -55,7 +55,7 @@ const getNextIdLimited = (currentId, indexDiff) => {
 
   let indexRecoil = 4;
   while (fullNewHex.length === 25){
-    console.log("fullNewHex.length === 25");
+    // console.log("fullNewHex.length === 25");
     subStrStart = currentId.substring(0,currentId.length - indexRecoil);
     subStrEnd = currentId.substring(currentId.length - indexRecoil);
     decimalValue = parseInt( subStrEnd, 16);
@@ -173,19 +173,6 @@ const getFuzzyScores = async (score, distance, lognumbersFilter=[]) => {
     .sort({lognumber: 1})
 };
 
-// const getTracks_From_firstId_range = async (first_id,range) => {
-//   TrackModel.find({
-//     _id: first_id,
-//   })
-//   .then(data => {
-//     // Based on the data of the returned item, get all the track documents that are with same:
-//     // lognumber
-//     // track
-//     // m_id equal to this data object m_id and m_id+range
-
-//   });
-// };
-
 const getTracks_From_ArrayIds = async (arrIds) => {
   return TrackModel.find({
     _id: {
@@ -193,7 +180,6 @@ const getTracks_From_ArrayIds = async (arrIds) => {
     },
   });
 };
-
 
 const getMelodiesFromTrackId = async (data, lengthSearch) => {
   const batchSize = 100; // Set an appropriate batch size
@@ -221,59 +207,45 @@ const getMelodiesFromFuzzyScores = async (fuzzyScores, distance) => {
   console.log( "getMelodiesFromFuzzyScores - fuzzyScores length: ", fuzzyScores.length, ", distance: ", distance );
   console.log("- Christmas - fuzzyScores[0]: ",fuzzyScores[0]);
   let idRanges = [];
-  let indexes_m_id = {};
+  // let indexes_m_id = {};
   const maxRange = 10; // used to be from 1 to 15
-  for (let i in fuzzyScores) {
-    indexes_m_id[fuzzyScores[i].first_id] = [];
-    // CRITICAL CHRISTMAS : getting the _ids of next notes is really important for speed (and maybe then filter them if they don't have same... track?)
-    for (let n = 4; n <  Math.min(maxRange,distance+1) ; n++) {
-      idRanges.push(getNextIdLimited(fuzzyScores[i].first_id, n));
-      // fuzzyScores[i][`_idRange${n}`]
-      //   ? fuzzyScores[i][`_idRange${n}`]!==-20
-      //     ?idRanges.push(fuzzyScores[i][`_idRange${n}`])
-      //     :null
-      //   : console.log( "An undefined fuzzyScores[i][`_idRange${n}`]. fuzzyScores[", i, "], with n: ",n," - ", fuzzyScores[i] );
-
-      // typeof (fuzzyScores[i][`fuzzyRange${n}`]) !== "undefined"
-      //   ? fuzzyScores[i][`fuzzyRange${n}`] !== -20
-      //     ? indexes_m_id[fuzzyScores[i].first_id]
-      //       .push(n) // to be used later for call to get the _id based on m_id + info of fuzzyScores[i]
-      //     : null
-      //   : console.log("An undefined fuzzyScores[i][`fuzzyRange${n}`]. fuzzyScores[", i, "], with n: ", n, " - ", fuzzyScores[i]);          
-    }
-  }
+  // for (let i in fuzzyScores) {
+  //   // indexes_m_id[fuzzyScores[i].first_id] = [];
+  //   // CRITICAL CHRISTMAS : getting the _ids of next notes is really important for speed (and maybe then filter them if they don't have same... track?)
+  //   // Why do we limit this to start at 4?!
+  //   for (let n = 4; n <  Math.min(maxRange,distance+1) ; n++) {
+  //     idRanges.push(getNextIdLimited(fuzzyScores[i].first_id, n));
+  //     // fuzzyScores[i][`_idRange${n}`]
+  //     //   ? fuzzyScores[i][`_idRange${n}`]!==-20
+  //     //     ?idRanges.push(fuzzyScores[i][`_idRange${n}`])
+  //     //     :null
+  //     //   : console.log( "An undefined fuzzyScores[i][`_idRange${n}`]. fuzzyScores[", i, "], with n: ",n," - ", fuzzyScores[i] );
+  //   }
+  // }
   let allFirstIds = fuzzyScores.map(a => a.first_id);
-  console.log("idRanges[0]: ",idRanges[0]);
+  console.log("allfirstIds 0 to 10: ",allFirstIds.slice(0,10));
+  let mapFirstIdToNext = {};
+  let orderedAllIds = [];
+  for (let n=0; n <maxRange; n++){
+    allFirstIds.map(a => idRanges.push(getNextIdLimited(a, n)) );
+    // Trying to see if it works with setting next ids for each first_id
+    // TODO test
+    allFirstIds.map( a => 
+      mapFirstIdToNext[a]
+      ? mapFirstIdToNext[a].push(getNextIdLimited(a, n))
+      : mapFirstIdToNext[a] = [getNextIdLimited(a, n)]);
+  }
+  console.log("# idRanges 0 to 10: ",idRanges.slice(0,10));
+  for (let i=0; i<10;i++){
+    console.log("for ",allFirstIds[i],": ",mapFirstIdToNext[allFirstIds[i]]);
+    // So this one is actually fine.
+  }
+  for(let i in mapFirstIdToNext){
+    orderedAllIds.push(...mapFirstIdToNext[i]);
+  }
   console.log("idRanges.length: ", idRanges.length);
-  // console.log("indexes_m_id[fuzzyScores[0].first_id]: ",indexes_m_id[fuzzyScores[0].first_id]);
-  // console.log("indexes_m_id[fuzzyScores[fuzzyScores.length-1].first_id]: ",indexes_m_id[fuzzyScores[fuzzyScores.length-1].first_id]);
-  
-  // let justFirstIds = await TrackModel
-  //   .find({ "_id": { "$in": [...allFirstIds] } })
-  // console.log("justFirstIds.length: ",justFirstIds.length);
-  // console.log("justFirstIds[0]: ",justFirstIds[0]);
-  // console.log("time: ",new Date());
-  // // Technically but takes really long!!! About 50 seconds!
-  // // Only works on local database?! WTH 4 mminutes!!!
-  // let trackDocFromFirstIds = await TrackModel.find({ '_id': { $in: justFirstIds } })
-  // .then(data => {
-  //   console.log("inside the then. time: ",new Date());
-  //   // For every data, get the elements that share its track attribute,
-  //   // and have m_id between its value and m_id+range
-  //   const promises = data.map(item => {
-  //     return TrackModel.find({
-  //       track: item.track,
-  //       m_id: { $gte: item.m_id, $lte: item.m_id + distance }
-  //     })
-  //     .then(result => ({ status: 'fulfilled', result }))
-  //     .catch(error => ({ status: 'rejected', error }));
-  //   });
-  //   // Use Promise.all to wait for all queries to complete
-  //   return Promise.all(promises);
-  // })
-  // console.log("trackDocFromFirstIds length: ",trackDocFromFirstIds.length)
-  // console.log("time after the requests: ",new Date());
-
+  console.log("With change: orderedAllIds.length", orderedAllIds.length);
+  idRanges = orderedAllIds;
   // // Christmas test
   // // const filteredIdRanges = idRanges.filter(a => a);
   // const filteredIdRanges = trackDocFromFirstIds.filter(a=>a);
@@ -291,7 +263,9 @@ const getMelodiesFromFuzzyScores = async (fuzzyScores, distance) => {
   const objectIdRanges = uniqueIdRanges.map(id => new ObjectId(id));
   console.log("objectIdRanges[0]: ",objectIdRanges[0])
   // Fetch matching tracks from the database based on unique IDs
-  const matchingTracks = await TrackModel.find({ "_id": { "$in": objectIdRanges } });
+  const matchingTracks = await TrackModel
+    .find({ "_id": { "$in": objectIdRanges } });
+
   // const matchingTracks = await TrackModel
   //   .find({ "_id": { "$in": [...uniqueIdRanges] } });
   console.log("matchingTracks.length: ", matchingTracks.length);
@@ -317,6 +291,7 @@ const getMelodiesFromFuzzyScores = async (fuzzyScores, distance) => {
   // Filter out undefined elements
   const filteredResultTracks = resultTracks.filter(track => track);
 
+  console.log("filteredResultTracks[0]: ",filteredResultTracks[0]);
   console.log("filteredResultTracks.length: ", filteredResultTracks.length);
   return filteredResultTracks;
 };

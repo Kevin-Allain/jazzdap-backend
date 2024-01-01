@@ -76,7 +76,7 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
       let arrIds = fuzzyScores.map(a => a.first_id);
       console.log("arrIds.length: ", arrIds.length);
 
-      // Christmas Critical WIP      
+      // Christmas Critical WIP
       const dataTrack = await CombinedDataService
         .getTracks_From_ArrayIds(arrIds);
       dataTrack ? console.log("dataTrack.length: ", dataTrack.length) : console.log("dataTrack undefined!");
@@ -87,7 +87,8 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
         .getMelodiesFromFuzzyScores(fuzzyScores, distance);
       arrTracksMelodies ? console.log("arrTracksMelodies.length: ", arrTracksMelodies.length) : console.log("arrTracksMelodies undefined!");
       console.log("Time: ", new Date());
-      console.log("~~~~ arrTracksMelodies[0]: ", arrTracksMelodies[0]);
+      console.log("~~~~ arrTracksMelodies to 10 ", arrTracksMelodies.splice(0,10));
+      // console.log("~~~~ arrTracksMelodies: ",arrTracksMelodies)
 
       let filteredMelodies = arrTracksMelodies.filter(a => (typeof a) !== 'undefined');
       console.log("filteredMelodies.length: ", filteredMelodies.length);
