@@ -297,12 +297,18 @@ const getMelodiesFromFuzzyScores = async (fuzzyScores, distance) => {
 };
 
 
-// WIP
+// WIP: additions for the other filters
 const getMetadataFromAttributes = async (attributeNameArray,attributeValueArray) => {
   // Ensure both arrays have the same length
   if (!Array.isArray(attributeValueArray) || !Array.isArray(attributeNameArray) || attributeValueArray.length !== attributeNameArray.length) { return res.status(400).json({ error: "Invalid input arrays" }); }
   // Mapping attribute values to their replacements
-  const attributeNameMap = { 'artist': '(N) Named Artist(s)', 'recording': '(E) Event Name', 'track': 'Track Title', "location":"Location" };
+  const attributeNameMap = {
+    'artist': '(N) Named Artist(s)',
+    'recording': '(E) Event Name',
+    'track': 'Track Title',
+    "location": "Location",
+    "producer": "Producer",
+  };
   // Replace values in attributeValueArray based on the mapping
   const sanitizedAttributeNameArray = attributeNameArray.map(n => attributeNameMap[n] || n);
   // console.log("sanitizedAttributeNameArray: ",sanitizedAttributeNameArray);
@@ -320,8 +326,8 @@ const getMetadataFromAttributes = async (attributeNameArray,attributeValueArray)
   return(resultsMeta);
   };
 
-const createSearchMap = async (query, filterArtist, filterRecording, filterTrack, filterLocations, percMatch, levenshteinScores) => {
-  console.log("---createSearchMap. ",{query, filterArtist, filterRecording, filterTrack, filterLocations, percMatch});
+const createSearchMap = async (query, filterArtist, filterRecording, filterTrack, filterLocations, filterProducers, percMatch, levenshteinScores) => {
+  console.log("---createSearchMap. ",{query, filterArtist, filterRecording, filterTrack, filterLocations, filterProducers, percMatch});
   // TODO first make a search! THEN if no match, create one
   const data = await SearchMapModel.create({
     query: query,
@@ -329,6 +335,7 @@ const createSearchMap = async (query, filterArtist, filterRecording, filterTrack
     filterRecording: filterRecording,
     filterTrack: filterTrack,
     filterLocations: filterLocations,
+    filterProducers: filterProducers,
     percMatch: percMatch,
     levenshteinScores: levenshteinScores
   });
@@ -340,9 +347,10 @@ const getSearchMap = async (
   filterRecording,
   filterTrack,
   filterLocations,
+  filterProducers,
   percMatch
 ) => {
-  console.log("getSearchMap. ", { query, filterArtist, filterRecording, filterTrack, filterLocations, percMatch });
+  console.log("getSearchMap. ", { query, filterArtist, filterRecording, filterTrack, filterLocations, filterProducers, percMatch });
   let queryRes = {
     query: query,
     percMatch: Number(percMatch),
@@ -350,6 +358,7 @@ const getSearchMap = async (
     filterRecording: filterRecording,
     filterTrack: filterTrack,
     filterLocations: filterLocations,
+    filterProducers: filterProducers, 
   };
   console.log("queryRes: ", queryRes);
   let matchingSearchMap = await SearchMapModel.find(queryRes);

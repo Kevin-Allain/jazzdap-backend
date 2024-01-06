@@ -28,6 +28,10 @@ const searchMapSchema = new mongoose.Schema({
         type: String,
         require: true
     },
+    filterProducers: {
+        type: String,
+        require: true
+    },    
     percMatch: {
         type: Number,
         require:true

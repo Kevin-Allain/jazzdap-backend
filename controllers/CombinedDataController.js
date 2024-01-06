@@ -10,14 +10,14 @@ const cacheDisregarded = new NodeCache({ stdTTL: 60 * 60 }); // Cache with a TTL
 
 module.exports.getFuzzyLevenshtein = async (req, res) => {
   console.log("---- getFuzzyLevenshtein ---- req.query: ", req.query);
-  const { stringNotes, percMatch, user, textFilterArtist, textFilterTrack, textFilterRecording, textFilterLocations } = req.query;
+  const { stringNotes, percMatch, user, textFilterArtist, textFilterTrack, textFilterRecording, textFilterLocations, textFilterProducers } = req.query;
   let notes = stringNotes;
   const notes_int = notes.split('-').map(a => Number(a));
   let distance = notes_int.length;
 
   console.log(">>> Searching if specific search exists");
   let matchSearchMap = await CombinedDataService
-    .getSearchMap(stringNotes, textFilterArtist, textFilterRecording, textFilterTrack, textFilterLocations, percMatch);
+    .getSearchMap(stringNotes, textFilterArtist, textFilterRecording, textFilterTrack, textFilterLocations, textFilterProducers, percMatch);
   if (matchSearchMap.length > 0) {
     console.log("matchSearchMap[0]._id: ", matchSearchMap[0]._id, ", matchSearchMap[0].query: ", matchSearchMap[0].query);
     res.send(matchSearchMap[0].levenshteinScores);
@@ -27,7 +27,7 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
     let score = CombinedDataService.map_to_fuzzy_score(
       CombinedDataService.calculateIntervalSum(notes_int)
     );
-    console.log("notes: ", notes, ", distance: ", distance, ", score: ", score, ", textFilterArtist: ", textFilterArtist, ", textFilterTrack: ", textFilterTrack, ", textFilterRecording: ", textFilterRecording,", textFilterLocations: ",textFilterLocations);
+    console.log("notes: ", notes,", distance: ", distance, ", score: ", score, ", textFilterArtist: ", textFilterArtist, ", textFilterTrack: ", textFilterTrack, ", textFilterRecording: ", textFilterRecording,", textFilterLocations: ",textFilterLocations,", textFilterProducers: ",textFilterProducers);
     console.log("Time: ", new Date());
     try {
       let lognumbersFilter = [];
@@ -36,13 +36,14 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
       let objsMetadata = [];
       // - Prepare the arrays and code queries to get match track to filter
       if (textFilterArtist !== '' || textFilterTrack !== '' || textFilterRecording !== ''
-        || textFilterLocations !==''
+        || textFilterLocations !=='' || textFilterProducers !==''
       ) {
         let attributeValueArray = [], attributeNameArray = [];
         if (textFilterArtist !== '') { attributeValueArray.push('artist'); attributeNameArray.push(textFilterArtist); }
         if (textFilterTrack !== '') { attributeValueArray.push('track'); attributeNameArray.push(textFilterTrack); }
         if (textFilterRecording !== '') { attributeValueArray.push('recording'); attributeNameArray.push(textFilterRecording); }
         if (textFilterLocations !== '') { attributeValueArray.push('location'); attributeNameArray.push(textFilterLocations); } 
+        if (textFilterProducers !== '') { attributeValueArray.push('producer'); attributeNameArray.push(textFilterProducers); }
 
         objsMetadata = await CombinedDataService
           .getMetadataFromAttributes(attributeValueArray, attributeNameArray);
@@ -106,7 +107,7 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
       for (let i = 0; i <= arrTracksMelodies.length - sectionLength; i += sectionLength) {
         const sectionNotesObj = arrTracksMelodies.slice(i, i + sectionLength);
         // For more filters
-        const cacheKey = `levenshtein:${stringNotes}:${sectionNotesObj.map(a => a.pitch).join("-")}_${percMatch}_${textFilterArtist}_${textFilterRecording}_${textFilterTrack}_${textFilterLocations}`;
+        const cacheKey = `levenshtein:${stringNotes}:${sectionNotesObj.map(a => a.pitch).join("-")}_${percMatch}_${textFilterArtist}_${textFilterRecording}_${textFilterTrack}_${textFilterLocations}_${textFilterProducers}`;
         const cachedResult = cache.get(cacheKey);
 
         if (cachedResult) {
@@ -164,7 +165,8 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
           textFilterArtist, 
           textFilterRecording, 
           textFilterTrack, 
-          textFilterLocations, 
+          textFilterLocations,
+          textFilterProducers, 
           percMatch, 
           levenshteinScores
         );
