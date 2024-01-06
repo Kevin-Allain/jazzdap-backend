@@ -10,14 +10,20 @@ const cacheDisregarded = new NodeCache({ stdTTL: 60 * 60 }); // Cache with a TTL
 
 module.exports.getFuzzyLevenshtein = async (req, res) => {
   console.log("---- getFuzzyLevenshtein ---- req.query: ", req.query);
-  const { stringNotes, percMatch, user, textFilterArtist, textFilterTrack, textFilterRecording, textFilterLocations, textFilterProducers } = req.query;
+  const { stringNotes, percMatch, user,
+    textFilterArtist,
+    textFilterTrack,
+    textFilterRecording,
+    textFilterLocations,
+    textFilterProducers,
+    startYear, endYear } = req.query;
   let notes = stringNotes;
   const notes_int = notes.split('-').map(a => Number(a));
   let distance = notes_int.length;
 
   console.log(">>> Searching if specific search exists");
   let matchSearchMap = await CombinedDataService
-    .getSearchMap(stringNotes, textFilterArtist, textFilterRecording, textFilterTrack, textFilterLocations, textFilterProducers, percMatch);
+    .getSearchMap(stringNotes, textFilterArtist, textFilterRecording, textFilterTrack, textFilterLocations, textFilterProducers, startYear, endYear, percMatch);
   if (matchSearchMap.length > 0) {
     console.log("matchSearchMap[0]._id: ", matchSearchMap[0]._id, ", matchSearchMap[0].query: ", matchSearchMap[0].query);
     res.send(matchSearchMap[0].levenshteinScores);
@@ -34,9 +40,10 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
       let sjaIdsFilter = [];
       let tracktitlesFilter = [];
       let objsMetadata = [];
+      console.log("startYear: ",startYear,", endYear: ",endYear,", (startYear !=='' && endYear !==''): ",(startYear !=='' && endYear !==''));
       // - Prepare the arrays and code queries to get match track to filter
       if (textFilterArtist !== '' || textFilterTrack !== '' || textFilterRecording !== ''
-        || textFilterLocations !=='' || textFilterProducers !==''
+        || textFilterLocations !=='' || textFilterProducers !=='' || (startYear !=='' && endYear !=='')
       ) {
         let attributeValueArray = [], attributeNameArray = [];
         if (textFilterArtist !== '') { attributeValueArray.push('artist'); attributeNameArray.push(textFilterArtist); }
@@ -44,6 +51,8 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
         if (textFilterRecording !== '') { attributeValueArray.push('recording'); attributeNameArray.push(textFilterRecording); }
         if (textFilterLocations !== '') { attributeValueArray.push('location'); attributeNameArray.push(textFilterLocations); } 
         if (textFilterProducers !== '') { attributeValueArray.push('producer'); attributeNameArray.push(textFilterProducers); }
+        if (startYear !== '') { attributeValueArray.push('startYear'); attributeNameArray.push(startYear); }
+        if (endYear !== '') { attributeValueArray.push('endYear'); attributeNameArray.push(endYear); }
 
         objsMetadata = await CombinedDataService
           .getMetadataFromAttributes(attributeValueArray, attributeNameArray);
@@ -64,7 +73,7 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
       // - Filter the results for tracks if there are filters set by user
       if (textFilterTrack !== "") {
         let lognumbersFromFuzzy = [...new Set(fuzzyScores.map((a) => a["lognumber"])),];
-        console.log("lognumbersFromFuzzy, ", lognumbersFromFuzzy);
+        // console.log("lognumbersFromFuzzy, ", lognumbersFromFuzzy);
         // for (var i in lognumbersFromFuzzy) { console.log("lognumbersFromFuzzy[i] ", lognumbersFromFuzzy[i], " in lognumbersFilter: ", lognumbersFilter.includes(lognumbersFromFuzzy[i])); }
         let matchessjaIdsFromFuzzy = [];
         let sjaIdsFromFuzzy = [...new Set(fuzzyScores.map((a) => "" + a["SJA_ID"])),];
@@ -74,12 +83,10 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
             matchessjaIdsFromFuzzy.push(sjaIdsFromFuzzy[i]);
           }
         }
-
         console.log("size before filtering based on SJA_ID. ", fuzzyScores.length);
         fuzzyScores = fuzzyScores.filter((item) => matchessjaIdsFromFuzzy.includes(item["SJA_ID"]));
         console.log("size after filtering based on SJA_ID. ", fuzzyScores.length);
       }
-
       let arrIds = fuzzyScores.map(a => a.first_id);
       console.log("arrIds.length: ", arrIds.length);
 
@@ -107,7 +114,7 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
       for (let i = 0; i <= arrTracksMelodies.length - sectionLength; i += sectionLength) {
         const sectionNotesObj = arrTracksMelodies.slice(i, i + sectionLength);
         // For more filters
-        const cacheKey = `levenshtein:${stringNotes}:${sectionNotesObj.map(a => a.pitch).join("-")}_${percMatch}_${textFilterArtist}_${textFilterRecording}_${textFilterTrack}_${textFilterLocations}_${textFilterProducers}`;
+        const cacheKey = `levenshtein:${stringNotes}:${sectionNotesObj.map(a => a.pitch).join("-")}_${percMatch}_${textFilterArtist}_${textFilterRecording}_${textFilterTrack}_${textFilterLocations}_${textFilterProducers}_${startYear}_${endYear}`;
         const cachedResult = cache.get(cacheKey);
 
         if (cachedResult) {
@@ -167,11 +174,11 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
           textFilterTrack, 
           textFilterLocations,
           textFilterProducers, 
+          startYear,endYear,
           percMatch, 
           levenshteinScores
         );
       }
-
       res.send(levenshteinScores);
     } catch (error) {
       console.error(error);

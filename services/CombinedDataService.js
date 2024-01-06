@@ -223,7 +223,7 @@ const getMelodiesFromFuzzyScores = async (fuzzyScores, distance) => {
   //   }
   // }
   let allFirstIds = fuzzyScores.map(a => a.first_id);
-  console.log("allfirstIds 0 to 10: ",allFirstIds.slice(0,10));
+  // console.log("allfirstIds 0 to 10: ",allFirstIds.slice(0,10));
   let mapFirstIdToNext = {};
   let orderedAllIds = [];
   for (let n=0; n <maxRange; n++){
@@ -235,11 +235,11 @@ const getMelodiesFromFuzzyScores = async (fuzzyScores, distance) => {
       ? mapFirstIdToNext[a].push(getNextIdLimited(a, n))
       : mapFirstIdToNext[a] = [getNextIdLimited(a, n)]);
   }
-  console.log("# idRanges 0 to 10: ",idRanges.slice(0,10));
-  for (let i=0; i<10;i++){
-    console.log("for ",allFirstIds[i],": ",mapFirstIdToNext[allFirstIds[i]]);
-    // So this one is actually fine.
-  }
+  // console.log("# idRanges 0 to 10: ",idRanges.slice(0,10));
+  // for (let i=0; i<10;i++){
+  //   console.log("for ",allFirstIds[i],": ",mapFirstIdToNext[allFirstIds[i]]);
+  //   // So this one is actually fine.
+  // }
   for(let i in mapFirstIdToNext){
     orderedAllIds.push(...mapFirstIdToNext[i]);
   }
@@ -298,36 +298,66 @@ const getMelodiesFromFuzzyScores = async (fuzzyScores, distance) => {
 
 
 // WIP: additions for the other filters
-const getMetadataFromAttributes = async (attributeNameArray,attributeValueArray) => {
+const getMetadataFromAttributes = async (attributeNameArray, attributeValueArray) => {
+  console.log("---- getMetadataFromAttributes");
   // Ensure both arrays have the same length
-  if (!Array.isArray(attributeValueArray) || !Array.isArray(attributeNameArray) || attributeValueArray.length !== attributeNameArray.length) { return res.status(400).json({ error: "Invalid input arrays" }); }
+  if (!Array.isArray(attributeValueArray) || !Array.isArray(attributeNameArray) || attributeValueArray.length !== attributeNameArray.length) {
+    return res.status(400).json({ error: "Invalid input arrays" });
+  }
+
   // Mapping attribute values to their replacements
   const attributeNameMap = {
     'artist': '(N) Named Artist(s)',
     'recording': '(E) Event Name',
     'track': 'Track Title',
-    "location": "Location",
-    "producer": "Producer",
-  };
-  // Replace values in attributeValueArray based on the mapping
-  const sanitizedAttributeNameArray = attributeNameArray.map(n => attributeNameMap[n] || n);
-  // console.log("sanitizedAttributeNameArray: ",sanitizedAttributeNameArray);
-  const queryCondition = {};
-  // Construct the query using the sanitized arrays
-  sanitizedAttributeNameArray.forEach((attributeName, index) => { 
-    queryCondition[attributeName] = { $regex: new RegExp(attributeValueArray[index], 'i') }; 
-  });
-  
-  console.log("queryCondition: ",queryCondition);
-  const resultsMeta = await TrackMetadataModel.find(queryCondition)
-      // .then(data => { console.log("Searched successfully MusicInfoControllerModel.find"); console.log("data.length: ", data.length,", and first item: ",data[0]); return data;  })
-      // .catch(error => { res.status(500).json(error); });
-  // console.log("resultsMeta[0]: ",resultsMeta[0])
-  return(resultsMeta);
+    'location': 'Location',
+    'producer': 'Producer',
+    'startYear': 'startYear',
+    'endYear': 'endYear',
   };
 
-const createSearchMap = async (query, filterArtist, filterRecording, filterTrack, filterLocations, filterProducers, percMatch, levenshteinScores) => {
-  console.log("---createSearchMap. ",{query, filterArtist, filterRecording, filterTrack, filterLocations, filterProducers, percMatch});
+  // Replace values in attributeValueArray based on the mapping
+  const sanitizedAttributeNameArray = attributeNameArray.map((n) => attributeNameMap[n] || n);
+
+  const queryCondition = {};
+  // Construct the query using the sanitized arrays
+  sanitizedAttributeNameArray.forEach((attributeName, index) => {
+    if (attributeName === 'startYear' || attributeName === 'endYear') {
+      console.log("attributeName === startYear || endYear");
+      // For startYear and endYear, convert values to numbers if they are not already
+      if (!queryCondition['Event Year']) {
+        queryCondition['Event Year'] = {};
+      }
+      queryCondition['Event Year'] = {
+        ...queryCondition['Event Year'],
+        $gte: attributeName === 'startYear' ? Number(attributeValueArray[index]) : queryCondition['Event Year'].$gte,
+        $lte: attributeName === 'endYear' ? Number(attributeValueArray[index]) : queryCondition['Event Year'].$lte,
+      };
+    } else {
+      // For other attributes, use regular regex matching
+      queryCondition[attributeName] =
+      {
+        ...queryCondition[attributeName],
+        $regex: new RegExp(attributeValueArray[index], 'i')
+      };
+    }
+  });
+
+  console.log("queryCondition: ", queryCondition);
+  const resultsMeta = await TrackMetadataModel.find(queryCondition);
+  return resultsMeta;
+};
+
+
+const createSearchMap = async (query, 
+  filterArtist, 
+  filterRecording, 
+  filterTrack, 
+  filterLocations, 
+  filterProducers, 
+  startYear,endYear, 
+  percMatch, levenshteinScores) => {
+  console.log("---createSearchMap. ",{query, filterArtist, filterRecording, filterTrack, filterLocations, filterProducers, startYear,endYear, percMatch});
   // TODO first make a search! THEN if no match, create one
   const data = await SearchMapModel.create({
     query: query,
@@ -337,7 +367,8 @@ const createSearchMap = async (query, filterArtist, filterRecording, filterTrack
     filterLocations: filterLocations,
     filterProducers: filterProducers,
     percMatch: percMatch,
-    levenshteinScores: levenshteinScores
+    levenshteinScores: levenshteinScores,
+    startYear_endYear: (startYear !== '' && endYear !== '') ? startYear + '_' + endYear : '',
   });
 }
 
@@ -348,9 +379,11 @@ const getSearchMap = async (
   filterTrack,
   filterLocations,
   filterProducers,
+  startYear,
+  endYear,
   percMatch
 ) => {
-  console.log("getSearchMap. ", { query, filterArtist, filterRecording, filterTrack, filterLocations, filterProducers, percMatch });
+  console.log("getSearchMap. ", { query, filterArtist, filterRecording, filterTrack, filterLocations, filterProducers,startYear,endYear, percMatch });
   let queryRes = {
     query: query,
     percMatch: Number(percMatch),
@@ -359,6 +392,7 @@ const getSearchMap = async (
     filterTrack: filterTrack,
     filterLocations: filterLocations,
     filterProducers: filterProducers, 
+    startYear_endYear: (startYear!=='' && endYear!=='')?startYear+'_'+endYear:'',
   };
   console.log("queryRes: ", queryRes);
   let matchingSearchMap = await SearchMapModel.find(queryRes);

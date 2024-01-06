@@ -32,6 +32,10 @@ const searchMapSchema = new mongoose.Schema({
         type: String,
         require: true
     },    
+    startYear_endYear:{
+        type: String,
+        require:true
+    },
     percMatch: {
         type: Number,
         require:true
