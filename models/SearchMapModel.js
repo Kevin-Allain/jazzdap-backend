@@ -24,6 +24,10 @@ const searchMapSchema = new mongoose.Schema({
         type: String,
         require: true
     },
+    filterLocations: {
+        type: String,
+        require: true
+    },
     percMatch: {
         type: Number,
         require:true
@@ -45,6 +49,8 @@ const searchMapSchema = new mongoose.Schema({
 })
 
 // Create indexes
-searchMapSchema.index({ query: 1, filterArtist: 1, filterRecording: 1, filterTrack: 1, percMatch:1 });
+searchMapSchema.index(
+    { query: 1, filterArtist: 1, filterRecording: 1, filterTrack: 1, percMatch:1 }
+);
 
 module.exports = mongoose.model('SearchMap',searchMapSchema);

@@ -297,12 +297,12 @@ const getMelodiesFromFuzzyScores = async (fuzzyScores, distance) => {
 };
 
 
-
+// WIP
 const getMetadataFromAttributes = async (attributeNameArray,attributeValueArray) => {
   // Ensure both arrays have the same length
   if (!Array.isArray(attributeValueArray) || !Array.isArray(attributeNameArray) || attributeValueArray.length !== attributeNameArray.length) { return res.status(400).json({ error: "Invalid input arrays" }); }
   // Mapping attribute values to their replacements
-  const attributeNameMap = { 'artist': '(N) Named Artist(s)', 'recording': '(E) Event Name', 'track': 'Track Title' };
+  const attributeNameMap = { 'artist': '(N) Named Artist(s)', 'recording': '(E) Event Name', 'track': 'Track Title', "location":"Location" };
   // Replace values in attributeValueArray based on the mapping
   const sanitizedAttributeNameArray = attributeNameArray.map(n => attributeNameMap[n] || n);
   // console.log("sanitizedAttributeNameArray: ",sanitizedAttributeNameArray);
@@ -320,34 +320,40 @@ const getMetadataFromAttributes = async (attributeNameArray,attributeValueArray)
   return(resultsMeta);
   };
 
-const createSearchMap = async (query, filterArtist, filterRecording, filterTrack, percMatch, levenshteinScores) => {
-  console.log("---createSearchMap. ",{query, filterArtist, filterRecording, filterTrack, percMatch});
+const createSearchMap = async (query, filterArtist, filterRecording, filterTrack, filterLocations, percMatch, levenshteinScores) => {
+  console.log("---createSearchMap. ",{query, filterArtist, filterRecording, filterTrack, filterLocations, percMatch});
   // TODO first make a search! THEN if no match, create one
   const data = await SearchMapModel.create({
     query: query,
     filterArtist: filterArtist,
     filterRecording: filterRecording,
     filterTrack: filterTrack,
+    filterLocations: filterLocations,
     percMatch: percMatch,
     levenshteinScores: levenshteinScores
   });
 }
 
-const getSearchMap = async( query, filterArtist, filterRecording, filterTrack, percMatch ) => {
-  console.log("getSearchMap. ",{query, filterArtist, filterRecording, filterTrack, percMatch});
-  let queryRes = { 
-    query: query, 
+const getSearchMap = async (
+  query,
+  filterArtist,
+  filterRecording,
+  filterTrack,
+  filterLocations,
+  percMatch
+) => {
+  console.log("getSearchMap. ", { query, filterArtist, filterRecording, filterTrack, filterLocations, percMatch });
+  let queryRes = {
+    query: query,
     percMatch: Number(percMatch),
     filterArtist: filterArtist,
-    filterRecording:filterRecording,
-    filterTrack:filterTrack
+    filterRecording: filterRecording,
+    filterTrack: filterTrack,
+    filterLocations: filterLocations,
   };
-  // if (filterArtist !== '') { queryRes.filterArtist = filterArtist }
-  // if (filterRecording !== '') { queryRes.filterRecording = filterRecording }
-  // if (filterTrack !== '') { queryRes.filterTrack = filterTrack }
-  console.log("queryRes: ",queryRes);
+  console.log("queryRes: ", queryRes);
   let matchingSearchMap = await SearchMapModel.find(queryRes);
-  console.log("matchingSearchMap.length: ",matchingSearchMap.length);
+  console.log("matchingSearchMap.length: ", matchingSearchMap.length);
   return matchingSearchMap;
 }
 
