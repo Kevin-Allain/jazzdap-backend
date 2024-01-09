@@ -138,6 +138,12 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
             CombinedDataService
               .calcLevenshteinDistance_int_optimistic(sectionNotesObj.map((a) => a.pitch), notes_int);
           const dissimilarityPercentage = levenshteinDistance / notes_int.length;
+          if (i <= 2) {
+            console.log("i: ", i, ", levenshteinDistance: ", levenshteinDistance, ", dissimilarityPercentage: ", dissimilarityPercentage, ", notes_int.length: ", notes_int.length)
+          }
+          if (sectionNotesObj.map((a) => a.pitch).toString() === notes_int.toString()) {
+            console.log("THIS SHOULD HAPPEN - matching perfectly. i: ", i);
+          }
 
           if (dissimilarityPercentage <= 1 - percMatch) {
             // console.log("We passed something. dissimilarityPercentage: ",dissimilarityPercentage,", with filters ",{textFilterArtist, textFilterTrack, textFilterRecording});
