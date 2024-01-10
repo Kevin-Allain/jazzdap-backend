@@ -101,7 +101,7 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
         .getMelodiesFromFuzzyScores(fuzzyScores, distance);
       arrTracksMelodies ? console.log("arrTracksMelodies.length: ", arrTracksMelodies.length) : console.log("arrTracksMelodies undefined!");
 
-      // Modulo is now 0
+      // Modulo is now 0 -> NOT ALWAYS!!! Is it the selection that is messed up? 
       let numMelodies = arrTracksMelodies.length / distance;
       console.log("numMelodies: ", numMelodies);
 
@@ -113,6 +113,7 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
 
       for (let i = 0; i <= arrTracksMelodies.length - sectionLength; i += sectionLength) {
         const sectionNotesObj = arrTracksMelodies.slice(i, i + sectionLength);
+        
         // For more filters
         const cacheKey = `levenshtein:${stringNotes}:${sectionNotesObj.map(a => a.pitch).join("-")}_${percMatch}_${textFilterArtist}_${textFilterRecording}_${textFilterTrack}_${textFilterLocations}_${textFilterProducers}_${startYear}_${endYear}`;
         const cachedResult = cache.get(cacheKey);
@@ -138,8 +139,19 @@ module.exports.getFuzzyLevenshtein = async (req, res) => {
             CombinedDataService
               .calcLevenshteinDistance_int_optimistic(sectionNotesObj.map((a) => a.pitch), notes_int);
           const dissimilarityPercentage = levenshteinDistance / notes_int.length;
-          if (i <= 2) {
+          if (i <= 2*sectionLength) {
             console.log("i: ", i, ", levenshteinDistance: ", levenshteinDistance, ", dissimilarityPercentage: ", dissimilarityPercentage, ", notes_int.length: ", notes_int.length)
+            console.log("sectionNotesObj.map((a) => a.pitch).toString(): ",sectionNotesObj.map((a) => a.pitch).toString(),", notes_int.toString(): ",notes_int.toString());
+          }
+          // if (sectionNotesObj[0].pitch === notes_int[0]){
+          //   console.log("~ could match? ");
+          //   console.log("sectionNotesObj.map((a) => a.pitch).toString(): ",sectionNotesObj.map((a) => a.pitch).toString(),", notes_int.toString(): ",notes_int.toString());
+          //   console.log("sectionNotesObj[0]: ",sectionNotesObj[0]);
+          // }
+          if (sectionNotesObj[0]._id.toHexString() === "650c4318a5bcafb5915fe6a1"){
+            console.log("~ should match? ");
+            console.log("sectionNotesObj.map((a) => a.pitch).toString(): ",sectionNotesObj.map((a) => a.pitch).toString(),", notes_int.toString(): ",notes_int.toString());
+            console.log("sectionNotesObj[0]: ",sectionNotesObj[0]);
           }
           if (sectionNotesObj.map((a) => a.pitch).toString() === notes_int.toString()) {
             console.log("THIS SHOULD HAPPEN - matching perfectly. i: ", i);

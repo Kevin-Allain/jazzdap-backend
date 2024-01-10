@@ -167,7 +167,9 @@ const getFuzzyScores = async (score, distance, lognumbersFilter=[]) => {
   if (lognumbersFilter.length > 0) {
     query.lognumber = { $in: lognumbersFilter };
   }
-  query[`fuzzyRange${distance}`] = score;
+  // query[`fuzzyRange${distance}`] = score;
+  query[`fuzzyRange${distance-1}`] = score;
+
   return Fuzzy_scoreModel.find(query)
     .lean()
     .sort({lognumber: 1})
@@ -202,98 +204,112 @@ const getMelodiesFromTrackId = async (data, lengthSearch) => {
   return results;
 };
 
-// TODO make a version without using _idRange: make query to backend to get those idRanges
 const getMelodiesFromFuzzyScores = async (fuzzyScores, distance) => {
   console.log( "getMelodiesFromFuzzyScores - fuzzyScores length: ", fuzzyScores.length, ", distance: ", distance );
-  console.log("- Christmas - fuzzyScores[0]: ",fuzzyScores[0]);
+  console.log("- Christmas - fuzzyScores[0]: ", fuzzyScores[0]);
   let idRanges = [];
-  // let indexes_m_id = {};
-  const maxRange = 10; // used to be from 1 to 15
-  // for (let i in fuzzyScores) {
-  //   // indexes_m_id[fuzzyScores[i].first_id] = [];
-  //   // CRITICAL CHRISTMAS : getting the _ids of next notes is really important for speed (and maybe then filter them if they don't have same... track?)
-  //   // Why do we limit this to start at 4?!
-  //   for (let n = 4; n <  Math.min(maxRange,distance+1) ; n++) {
-  //     idRanges.push(getNextIdLimited(fuzzyScores[i].first_id, n));
-  //     // fuzzyScores[i][`_idRange${n}`]
-  //     //   ? fuzzyScores[i][`_idRange${n}`]!==-20
-  //     //     ?idRanges.push(fuzzyScores[i][`_idRange${n}`])
-  //     //     :null
-  //     //   : console.log( "An undefined fuzzyScores[i][`_idRange${n}`]. fuzzyScores[", i, "], with n: ",n," - ", fuzzyScores[i] );
-  //   }
-  // }
-  let allFirstIds = fuzzyScores.map(a => a.first_id);
-  // console.log("allfirstIds 0 to 10: ",allFirstIds.slice(0,10));
+  const maxRange = distance; // used to be from 1 to 15 // changed to distance. No need to get more
+  let allFirstIds = fuzzyScores.map((a) => a.first_id);
+
   let mapFirstIdToNext = {};
   let orderedAllIds = [];
-  for (let n=0; n <maxRange; n++){
-    allFirstIds.map(a => idRanges.push(getNextIdLimited(a, n)) );
+  for (let n = 0; n < maxRange; n++) {
+    allFirstIds.map((a) => idRanges.push(getNextIdLimited(a, n)));
     // Trying to see if it works with setting next ids for each first_id
-    // TODO test
-    allFirstIds.map( a => 
+    allFirstIds.map((a) =>
       mapFirstIdToNext[a]
-      ? mapFirstIdToNext[a].push(getNextIdLimited(a, n))
-      : mapFirstIdToNext[a] = [getNextIdLimited(a, n)]);
+        ? mapFirstIdToNext[a].push(getNextIdLimited(a, n))
+        : (mapFirstIdToNext[a] = [getNextIdLimited(a, n)])
+    );
   }
   // console.log("# idRanges 0 to 10: ",idRanges.slice(0,10));
-  // for (let i=0; i<10;i++){
-  //   console.log("for ",allFirstIds[i],": ",mapFirstIdToNext[allFirstIds[i]]);
-  //   // So this one is actually fine.
-  // }
-  for(let i in mapFirstIdToNext){
+  for (let i = 0; i < 5; i++) { console.log( "for allFirstIds[i]: ", allFirstIds[i], ", mapFirstIdToNext: ", mapFirstIdToNext[allFirstIds[i]] ); }
+
+  for (let i in mapFirstIdToNext) {
     orderedAllIds.push(...mapFirstIdToNext[i]);
   }
-  console.log("idRanges.length: ", idRanges.length);
-  console.log("With change: orderedAllIds.length", orderedAllIds.length);
   idRanges = orderedAllIds;
-  // // Christmas test
-  // // const filteredIdRanges = idRanges.filter(a => a);
-  // const filteredIdRanges = trackDocFromFirstIds.filter(a=>a);
-  // console.log("~Critical Christmas: For cloud: changed filteredIdRanges. Its length: ",filteredIdRanges.length);
+  console.log("idRanges.length: ", idRanges.length);
 
   // Create a set of unique IDs from idRanges
   const uniqueIdRanges = [...new Set(idRanges)];
-  console.log("uniqueIdRanges.length: ", uniqueIdRanges.length);
-  const filteredUniqueIdRanges = uniqueIdRanges.filter(a => a);
-  console.log("filteredUniqueIdRanges.length: ", filteredUniqueIdRanges.length);
-  console.log("uniqueIdRanges[0]: ",uniqueIdRanges[0]);
+  const nonEmptyUniqueIdRanges = uniqueIdRanges.filter((a) => a);
+  console.log("nonEmptyUniqueIdRanges.length: ", nonEmptyUniqueIdRanges.length);
 
-  // // Fetch matching tracks from the database based on unique IDs
-  // Convert string representations to ObjectId
-  const objectIdRanges = uniqueIdRanges.map(id => new ObjectId(id));
-  console.log("objectIdRanges[0]: ",objectIdRanges[0])
   // Fetch matching tracks from the database based on unique IDs
-  const matchingTracks = await TrackModel
-    .find({ "_id": { "$in": objectIdRanges } });
+  // Convert string representations to ObjectId
+  const objectIdRanges = nonEmptyUniqueIdRanges.map((id) => new ObjectId(id));
+  console.log("objectIdRanges[0]: ", objectIdRanges[0]); // TODO slow breaking point
+  // Fetch matching tracks from the database based on unique IDs
+  const matchingTracks = await TrackModel.find({
+    _id: { $in: objectIdRanges },
+  });
 
-  // const matchingTracks = await TrackModel
-  //   .find({ "_id": { "$in": [...uniqueIdRanges] } });
   console.log("matchingTracks.length: ", matchingTracks.length);
-  console.log("matchingTracks[0]: ",matchingTracks[0]);
+  console.log("matchingTracks[0]: ", matchingTracks[0]);
   // Create a lookup object for matching tracks based on their _id attribute
   const trackLookup = {};
-  matchingTracks.forEach(track => {
+  matchingTracks.forEach((track) => {
     trackLookup[track._id.toHexString()] = track;
   });
-  console.log("generated trackLookup");
 
   // Create an array for looking up tracks based on their _id attribute
-  const trackLookupArray = Array.from(matchingTracks, 
-    track => ({ id: track._id.toHexString(), track })
-  );
-  console.log("trackLookupArray.length: ",trackLookupArray.length);
-  console.log("trackLookupArray[0]: ",trackLookupArray[0]);
+  const trackLookupArray = Array.from(matchingTracks, (track) => ({
+    id: track._id.toHexString(),
+    track,
+  }));
+  console.log("trackLookupArray.length: ", trackLookupArray.length);
+  console.log("trackLookupArray[0]: ", trackLookupArray[0]);
 
   // Map idRanges to the corresponding tracks using the lookup object
-  const resultTracks = idRanges.map((idRange) => trackLookup[idRange] );
+  const resultTracks = idRanges.map((idRange) => trackLookup[idRange]);
 
-  console.log("resultTracks.length: ",resultTracks.length);
+  console.log("resultTracks.length: ", resultTracks.length);
+
+  // cases of undefined in the selection?
+  const specMatch = resultTracks.filter(
+    (a) => a && a.SJA_ID && a.SJA_ID === "SJA_AC_A0003_N0005_E0010_Y25111957_14"
+  );
+  console.log("specMatch[0]: ", specMatch[0]);
+  // console.log("~ resultTracks[0]: ", resultTracks[0])
+  // console.log("~ resultTracks[4]: ", resultTracks[4])
+  // console.log("~ resultTracks[5]: ", resultTracks[5])
+  // console.log("~ resultTracks[6]: ", resultTracks[6])
+  // console.log("~ resultTracks[10]: ", resultTracks[10])
+
   // Filter out undefined elements
-  const filteredResultTracks = resultTracks.filter(track => track);
-
-  console.log("filteredResultTracks[0]: ",filteredResultTracks[0]);
+  const filteredResultTracks = resultTracks.filter((track) => track);
+  const specMatchFiltered = filteredResultTracks.filter(
+    (a) => a && a.SJA_ID && a.SJA_ID === "SJA_AC_A0003_N0005_E0010_Y25111957_14"
+  );
+  console.log("specMatchFiltered[0]: ", specMatchFiltered[0]);
+  console.log("filteredResultTracks[0]: ", filteredResultTracks[0]);
   console.log("filteredResultTracks.length: ", filteredResultTracks.length);
-  return filteredResultTracks;
+
+  const arrOrganizedTracks = [];
+  // Create a map for faster lookup
+  const firstIdsMap = new Map(allFirstIds.map((id) => [id, true]));
+  // Loop over matchingTracks and organize them
+  for (let i = 0; i < matchingTracks.length; i++) {
+    const currentTrack = matchingTracks[i];
+    // Check if the current track's _id is in allFirstIds
+    if (firstIdsMap.has(currentTrack._id.toHexString())) {
+      // Add the current track and the next 5 tracks (adjust as needed)
+      let selectedTracks = matchingTracks.slice(i, i + distance);
+      arrOrganizedTracks.push(...selectedTracks);
+      if (i == 0 || (i % matchingTracks.length) / 2 === 0) {
+        console.log("--\ncurrentTrack: ",currentTrack);
+        console.log("selectedTracks.length: ",selectedTracks.length);
+        console.log("arrOrganizedTracks.length: ",arrOrganizedTracks.length);
+      }
+    }
+  }
+  // Output the result
+  console.log("arrOrganizedTracks.length: ", arrOrganizedTracks.length);
+  console.log("arrOrganizedTracks[0]: ", arrOrganizedTracks[0]);
+
+  // return filteredResultTracks;
+  return arrOrganizedTracks;
 };
 
 
