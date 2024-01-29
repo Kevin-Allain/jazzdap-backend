@@ -7,8 +7,8 @@ const {
     get_idContent_sample,
     getMatchFuzzy 
 } = require('../controllers/TrackController')
-const { getListFuzzyScores, getAllFuzzyScores, getListFuzzyDist } = require('../controllers/Fuzzy_scoreController')
-const { getFuzzyLevenshtein } = require('../controllers/CombinedDataController')
+const { getListFuzzyScores, getAllFuzzyScores, getListFuzzyDist } = require('../controllers/Fuzzy_scoreController');
+const { getFuzzyLevenshtein } = require('../controllers/CombinedDataController');
 const { 
     getTrackMetadata,
     getTrackMetaFromNoteId,
@@ -17,17 +17,18 @@ const {
     get_idContent_track,
     getMetadataFromAttribute,
     testMetadata
-} = require('../controllers/MusicInfoController')
-const {loginTest, loginUser, registerUser} = require ('../controllers/AuthController')
-const {addAnnotation, getAnnotations, deleteAnnotation, updateAnnotation, get_idContent_annotation } = require ('../controllers/AnnotationController')
-const {addComment, getComments, getCommentsOfAnnotation, deleteComment, updateComment,get_idContent_comment} = require ('../controllers/CommentController')
-const { getUserAnnotations } = require("../controllers/UserController")
+} = require('../controllers/MusicInfoController');
+const {loginTest, loginUser, registerUser} = require ('../controllers/AuthController');
+const {addAnnotation, getAnnotations, deleteAnnotation, updateAnnotation, get_idContent_annotation } = require ('../controllers/AnnotationController');
+const {addComment, getComments, getCommentsOfAnnotation, deleteComment, updateComment,get_idContent_comment} = require ('../controllers/CommentController');
+const { getUserAnnotations } = require("../controllers/UserController");
 const { 
     createWorkflow, getWorkflow, getWorkflowsInfo, 
     deleteWorkflow, changeTitle,  changeDescription, 
     addContentWorkflow, deleteWorkflowObject,
     changeWorkflowPrivacy, getExactMatchWorkflowParameter
-} = require("../controllers/WorkflowController")
+} = require("../controllers/WorkflowController");
+const {getSliceMp3} = require("../controllers/AudioSlicerController");
 const {get_idContent_search, getSearchMap, createSearchMap} = require("../controllers/SearchMapController");
 
 const router = Router();
@@ -105,5 +106,8 @@ router.get('/getFuzzyLevenshtein',getFuzzyLevenshtein);
 // SearchMap
 router.get('/getSearchMap',getSearchMap);
 router.post('/createSearchMap',createSearchMap);
+
+//Audioslicer
+router.get('/getSliceMp3',getSliceMp3);
 
 module.exports = router;
