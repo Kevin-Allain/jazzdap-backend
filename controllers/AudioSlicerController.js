@@ -9,9 +9,9 @@ const fs = require('fs').promises; // Node.js built-in 'promises' version of fs
 const cutter = require('mp3-cutter');
 
 // Function to handle audio slicing
-const sliceMp3 = async (file,start,end, pathFolderOutput=process.cwd()) => {
+const sliceMp3 = async (fileName,start,end, pathFolderOutput=process.cwd()) => {
     console.log("-+- getSliceMp3 -+-");
-    console.log({file,start,end});
+    console.log({fileName,start,end});
 
     console.log("-- PATHS");
     console.log("__dirname: ",__dirname);
@@ -20,10 +20,10 @@ const sliceMp3 = async (file,start,end, pathFolderOutput=process.cwd()) => {
     console.log("--");
 
     try {
-        const inputFile = path.join(process.cwd(),'audio_files','test_audio.mp3');
+        const inputFile = path.join(process.cwd(),'audio_files',fileName+'.mp3');
         console.log("inputFile: ",inputFile);
-        const outputFileName = (file !== '')
-            ? `${file}_${start}_${end}.mp3`
+        const outputFileName = (fileName !== '')
+            ? `${fileName}_${start}_${end}.mp3`
             : `sliced_audio_${start}_${end}.mp3`;
         console.log("outputFileName: ",outputFileName);
         const outputFile = path.join(pathFolderOutput, 'public', outputFileName);
