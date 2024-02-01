@@ -8,36 +8,64 @@ const path = require('path');
 const fs = require('fs').promises; // Node.js built-in 'promises' version of fs
 const cutter = require('mp3-cutter');
 
+const doesMp3exist = async(sja_id) => {
+    console.log("-+- doesMp3exist -+- sja_id: ",sja_id);
+
+    // 1 - We search if there is a file with sja... .mp3
+    try {
+        await fs.access(outputFile);
+        console.log("Output file already exists. Returning existing file path.");
+        return outputFile;
+    } catch (notFoundError) {
+        // 2 - Output file doesn't exist, search database
+        console.log("Output file doesn't exist. Proceeding with slicing.");
+
+    }
+
+}
+
 // Function to handle audio slicing
-const sliceMp3 = async (fileName,start,end, pathFolderOutput=process.cwd()) => {
+const sliceMp3 = async (fileName, start, end, pathFolderOutput = process.cwd()) => {
     console.log("-+- getSliceMp3 -+-");
-    console.log({fileName,start,end});
+    console.log({ fileName, start, end });
 
     console.log("-- PATHS");
-    console.log("__dirname: ",__dirname);
-    console.log("process.cwd(): ",process.cwd());
+    console.log("__dirname: ", __dirname);
+    console.log("process.cwd(): ", process.cwd());
     console.log("pathFolderOutput: ", pathFolderOutput);
     console.log("--");
 
     try {
-        const inputFile = path.join(process.cwd(),'audio_files',fileName+'.mp3');
-        console.log("inputFile: ",inputFile);
+        const inputFile = path.join(process.cwd(), 'audio_files', fileName + '.mp3');
+        console.log("inputFile: ", inputFile);
         const outputFileName = (fileName !== '')
             ? `${fileName}_${start}_${end}.mp3`
             : `sliced_audio_${start}_${end}.mp3`;
-        console.log("outputFileName: ",outputFileName);
+        console.log("outputFileName: ", outputFileName);
+
         const outputFile = path.join(pathFolderOutput, 'public', outputFileName);
-        console.log("outputFile: ",outputFile);
+        console.log("outputFile: ", outputFile);
 
-        // Use mp3-cutter to perform the audio slice
-        cutter.cut({
-            src: inputFile,
-            target: outputFile,
-            start,
-            end,
-        });
+        // Check if the output file already exists
+        try {
+            await fs.access(outputFile);
+            console.log("Output file already exists. Returning existing file path.");
+            return outputFile;
+        } catch (notFoundError) {
+            // Output file doesn't exist, proceed with slicing
+            console.log("Output file doesn't exist. Proceeding with slicing.");
 
-        return outputFile;
+            // Use mp3-cutter to perform the audio slice
+            cutter.cut({
+                src: inputFile,
+                target: outputFile,
+                start,
+                end,
+            });
+
+            console.log('Audio sliced successfully');
+            return outputFile;
+        }
     } catch (error) {
         console.error('Error slicing audio', error);
         throw error;
