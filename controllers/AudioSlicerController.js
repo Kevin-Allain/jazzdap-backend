@@ -32,25 +32,22 @@ const sliceMp3 = async (fileName, start, end, pathFolderOutput = process.cwd()) 
         const outputFile = path.join(pathFolderOutput, 'public', outputFileName);
         console.log("outputFile: ", outputFile);
 
+        const splitsFile = outputFile.split('\\'); // TODO doubt about running this on the Red Hat server. Might be a '/' character.
+        // We only care about the last element
+        const lastSplit = splitsFile.at(-1);
         // Check if the output file already exists
         try {
             await fs.access(outputFile);
             console.log("Output file already exists. Returning existing file path.");
-            return outputFile;
+            return lastSplit;
         } catch (notFoundError) {
             // Output file doesn't exist, proceed with slicing
             console.log("Output file doesn't exist. Proceeding with slicing.");
-
             // Use mp3-cutter to perform the audio slice
-            cutter.cut({
-                src: inputFile,
-                target: outputFile,
-                start,
-                end,
-            });
-
+            cutter.cut({ src: inputFile, target: outputFile, start, end, });
             console.log('Audio sliced successfully');
-            return outputFile;
+            // return outputFile;
+            return lastSplit;
         }
     } catch (error) {
         console.error('Error slicing audio', error);
@@ -67,9 +64,9 @@ module.exports.getSliceMp3 = async (req, res) => {
         // Second: verify the existence of the file
         // if file exists, set slicedAudioPath as the new sliceMp3
         // otherwise, create slice of the mp3
-        const slicedAudioPath = await sliceMp3(file, start, end);
+        const slicedAudio = await sliceMp3(file, start, end);
         console.log('Audio sliced successfully');
-        res.json({ success: true, slicedAudioPath });
+        res.send({ success: true, slicedAudio });
     } catch (error) {
         console.error('Error processing audio slice request', error);
         res.status(500).json({ success: false, error: error.message });
@@ -96,10 +93,6 @@ module.exports.doesMp3exist = async (req, res) => {
       const data = await MusicInfoControllerModel.find({ SJA_ID: sja_id });
       console.log("Searched successfully MusicInfoControllerModel.find");
       console.log("data.length: ", data.length);
-        //   console.log("data[0]: ",data[0]);
-        //   console.log(Object.keys(data[0]));
-        //   console.log(Object.values(data[0]));
-        //   console.log('data[0]._doc["Audio Filename (Internal backup)"]: ',data[0]._doc['Audio Filename (Internal backup)']);
       // Check if there is at least one result and get the value of "Audio Filename (Internal backup)"
       const audioFilename =
         data.length > 0 ? data[0]._doc['Audio Filename (Internal backup)'] : null;
@@ -111,18 +104,18 @@ module.exports.doesMp3exist = async (req, res) => {
         try {
           await fs.access(databaseLocalFilePath);
           console.log("Local file exists. Returning true.");
-          res.json({ exists: true });
+          res.send({ exists: true });
         } catch (databaseLocalFileNotFoundError) {
           console.log("Local file does not exist. Returning false.");
-          res.json({ exists: false });
+          res.send({ exists: false });
         }
       } else {
         console.log( "Audio filename not found in the database. Returning false." );
-        res.json({ exists: false });
+        res.send({ exists: false });
       }
     } catch (error) {
       console.error("Error querying MusicInfoControllerModel:", error);
-      res.status(500).json({ error: "Internal server error" });
+      res.status(500).send({ error: "Internal server error" });
     }
   }
 };
