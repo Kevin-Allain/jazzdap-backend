@@ -28,7 +28,7 @@ const {
     addContentWorkflow, deleteWorkflowObject,
     changeWorkflowPrivacy, getExactMatchWorkflowParameter
 } = require("../controllers/WorkflowController");
-const {getSliceMp3} = require("../controllers/AudioSlicerController");
+const {getSliceMp3, doesMp3exist} = require("../controllers/AudioSlicerController");
 const {get_idContent_search, getSearchMap, createSearchMap} = require("../controllers/SearchMapController");
 
 const router = Router();
@@ -109,5 +109,6 @@ router.post('/createSearchMap',createSearchMap);
 
 //Audioslicer
 router.get('/getSliceMp3',getSliceMp3);
+router.get('/doesMp3exist',doesMp3exist);
 
 module.exports = router;
