@@ -96,9 +96,14 @@ module.exports.doesMp3exist = async (req, res) => {
       const data = await MusicInfoControllerModel.find({ SJA_ID: sja_id });
       console.log("Searched successfully MusicInfoControllerModel.find");
       console.log("data.length: ", data.length);
+        //   console.log("data[0]: ",data[0]);
+        //   console.log(Object.keys(data[0]));
+        //   console.log(Object.values(data[0]));
+        //   console.log('data[0]._doc["Audio Filename (Internal backup)"]: ',data[0]._doc['Audio Filename (Internal backup)']);
       // Check if there is at least one result and get the value of "Audio Filename (Internal backup)"
       const audioFilename =
-        data.length > 0 ? data[0]["Audio Filename (Internal backup)"] : null;
+        data.length > 0 ? data[0]._doc['Audio Filename (Internal backup)'] : null;
+      console.log("audioFilename: ",audioFilename);
       if (audioFilename) {
         // Construct the local file path based on the assumed directory structure
         const databaseLocalFilePath = path.join(audioFilesDirectory, audioFilename);
@@ -112,9 +117,7 @@ module.exports.doesMp3exist = async (req, res) => {
           res.json({ exists: false });
         }
       } else {
-        console.log(
-          "Audio filename not found in the database. Returning false."
-        );
+        console.log( "Audio filename not found in the database. Returning false." );
         res.json({ exists: false });
       }
     } catch (error) {
