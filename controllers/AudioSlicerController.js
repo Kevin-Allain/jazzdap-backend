@@ -119,3 +119,60 @@ module.exports.doesMp3exist = async (req, res) => {
     }
   }
 };
+
+module.exports.doMp3exist = async (req, res) => {
+  const { sja_ids } = req.query;
+  console.log("-+- doesMp3exist -+- sja_ids: ", sja_ids);
+  // Construct the assumed directory structure for local files
+  const audioFilesDirectory = path.join(process.cwd(), "audio_files");
+  const objectSja_exists = {};
+  for (let i in sja_ids) {
+    const sja_id = sja_ids[i];
+    // Extract sja_id from the request query parameters
+    // 1 - Check if there is a file with sja... .mp3 locally
+    const localFilePath = path.join(audioFilesDirectory, `${sja_id}.mp3`);
+    console.log("localFilePath: ", localFilePath);
+    try {
+      await fs.access(localFilePath);
+      console.log("Local file exists. Returning true.");
+      // res.json({ exists: true });
+      objectSja_exists[sja_id] = true;
+    } catch (localFileNotFoundError) {
+      console.log(
+        "Local file does not exist. Proceeding with database search."
+      );
+      // 2 - Search in the database with the MusicInfoControllerModel
+      try {
+        const data = await MusicInfoControllerModel.find({ SJA_ID: sja_id });
+        console.log("Searched successfully MusicInfoControllerModel.find");
+        console.log("data.length: ", data.length);
+        // Check if there is at least one result and get the value of "Audio Filename (Internal backup)"
+        const audioFilename = data.length > 0 ? data[0]._doc["Audio Filename (Internal backup)"] : null;
+        console.log("audioFilename: ", audioFilename);
+        if (audioFilename) {
+          // Construct the local file path based on the assumed directory structure
+          const databaseLocalFilePath = path.join(audioFilesDirectory,audioFilename);
+          // Check if the local file exists
+          try {
+            await fs.access(databaseLocalFilePath);
+            // console.log("Local file exists. Returning true.");
+            // res.send({ exists: true });
+            objectSja_exists[sja_id] = true;
+          } catch (databaseLocalFileNotFoundError) {
+            // console.log("Local file does not exist. Returning false.");
+            // res.send({ exists: false });
+            objectSja_exists[sja_id] = false;
+          }
+        } else {
+          console.log( "Audio filename not found in the database. Returning false." ); 
+          // res.send({ exists: false });
+          objectSja_exists[sja_id] = false;
+        }
+      } catch (error) {
+        console.error("Error querying MusicInfoControllerModel:", error);
+        res.status(500).send({ error: "Internal server error" });
+      }
+    }
+    res.send({objectsExist: objectSja_exists});
+  }
+};
