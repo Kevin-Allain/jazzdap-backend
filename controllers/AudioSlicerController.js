@@ -173,6 +173,6 @@ module.exports.doMp3exist = async (req, res) => {
         res.status(500).send({ error: "Internal server error" });
       }
     }
-    res.send({objectsExist: objectSja_exists});
   }
+    res.send({objectsExist: objectSja_exists});
 };
